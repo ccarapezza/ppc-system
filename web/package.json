@@ -1,0 +1,22 @@
+{
+  "name": "wifitimer-webclient",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "scripts": {
+    "build:css": "npx tailwindcss -i src/style.css -o ../data/style.css --minify",
+    "minify:js": "uglifyjs ./src/script.js -o ../data/script.js",
+    "minify:html": "html-minifier-terser --collapse-whitespace --remove-comments --remove-optional-tags -o ../data/index.html src/index.html",
+    "build": "npm run build:css && npm run minify:js && npm run minify:html"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "html-minifier": "^4.0.0",
+    "tailwindcss": "^3.4.10"
+  },
+  "dependencies": {
+    "html-minifier-terser": "^7.2.0",
+    "uglifyjs": "^2.4.11"
+  }
+}

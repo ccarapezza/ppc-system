@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+    font-family: "D7MBI";
+    src: url("./DSEG7Modern-BoldItalic.woff") format('woff');
+}
+
+.D7MBI {
+    font-family: "D7MBI";
+}
+
+.clock-background {
+    border: 3px solid #000;
+    border-radius: 9px;
+    background-color: #fb7c00;
+    box-shadow: 4px 4px 1px 0px rgba(0, 0, 0, 0.1) inset;
+}
+
+.clock-time-background {
+    z-index: 50;
+    position: absolute;
+    color: rgba(0, 0, 0, 0.15);
+}
+
+.disable-clock-text {
+    color: rgba(0, 0, 0, 0.15);
+}
+
+.disable-clock-background{
+    background-color: rgba(0, 0, 0, 0.15);
+}
