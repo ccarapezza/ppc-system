@@ -8,12 +8,12 @@ void setup() {
   ppcConnection.start();
   ppcConnection.getNetworks(false);
   ppcConnection.startAP();
-  ppcConnection.connectToNetwork("Chori-NET", "00434081431");
+  ppcConnection.connectToNetwork("Chori-NET", "00434081431s"/*, NULL*/);
   startServer();
 }
 
 void loop() {
-  //connection.run();
+  ppcConnection.run();
 }
 
 void criticalLoop() {
