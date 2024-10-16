@@ -25,7 +25,6 @@ public:
     ~PpcConnection(); // Destructor
     void start();
     void run();
-    std::vector<NetworkInfo> getNetworks(bool showHidden);
     void startAP();
     void connectToNetwork(const char* ssid, const char* password/*, void(*func)()*/);
     void connectToNetworkSync(const char* ssid, const char* password);
@@ -35,6 +34,7 @@ public:
 	void setState(ConnectionState& newState);
     inline jobs_t getJob() const { return job; }
     void setJob(jobs_t job);
+    static std::vector<NetworkInfo> getNetworks(bool showHidden);
 
     void connect();
     void disconnect();
