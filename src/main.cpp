@@ -6,10 +6,9 @@ PpcConnection ppcConnection;
 
 void setup() {
   ppcConnection.start();
-  ppcConnection.getNetworks(false);
   ppcConnection.startAP();
   ppcConnection.connectToNetwork("Chori-NET", "00434081431s"/*, NULL*/);
-  startServer();
+  startServer(&ppcConnection);
 }
 
 void loop() {

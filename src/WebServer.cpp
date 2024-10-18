@@ -8,7 +8,7 @@
 
 AsyncWebServer server(80);
 
-void startServer() {
+void startServer(PpcConnection *ppcConnection) {
 
     LittleFS.begin();
     
@@ -33,59 +33,68 @@ void startServer() {
     });
 
       // sends JSON
-    server.on("/json1", HTTP_GET, [](AsyncWebServerRequest* request) {
+    server.on("/wifi-status", HTTP_GET, [ppcConnection](AsyncWebServerRequest* request) {
         AsyncJsonResponse* response = new AsyncJsonResponse();
         JsonObject root = response->getRoot().to<JsonObject>();
-        root["hello"] = "world";
+        switch(ppcConnection->getCurrentState()->getType()){
+            case DISCONNECTED:
+                root["status"] = "disconnected";
+                break;
+            case CONNECTING:
+                root["status"] = "connecting";
+                break;
+            case CONNECTED:
+                root["status"] = "connected";
+                break;
+        }
         response->setLength();
         request->send(response);
     });
 
-    server.on("/scan", HTTP_GET, [](AsyncWebServerRequest *request){
-        //TODO: Esta funcion funciona correctamente
-        String json = "[";
-        int n = WiFi.scanComplete();
-        if(n == -2){
-        WiFi.scanNetworks(true);
-        } else if(n){
-        for (int i = 0; i < n; ++i){
-            if(i) json += ",";
-            json += "{";
-            json += "\"rssi\":"+String(WiFi.RSSI(i));
-            json += ",\"ssid\":\""+WiFi.SSID(i)+"\"";
-            json += ",\"bssid\":\""+WiFi.BSSIDstr(i)+"\"";
-            json += ",\"channel\":"+String(WiFi.channel(i));
-            json += ",\"secure\":"+String(WiFi.encryptionType(i));
-            json += ",\"hidden\":"+String(WiFi.isHidden(i)?"true":"false");
-            json += "}";
-        }
-        WiFi.scanDelete();
-        if(WiFi.scanComplete() == -2){
-            WiFi.scanNetworks(true);
-        }
-        }
-        json += "]";
-        request->send(200, "text/json", json);
-        json = String();
-    });
-
-    server.on("/wifi-scan", HTTP_GET, [](AsyncWebServerRequest* request) {
-        //TODO: revisar y eliminar
+    server.on("/wifi-scan", HTTP_GET, [](AsyncWebServerRequest *request){
         AsyncJsonResponse* response = new AsyncJsonResponse();
         JsonObject root = response->getRoot().to<JsonObject>();
-        JsonArray data = root.createNestedArray("data");
+        JsonArray data = root["data"].to<JsonArray>();
+        
+        int n = WiFi.scanComplete();
+        if(n == -2){
+            WiFi.scanNetworks(true);
+        } else if(n){
+            for (int i = 0; i < n; ++i){
+                //create a json object
+                JsonObject network = data.add<JsonObject>();
 
-        std::vector<NetworkInfo> networks = PpcConnection::getNetworks(false);
+                network["ssid"] = WiFi.SSID(i);
+                network["encryptionType"] = WiFi.encryptionType(i);
+                network["RSSI"] = WiFi.RSSI(i);
+                network["BSSID"] = WiFi.BSSIDstr(i);
+                network["channel"] = WiFi.channel(i);
+                network["isHidden"] = WiFi.isHidden(i);
 
-        for (int i = 0; i < networks.size(); i++) {
-            //create a json object
-            JsonObject network = data.createNestedObject();
-            network["ssid"] = networks[i].ssid;
-            network["encryptionType"] = networks[i].encryptionType;
-            network["RSSI"] = networks[i].RSSI;
-            network["BSSID"] = networks[i].BSSID;
-            network["channel"] = networks[i].channel;   
-            network["isHidden"] = networks[i].isHidden;
+            }
+            WiFi.scanDelete();
+            if(WiFi.scanComplete() == -2){
+                WiFi.scanNetworks(true);
+            }
+        }
+        response->setLength();
+        request->send(response);
+    });
+
+    server.on("/wifi-connect", HTTP_POST, [ppcConnection](AsyncWebServerRequest *request){
+
+        AsyncJsonResponse* response = new AsyncJsonResponse();
+        JsonObject root = response->getRoot().to<JsonObject>();
+
+        if (request->hasParam("ssid", true) && request->hasParam("password", true)) {
+            const char* ssid = request->getParam("ssid", true)->value().c_str();
+            const char* password = request->getParam("password", true)->value().c_str();
+
+            ppcConnection->connectToNetwork(ssid, password);
+
+            root["status"] = "connecting";
+        } else {
+            root["status"] = "error";
         }
 
         response->setLength();
