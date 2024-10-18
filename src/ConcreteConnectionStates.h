@@ -4,6 +4,7 @@
 class Disconnected : public ConnectionState
 {
 public:
+    connection_state getType() { return DISCONNECTED; }
     void loop(PpcConnection *connection);
     static ConnectionState &getInstance();
 
@@ -16,6 +17,7 @@ private:
 class Connecting : public ConnectionState
 {
 public:
+    connection_state getType() { return CONNECTING; }
     void loop(PpcConnection *connection);
     static ConnectionState &getInstance();
 
@@ -28,6 +30,7 @@ private:
 class Connected : public ConnectionState
 {
 public:
+    connection_state getType() { return CONNECTED; }
     void loop(PpcConnection *connection);
     static ConnectionState &getInstance();
 
