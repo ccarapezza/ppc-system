@@ -5,10 +5,13 @@
 #include "AsyncJson.h"
 #include "ArduinoJson.h"
 #include "PpcConnection.h"
+#include "Clock.h"
 
 AsyncWebServer server(80);
 
 void startServer(PpcConnection *ppcConnection) {
+
+    Clock& clock = Clock::getInstance();
 
     LittleFS.begin();
     
@@ -30,6 +33,14 @@ void startServer(PpcConnection *ppcConnection) {
   
     server.on("/DSEG7Modern-BoldItalic.woff", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(LittleFS, "/DSEG7Modern-BoldItalic.woff", "font/woff");
+    });
+
+    server.on("/get-time", HTTP_GET, [&clock](AsyncWebServerRequest *request) {
+        AsyncJsonResponse* response = new AsyncJsonResponse();
+        JsonObject root = response->getRoot().to<JsonObject>();
+        root["time"] = clock.getCurrentDate();
+        response->setLength();
+        request->send(response);
     });
 
       // sends JSON
