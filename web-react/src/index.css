@@ -11,6 +11,14 @@
     font-family: "D7MBI";
 }
 
+body {
+    background: #ffffff;
+}
+
+.dark body {
+    background: #212e46;
+}
+
 .clock-background {
     border: 3px solid #000;
     border-radius: 9px;

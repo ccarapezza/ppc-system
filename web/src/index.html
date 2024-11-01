@@ -4,165 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="style.css" rel="stylesheet">
     <script src="script.js"></script>
+    <script src="https://kit.fontawesome.com/78ba08bcea.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
-    <div id="tailwindModal" class="hidden relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 
-        <div class="fixed inset-0 z-10 overflow-y-auto">
-            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                <div
-                    class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                        <div class="sm:flex sm:items-start">
-                            <div
-                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                                <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                    stroke="currentColor" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                                </svg>
-                            </div>
-                            <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-                                <h3 class="text-base font-semibold leading-6 text-gray-900"
-                                    id="tailwindModalMessageTitle"></h3>
-                                <div class="mt-2">
-                                    <p id="tailwindModalMessage" class="text-sm text-gray-500"></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                        <button type="button" id="tailwindModalConfirm"
-                            class="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto">Confirm</button>
-                        <button type="button"
-                            onclick="document.getElementById('tailwindModal').classList.add('hidden');"
-                            class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancel</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="editEvent-tailwindModal" class="hidden relative z-10" aria-labelledby="modal-title" role="dialog"
-        aria-modal="true">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-
-        <div class="fixed inset-0 z-10 overflow-y-auto">
-            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                <div
-                    class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-                    <form id="editEvent-form" class="w-full">
-                        <div class="bg-white">
-                            <div class="sm:flex sm:items-start">
-
-                                <div class="space-y-12 w-full">
-
-                                    <div class="pb-2 w-full">
-                                        <h2 class="text-base font-semibold leading-7 text-gray-900 border-b border-gray-200 w-full">
-                                            <p id="event-modal-title" class="p-2">Edit Event</p>
-                                        </h2>
-
-                                        <input id="editEvent-id" type="hidden">
-
-                                        <div class="p-4">
-                                            <div class="mt-2 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                                                <div class="sm:col-span-4">
-                                                    <label for="username"
-                                                        class="block text-sm font-medium leading-6 text-gray-900">Time</label>
-                                                    <div class="mt-2">
-                                                        <input id="editEvent-hours" value="11"
-                                                            class="rounded-md text-center border-0 w-14 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300"
-                                                            type="number" min="0" max="23" minlength="2">
-                                                        :
-                                                        <input id="editEvent-minutes" value="45"
-                                                            class="rounded-md text-center border-0 w-14 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300"
-                                                            type="number" min="0" max="59">
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="mt-2 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                                                <div class="sm:col-span-4">
-                                                    <label for="username"
-                                                        class="block text-sm font-medium leading-6 text-gray-900">Event</label>
-                                                    <div id="editEvent-event" class="mt-2">
-                                                    </div>
-
-                                                    <div id="editEvent-eventSelector" class="hidden">
-                                                        <input type="hidden" id="editEvent-eventSelector-value">
-                                                        <div>
-                                                            <div class="relative mt-2">
-                                                                <button type="button"
-                                                                    class="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6"
-                                                                    aria-haspopup="listbox" aria-expanded="true"
-                                                                    aria-labelledby="listbox-label" onclick="document.getElementById('select-event-options').classList.toggle('hidden');">
-                                                                    <div class="flex items-center">
-                                                                        <div id="selected-event-icon" class="bg-green-500 w-3 h-3 rounded-full d-flex">&nbsp;</div>
-                                                                        <div id="selected-event-label" class="text-green-500 font-bold pl-2 text-sm">ON</div>
-                                                                    </div>
-                                                                    <div>
-                                                                        <span class="pointer-events-none absolute inset-y-0 right-0 ml-3 flex items-center pr-2">
-                                                                            <svg class="h-5 w-5 text-gray-400"
-                                                                                viewBox="0 0 20 20" fill="currentColor"
-                                                                                aria-hidden="true">
-                                                                                <path fill-rule="evenodd"
-                                                                                    d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z"
-                                                                                    clip-rule="evenodd" />
-                                                                            </svg>
-                                                                        </span>
-                                                                    </div>
-                                                                </button>
-
-                                                                <ul id="select-event-options" class="hidden absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
-                                                                    tabindex="-1" role="listbox"
-                                                                    aria-labelledby="listbox-label"
-                                                                    aria-activedescendant="listbox-option-3">
-                                                                    <li onclick="selectEvent(1)" class="hover:bg-yellow-100 cursor-pointer text-gray-900 relative cursor-default select-none py-2 pl-3 pr-9"
-                                                                        id="listbox-option-0" role="option">
-                                                                        <div class="flex items-center">
-                                                                            <div class="bg-green-500 w-3 h-3 rounded-full d-flex">&nbsp;</div>
-                                                                            <div class="text-green-500 font-bold pl-2 text-sm">ON</span>
-                                                                        </div>
-                                                                    </li>
-
-                                                                    <li onclick="selectEvent(0)" class="hover:bg-yellow-100 cursor-pointer text-gray-900 relative cursor-default select-none py-2 pl-3 pr-9"
-                                                                        id="listbox-option-0" role="option">
-                                                                        <div class="flex items-center">
-                                                                            <div class="bg-red-500 w-3 h-3 rounded-full d-flex">&nbsp;</div>
-                                                                            <div class="text-red-500 font-bold pl-2 text-sm">OFF</span>
-                                                                        </div>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                            </div>
-                        </div>
-                        <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                            <button type="submit" id="tailwindModalConfirm"
-                                class="inline-flex w-full justify-center rounded-md bg-green-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 sm:ml-3 sm:w-auto">Confirm</button>
-                            <button type="button"
-                                onclick="document.getElementById('editEvent-tailwindModal').classList.add('hidden');"
-                                class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <nav class="bg-gray-800">
+    <nav class="gradient-background">
         <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
             <div class="relative flex h-16 items-center justify-between">
                 <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
@@ -193,11 +43,8 @@
                     </button>
                 </div>
                 <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-                    <div class="flex flex-shrink-0 items-center">
-                        <img class="block h-8 w-auto lg:hidden"
-                            src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company">
-                        <img class="hidden h-8 w-auto lg:block"
-                            src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company">
+                    <div class="flex flex-shrink-0 items-center text-white font-bold text-3xl">
+                        PPC
                     </div>
                     <div class="hidden sm:ml-6 sm:block">
                         <div class="flex space-x-4">
@@ -272,81 +119,53 @@
             <h1 class="text-3xl font-bold tracking-tight text-gray-900">Dashboard</h1>
         </div>
     </header>
-    <main>
-        <div class="mx-auto max-w-7xl py-2">
+    <main class="mx-auto max-w-7xl px-4 py-6">
+        <div class=" flex flex-col gap-6 p-4">
+            <div class="flex justify-start items-center gap-2 border rounded-2xl p-4">
+                <div>
+                    <i class="fa-solid fa-wifi"></i> <span class="font-bold text-md">WiFi</span>
+                    <p id="wifi-status-loading">
+                        <i class="fa-solid fa-circle-notch fa-spin"></i>
+                    </p>
+                </div>
+            </div>
             <!-- Your content -->
-            <div class="absolute left-1/2 my-5 flex w-screen max-w-max -translate-x-1/2 px-4 flex-col">
-                <div class="flex flex-col gap-4 justify-center rounded-md border border-gray-200 p-2 mb-2">
-                    <div class="clock-background w-full">
-                        <div class="flex gap-2 p-2 justify-end">
-                            <div class="rounded-full disable-clock-background px-2 py-1 text-sm font-bold shadow-sm text-clock">AUTO</div>
-                            <div class="rounded-full bg-black px-2 py-1 text-sm font-bold shadow-sm text-clock">MANUAL</div>
-                        </div>
-                        <div class="flex align-center p-2 justify-center items-center clock-wrapper w-full">
-                            <div class="w-full text-center D7MBI clock-time"><span id="clock" class="text-6xl w-full">!! !!</span><span id="clock-sec" class="ml-1 text-2xl">!!</span></div>
-                            <div class="w-full text-center D7MBI clock-time-background"><span class="text-6xl">88:88</span><span class="ml-1 text-2xl">88</span></div>
-                        </div>
-                    </div>
-                    <button id="switch-on" type="button"
-                        onclick="SetStatus(0);"
-                        class="hidden rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500">
-                        ON
-                    </button>
-                    <button id="switch-off" type="button"
-                        onclick="SetStatus(1);"
-                        class="hidden rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500">
-                        OFF
-                    </button>
+            <div class="flex justify-start items-center gap-2 border rounded-2xl p-4">
+                <div>
+                    <i class="fa-solid fa-wifi"></i> <span class="font-bold text-md">WiFi</span>
+                    <p id="wifi-status-loading">
+                        <i class="fa-solid fa-circle-notch fa-spin"></i>
+                    </p>
+                    <p class="flex justify-start items-center gap-2">
+                        <span id="conn-status-connected" class="flex w-3 h-3 bg-green-500 rounded-full hidden"></span>
+                        <span id="conn-status-disconnected" class="flex w-3 h-3 bg-red-500 rounded-full hidden"></span>
+                        <span id="connection-status"></span>
+                    </p>
                 </div>
-                <div class="flex justify-center rounded-md border border-gray-200 p-2 mb-2">
-                    <div class="border rounded-md border-gray-700 ml-2">
-                        <div
-                            class="border-b bg-gray-200 rounded-t-md px-2 font-bold text-center text-sm whitespace-nowrap">
-                            Current State
+            </div>
+            <div class="flex justify-start items-center gap-2 border rounded-2xl p-4">
+                <div>
+                    <i class="fa-solid fa-tower-broadcast"></i> <span class="font-bold text-md">Access Point</span>
+                    <p id="ap-info-loading">
+                        <i class="fa-solid fa-circle-notch fa-spin"></i>
+                    </p>
+                    <div id="ap-info" class="flex flex-col gap-1 m-2">
+                        <div>
+                            <span id="ap-name"></span>
                         </div>
-                        <div id="currentState-off" class="flex hidden align-center p-2 justify-center items-center">
-                            <div class="bg-red-500 w-5 h-5 rounded-full d-flex">&nbsp;</div> <span
-                                class="text-red-500 font-bold pl-2">OFF</span>
-                        </div>
-                        <div id="currentState-on" class="flex hidden align-center p-2 justify-center items-center">
-                            <div class="bg-green-500 w-5 h-5 rounded-full">&nbsp;</div> <span
-                                class="text-green-500 font-bold pl-2">ON</span>
-                        </div>
-                    </div>
-                    <div class="border rounded-md border-gray-700 ml-2">
-                        <div
-                            class="border-b bg-gray-200 rounded-t-md px-2 font-bold text-center text-sm whitespace-nowrap">
-                            Next Event
-                        </div>
-                        <div class="w-full text-center text-sm">
-                            13:45
-                        </div>
-                        <div id="currentState-off" class="flex align-center px-2 justify-center items-center">
-                            <div class="bg-red-500 w-3 h-3 rounded-full d-flex">&nbsp;</div> <span
-                                class="text-red-500 font-bold pl-2 text-sm">OFF</span>
-                        </div>
-                        <div id="currentState-on" class="flex hidden align-center px-2 justify-center items-center">
-                            <div class="bg-green-500 w-3 h-3 rounded-full">&nbsp;</div> <span
-                                class="text-green-500 font-bold pl-2 text-sm">ON</span>
+                        <div>
+                            <span id="ap-ip"></span>
                         </div>
                     </div>
                 </div>
-
-                <div class="border rounded-md">
-                    <div id="events" class="p-4">
-
-                    </div>
+            </div>
+            <div class="flex flex-col justify-start items-center gap-2 border rounded-2xl p-4">
+                <div class="w-full">
+                    <i class="fa-solid fa-wifi my-4"></i> <span class="font-bold text-md">WiFi Networks</span>
                 </div>
-
-                <button id="addEvent" type="button"
-                onclick="clickAddButton();"
-                    class="mt-2 mb-4 inline-flex items-center justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500">
-                    <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    <span class="ml-2">Add Event</span>
-                </button>
+                <i id="wifi-loading" class="fa-solid fa-circle-notch fa-spin hidden"></i>
+                <ul id="wifi-network" class="w-full">
+                </ul>
             </div>
         </div>
     </main>
