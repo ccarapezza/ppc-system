@@ -8,7 +8,7 @@ PpcConnection ppcConnection;
 void setup() {
   ppcConnection.start();
   ppcConnection.startAP();
-  ppcConnection.connectToNetwork("Chori-NET", "00434081431s"/*, NULL*/);
+  ppcConnection.connectToNetwork("Chori-NET", "00434081431"/*, NULL*/);
   startServer(&ppcConnection);
 
   Clock& clock = Clock::getInstance();

@@ -15,6 +15,11 @@ typedef enum {
     DISCONNECT,
 } jobs_t;
 
+struct ApInfo {
+    String ssid;
+    String ip;
+};
+
 // Forward declaration to resolve circular dependency/include
 class ConnectionState;
 
@@ -28,6 +33,8 @@ public:
     void startAP();
     void connectToNetwork(const char* ssid, const char* password/*, void(*func)()*/);
     void connectToNetworkSync(const char* ssid, const char* password);
+    ApInfo getApInfo();
+    String getSSID();
 
 	//StateMachine
 	inline ConnectionState* getCurrentState() const { return currentState; }

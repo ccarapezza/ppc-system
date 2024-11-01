@@ -14,7 +14,7 @@ void Disconnected::loop(PpcConnection *connection)
 
 ConnectionState &Disconnected::getInstance()
 {
-    Serial.println("ConnectionState: DISCONNECTED");
+    //Serial.println("ConnectionState: DISCONNECTED");
     static Disconnected instance;
     return instance;
 }
@@ -32,7 +32,7 @@ void Connecting::loop(PpcConnection *connection)
 
 ConnectionState &Connecting::getInstance()
 {
-    Serial.println("ConnectionState: CONNECTING");
+    //Serial.println("ConnectionState: CONNECTING");
     static Connecting instance;
     return instance;
 }
@@ -51,7 +51,7 @@ void Connected::loop(PpcConnection *connection)
 
 ConnectionState &Connected::getInstance()
 {
-    Serial.println("ConnectionState: CONNECTED");
+    //Serial.println("ConnectionState: CONNECTED");
     static Connected instance;
     return instance;
 }

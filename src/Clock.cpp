@@ -29,8 +29,8 @@ Clock* Clock::instance = nullptr;
 // Constructor privado
 Clock::Clock() : Rtc(tWire) {
     // Inicialización del reloj (si es necesario)
-    Serial.begin(9600); // Ejemplo de inicialización del puerto serie
-    tWire.begin(2, 0); 
+    //Serial.begin(9600); // Ejemplo de inicialización del puerto serie
+    tWire.begin(1, 0); 
     Rtc.Begin();
 }
 
@@ -48,19 +48,19 @@ Clock& Clock::getInstance() {
 }
 
 void Clock::start() {
-  Serial.begin(115200);
-  Serial.println("Starting clock...");
+  //Serial.begin(115200);
+  //Serial.println("Starting clock...");
    
   if (!Rtc.IsDateTimeValid()) {
-    Serial.println("RTC lost confidence in the DateTime!");
+    //Serial.println("RTC lost confidence in the DateTime!");
     Rtc.SetIsRunning(true);
     RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
     Rtc.SetDateTime(compiled);
     if (!Rtc.GetIsRunning()) {
-      Serial.println("RTC was unable to start");
+      //Serial.println("RTC was unable to start");
     }
   }
-  Serial.println("Clock started.");
+  //Serial.println("Clock started.");
 }
 
 String Clock::getCurrentDate() {

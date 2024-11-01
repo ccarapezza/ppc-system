@@ -14,9 +14,25 @@ void startServer(PpcConnection *ppcConnection) {
     Clock& clock = Clock::getInstance();
 
     LittleFS.begin();
+
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "GET, POST, PUT");
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "Content-Type");
+
+    server.onNotFound([](AsyncWebServerRequest *request) {
+        if (request->method() == HTTP_OPTIONS) {
+            request->send(200);
+        } else {
+            request->send(404);
+        }
+    });
     
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(LittleFS, "/index.html", "text/html");
+    });
+
+    server.on("/fontawesome.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/fontawesome.js", "text/javascript");
     });
 
     server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -56,8 +72,15 @@ void startServer(PpcConnection *ppcConnection) {
                 break;
             case CONNECTED:
                 root["status"] = "connected";
+                root["ssid"] = ppcConnection->getSSID();
                 break;
         }
+
+        JsonObject apJsonInfo = root.createNestedObject("ap-info");
+        ApInfo apInfo = ppcConnection->getApInfo();
+        apJsonInfo["ssid"] = apInfo.ssid;
+        apJsonInfo["ip"] = apInfo.ip;
+
         response->setLength();
         request->send(response);
     });
