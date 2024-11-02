@@ -5,7 +5,10 @@
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include "Clock.h"
+#include "Log.h"
 
+// Usa la misma instancia global de logger
+extern Log logger; // Declarar la instancia externa
 /*
 TwoWire tWire;
 tWire.begin(2, 0); 
@@ -28,9 +31,7 @@ Clock* Clock::instance = nullptr;
 
 // Constructor privado
 Clock::Clock() : Rtc(tWire) {
-    // Inicialización del reloj (si es necesario)
-    //Serial.begin(9600); // Ejemplo de inicialización del puerto serie
-    tWire.begin(1, 0); 
+    tWire.begin(2, 0); 
     Rtc.Begin();
 }
 
@@ -48,23 +49,23 @@ Clock& Clock::getInstance() {
 }
 
 void Clock::start() {
-  //Serial.begin(115200);
-  //Serial.println("Starting clock...");
+  logger.log(LOG_INFO, "Starting clock...");
    
   if (!Rtc.IsDateTimeValid()) {
-    //Serial.println("RTC lost confidence in the DateTime!");
+    logger.log(LOG_ERR, "RTC lost confidence in the DateTime!");
     Rtc.SetIsRunning(true);
     RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
     Rtc.SetDateTime(compiled);
     if (!Rtc.GetIsRunning()) {
-      //Serial.println("RTC was unable to start");
+      logger.log(LOG_ERR, "RTC lost confidence in the DateTime!");
     }
   }
-  //Serial.println("Clock started.");
+  logger.log(LOG_INFO, "Clock started!");
 }
 
 String Clock::getCurrentDate() {
   if (!Rtc.IsDateTimeValid()) {
+    logger.log(LOG_ERR, "RTC lost confidence in the DateTime!");
     return "RTC lost confidence in the DateTime!";
   }
   String currentTime;

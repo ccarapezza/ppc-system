@@ -6,8 +6,12 @@
 #include "ArduinoJson.h"
 #include "PpcConnection.h"
 #include "Clock.h"
+#include <WiFiUdp.h>
 
 AsyncWebServer server(80);
+
+//WiFiUDP udpClient;
+//Syslog syslog(udpClient, "192.168.0.10", 5140, "esp8266", "syslog", LOG_KERN);
 
 void startServer(PpcConnection *ppcConnection) {
 
@@ -29,6 +33,14 @@ void startServer(PpcConnection *ppcConnection) {
     
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(LittleFS, "/index.html", "text/html");
+    });
+    
+    server.on("/assets/index-C6T_Mup5.js", [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/assets/index-C6T_Mup5.js", "text/javascript");
+    });
+
+    server.on("/assets/index-UBPlRQ0_.css", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/assets/index-UBPlRQ0_.css", "text/css");
     });
 
     server.on("/fontawesome.js", HTTP_GET, [](AsyncWebServerRequest *request) {

@@ -1,6 +1,9 @@
 #include "ConcreteConnectionStates.h"
 #include "PpcConnection.h"
 #include <ESP8266WiFi.h>
+#include "Log.h"
+
+extern Log logger;
 
 void Disconnected::loop(PpcConnection *connection)
 {
@@ -14,7 +17,7 @@ void Disconnected::loop(PpcConnection *connection)
 
 ConnectionState &Disconnected::getInstance()
 {
-    //Serial.println("ConnectionState: DISCONNECTED");
+    logger.log(LOG_INFO, "ConnectionState: DISCONNECTED");
     static Disconnected instance;
     return instance;
 }
@@ -32,7 +35,7 @@ void Connecting::loop(PpcConnection *connection)
 
 ConnectionState &Connecting::getInstance()
 {
-    //Serial.println("ConnectionState: CONNECTING");
+    logger.log(LOG_INFO, "ConnectionState: CONNECTING");
     static Connecting instance;
     return instance;
 }
@@ -51,7 +54,7 @@ void Connected::loop(PpcConnection *connection)
 
 ConnectionState &Connected::getInstance()
 {
-    //Serial.println("ConnectionState: CONNECTED");
+    logger.log(LOG_INFO, "ConnectionState: CONNECTED");
     static Connected instance;
     return instance;
 }

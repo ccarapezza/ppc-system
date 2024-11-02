@@ -1,0 +1,19 @@
+{
+  "name": "syslogserver",
+  "version": "1.0.0",
+  "description": "SysLog Server for NodeJs",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "colors": "^1.4.0",
+    "fs-extra": "^11.2.0",
+    "nsyslog-parser": "^0.10.1",
+    "syslog-parse": "^2.0.0"
+  }
+}

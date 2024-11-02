@@ -4,8 +4,13 @@
 #include <PpcConnection.h>
 #include <NetworkInfo.h>
 #include <ConcreteConnectionStates.h>
+#include "Log.h"
 
-const char*   _apName               = String("ESP_" + ESP.getChipId()).c_str();
+extern Log logger;
+
+String apName = "PPC-AP_" + String(ESP.getChipId());
+const char* _apName = apName.c_str();
+
 const char*   _apPassword           = NULL;
 
 String _ssid = "";
@@ -32,9 +37,7 @@ void PpcConnection::setJob(jobs_t job) {
 void PpcConnection::start() {
     // Start implementation, por ejemplo, inicializar comunicación serie
     wl_status_t status = WiFi.status();
-    //Serial.printf("Initial status: %d\n", status);
-    //Serial.begin(115200);
-    //Serial.println();
+    logger.logf(LOG_INFO, "Initial status: %d", status);
     WiFi.mode(WIFI_AP_STA);
 }
 
@@ -56,16 +59,17 @@ void PpcConnection::connectToNetwork(const char* ssid, const char* password/*, v
 
 void PpcConnection::connect() {
     WiFi.begin(_ssid.c_str(), _pass.c_str());
-    //Serial.printf("Connecting to %s\n", _ssid.c_str());
+    logger.logf(LOG_INFO, "Connecting to %s", _ssid.c_str());
 }
 
 void PpcConnection::disconnect() {
     WiFi.disconnect();
-    //Serial.println("Disconnecting");
+    logger.logf(LOG_INFO, "Disconnecting from %s", _ssid.c_str());
 }
 
 void PpcConnection::startAP() {
     static int channel = (MIN_WIFI_CHANNEL % MAX_WIFI_CHANNEL) + 1;
+    logger.logf(LOG_INFO, "Starting AP %s", _apName);
     WiFi.softAP(_apName, _apPassword, channel);
 }
 
@@ -82,7 +86,7 @@ std::vector<NetworkInfo> PpcConnection::getNetworks(bool showHidden) {
 
     for (int i = 0; i < n; i++) {
         WiFi.getNetworkInfo(i, networks[i].ssid, networks[i].encryptionType, networks[i].RSSI, networks[i].BSSID, networks[i].channel, networks[i].isHidden);
-        //Serial.printf("%d: %s, Ch:%d (%ddBm) %s %s\n", i + 1, networks[i].ssid.c_str(), networks[i].channel, networks[i].RSSI, networks[i].encryptionType == ENC_TYPE_NONE ? "open" : "", networks[i].isHidden ? "hidden" : "");
+        logger.logf(LOG_INFO, "%d: %s, Ch:%d (%ddBm) %s %s", i + 1, networks[i].ssid.c_str(), networks[i].channel, networks[i].RSSI, networks[i].encryptionType == ENC_TYPE_NONE ? "open" : "", networks[i].isHidden ? "hidden" : "");
     }
 
     return networks;
@@ -90,11 +94,11 @@ std::vector<NetworkInfo> PpcConnection::getNetworks(bool showHidden) {
 
 void PpcConnection::connectToNetworkSync(const char* ssid, const char* password) {
     WiFi.begin(ssid, password);
-    //Serial.printf("Connecting to %s\n", ssid);
+    logger.logf(LOG_INFO, "Connecting to %s", ssid);
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
-        //Serial.print(".");
+        logger.logf(LOG_INFO, ".");
     }
-    //Serial.println();
-    //Serial.printf("Connected to %s , IP: %s\n", ssid, WiFi.localIP().toString().c_str());
+    logger.logf(LOG_INFO, "Connected to %s , IP: %s\n", ssid, WiFi.localIP().toString().c_str());
+
 }
