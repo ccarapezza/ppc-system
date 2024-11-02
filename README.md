@@ -48,6 +48,13 @@ PPC System es un sistema de gestión para ESP8266 que permite administrar entrad
     ```
 4. Los archivos generados (`index.html`, `script.js`, `style.css`) se copiarán automáticamente a la carpeta `/data` para ser subidos a la memoria FLASH del dispositivo.
 
+### Logs - SysLog Srv Tool
+SysLog Srv es una herramienta que permite montar un server para SysLog y podes monitorizar los logs del dispositivo.
+Para iniciar el servidor dirigase a tools\SysLogServer y ejecute:
+```bash
+    npm start
+```
+
 ### Subida del Sistema de Archivos
 
 1. Utiliza las herramientas de PlatformIO para subir la imagen del sistema de archivos:
