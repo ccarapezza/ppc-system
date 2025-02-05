@@ -142,8 +142,7 @@ void startServer(PpcConnection *ppcConnection) {
         JsonObject root = response->getRoot().to<JsonObject>();
 
         //get body json params
-
-
+        /*
         if (request->hasParam("ssid", true) && request->hasParam("password", true)) {
             const char* ssid = request->getParam("ssid", true)->value().c_str();
             const char* password = request->getParam("password", true)->value().c_str();
@@ -154,6 +153,9 @@ void startServer(PpcConnection *ppcConnection) {
         } else {
             root["status"] = "error";
         }
+        */
+
+        root["status"] = "test";
 
         response->setLength();
         request->send(response);
