@@ -136,13 +136,12 @@ void startServer(PpcConnection *ppcConnection) {
         request->send(response);
     });
 
-    server.on("/wifi-connect", HTTP_POST, [ppcConnection](AsyncWebServerRequest *request){
+    server.on("/wifi-connect", HTTP_POST, [ppcConnection, logger](AsyncWebServerRequest *request){
         logger.logf(LOG_INFO, "Connecting to network %s", request->getParam("ssid", true)->value().c_str());
         AsyncJsonResponse* response = new AsyncJsonResponse();
         JsonObject root = response->getRoot().to<JsonObject>();
 
         //get body json params
-        /*
         if (request->hasParam("ssid", true) && request->hasParam("password", true)) {
             const char* ssid = request->getParam("ssid", true)->value().c_str();
             const char* password = request->getParam("password", true)->value().c_str();
@@ -153,7 +152,6 @@ void startServer(PpcConnection *ppcConnection) {
         } else {
             root["status"] = "error";
         }
-        */
 
         root["status"] = "test";
 
