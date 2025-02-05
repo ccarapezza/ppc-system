@@ -32,6 +32,7 @@ public:
     void run();
     void startAP();
     void connectToNetwork(const char* ssid, const char* password/*, void(*func)()*/);
+    void disconnectNetwork();
     void connectToNetworkSync(const char* ssid, const char* password);
     ApInfo getApInfo();
     String getSSID();

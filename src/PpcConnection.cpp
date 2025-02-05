@@ -49,8 +49,14 @@ void PpcConnection::run() {
     currentState->loop(this);
 }
 
+void PpcConnection::disconnectNetwork() {
+    logger.logf(LOG_INFO, "Enqueueing disconnect job");
+    setJob(DISCONNECT);
+}
+
 void PpcConnection::connectToNetwork(const char* ssid, const char* password/*, void(*func)()*/)
 {
+    logger.logf(LOG_INFO, "Connecting to %s: Password: %s", ssid, password);
     _ssid = ssid;
     _pass = password;
     //_jobcallback = func;
@@ -58,18 +64,24 @@ void PpcConnection::connectToNetwork(const char* ssid, const char* password/*, v
 }
 
 void PpcConnection::connect() {
-    WiFi.begin(_ssid.c_str(), _pass.c_str());
     logger.logf(LOG_INFO, "Connecting to %s", _ssid.c_str());
+    WiFi.begin(_ssid.c_str(), _pass.c_str());
 }
 
 void PpcConnection::disconnect() {
-    WiFi.disconnect();
     logger.logf(LOG_INFO, "Disconnecting from %s", _ssid.c_str());
+    bool disconnected = WiFi.disconnect(false);
+    if (disconnected) {
+        logger.logf(LOG_INFO, "Disconnected from %s", _ssid.c_str());
+    }
+    else {
+        logger.logf(LOG_ERR, "Error disconnecting from %s", _ssid.c_str());
+    }
 }
 
 void PpcConnection::startAP() {
-    static int channel = (MIN_WIFI_CHANNEL % MAX_WIFI_CHANNEL) + 1;
     logger.logf(LOG_INFO, "Starting AP %s", _apName);
+    static int channel = (MIN_WIFI_CHANNEL % MAX_WIFI_CHANNEL) + 1;
     WiFi.softAP(_apName, _apPassword, channel);
 }
 
@@ -81,6 +93,7 @@ ApInfo PpcConnection::getApInfo() {
 }
 
 std::vector<NetworkInfo> PpcConnection::getNetworks(bool showHidden) {
+    logger.logf(LOG_INFO, "Scanning networks");
     int n = WiFi.scanNetworks(false, showHidden);
     std::vector<NetworkInfo> networks(n);
 
@@ -93,8 +106,8 @@ std::vector<NetworkInfo> PpcConnection::getNetworks(bool showHidden) {
 }
 
 void PpcConnection::connectToNetworkSync(const char* ssid, const char* password) {
-    WiFi.begin(ssid, password);
     logger.logf(LOG_INFO, "Connecting to %s", ssid);
+    WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
         logger.logf(LOG_INFO, ".");

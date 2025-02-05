@@ -7,6 +7,9 @@
 #include "PpcConnection.h"
 #include "Clock.h"
 #include <WiFiUdp.h>
+#include "Log.h"
+
+extern Log logger;
 
 AsyncWebServer server(80);
 
@@ -34,16 +37,28 @@ void startServer(PpcConnection *ppcConnection) {
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(LittleFS, "/index.html", "text/html");
     });
+
+    server.on("/about", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/index.html", "text/html");
+    });
     
-    server.on("/assets/index-C6T_Mup5.js", [](AsyncWebServerRequest *request) {
-        request->send(LittleFS, "/assets/index-C6T_Mup5.js", "text/javascript");
+    server.on("/assets/index-Bl7wJD4T.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/assets/index-Bl7wJD4T.js", "text/javascript");
     });
 
-    server.on("/assets/index-UBPlRQ0_.css", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(LittleFS, "/assets/index-UBPlRQ0_.css", "text/css");
+    server.on("/assets/index-CkZt9zC8.css", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/assets/index-CkZt9zC8.css", "text/css");
     });
 
-    server.on("/fontawesome.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+    server.on("/ppc-bot.jpg", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/ppc-bot.jpg", "image/jpeg");
+    });
+
+    server.on("/DSEG7Modern-BoldItalic.woff", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/DSEG7Modern-BoldItalic.woff", "font/woff");
+    });
+
+     server.on("/fontawesome.js", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(LittleFS, "/fontawesome.js", "text/javascript");
     });
 
@@ -53,14 +68,6 @@ void startServer(PpcConnection *ppcConnection) {
 
     server.on("/script.js", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(LittleFS, "/script.js", "text/javascript");
-    });
-
-    server.on("/image.jpg", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(LittleFS, "/image.jpg", "image/jpeg");
-    });
-  
-    server.on("/DSEG7Modern-BoldItalic.woff", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(LittleFS, "/DSEG7Modern-BoldItalic.woff", "font/woff");
     });
 
     server.on("/get-time", HTTP_GET, [&clock](AsyncWebServerRequest *request) {
@@ -73,6 +80,7 @@ void startServer(PpcConnection *ppcConnection) {
 
       // sends JSON
     server.on("/wifi-status", HTTP_GET, [ppcConnection](AsyncWebServerRequest* request) {
+        logger.logf(LOG_INFO, "Sending wifi status");
         AsyncJsonResponse* response = new AsyncJsonResponse();
         JsonObject root = response->getRoot().to<JsonObject>();
         switch(ppcConnection->getCurrentState()->getType()){
@@ -88,7 +96,7 @@ void startServer(PpcConnection *ppcConnection) {
                 break;
         }
 
-        JsonObject apJsonInfo = root.createNestedObject("ap-info");
+        JsonObject apJsonInfo = root["ap-info"].to<JsonObject>();
         ApInfo apInfo = ppcConnection->getApInfo();
         apJsonInfo["ssid"] = apInfo.ssid;
         apJsonInfo["ip"] = apInfo.ip;
@@ -98,6 +106,7 @@ void startServer(PpcConnection *ppcConnection) {
     });
 
     server.on("/wifi-scan", HTTP_GET, [](AsyncWebServerRequest *request){
+        logger.logf(LOG_INFO, "Scanning for networks");
         AsyncJsonResponse* response = new AsyncJsonResponse();
         JsonObject root = response->getRoot().to<JsonObject>();
         JsonArray data = root["data"].to<JsonArray>();
@@ -128,9 +137,12 @@ void startServer(PpcConnection *ppcConnection) {
     });
 
     server.on("/wifi-connect", HTTP_POST, [ppcConnection](AsyncWebServerRequest *request){
-
+        logger.logf(LOG_INFO, "Connecting to network %s", request->getParam("ssid", true)->value().c_str());
         AsyncJsonResponse* response = new AsyncJsonResponse();
         JsonObject root = response->getRoot().to<JsonObject>();
+
+        //get body json params
+
 
         if (request->hasParam("ssid", true) && request->hasParam("password", true)) {
             const char* ssid = request->getParam("ssid", true)->value().c_str();
@@ -142,6 +154,20 @@ void startServer(PpcConnection *ppcConnection) {
         } else {
             root["status"] = "error";
         }
+
+        response->setLength();
+        request->send(response);
+    });
+
+    server.on("/wifi-disconnect", HTTP_POST, [ppcConnection, logger](AsyncWebServerRequest *request){
+        logger.logf(LOG_INFO, "Disconnecting from network");
+
+        AsyncJsonResponse* response = new AsyncJsonResponse();
+        JsonObject root = response->getRoot().to<JsonObject>();
+
+        ppcConnection->disconnectNetwork();
+
+        root["status"] = "disconnected";
 
         response->setLength();
         request->send(response);
