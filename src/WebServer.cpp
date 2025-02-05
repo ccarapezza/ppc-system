@@ -136,13 +136,23 @@ void startServer(PpcConnection *ppcConnection) {
         request->send(response);
     });
 
-    server.on("/wifi-connect", HTTP_POST, [ppcConnection, logger](AsyncWebServerRequest *request){
-        logger.logf(LOG_INFO, "Connecting to network %s", request->getParam("ssid", true)->value().c_str());
+    server.on("/wifi-connect", HTTP_POST, [ppcConnection](AsyncWebServerRequest *request){
+        int params = request->params();
+        for(int i=0;i<params;i++){
+            const AsyncWebParameter* p = request->getParam(i);
+            if(p->isPost()){
+                logger.logf(LOG_INFO, "POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+            } else if(!p->isFile()){
+                logger.logf(LOG_INFO, "GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
+            } else{
+                logger.logf(LOG_INFO, "UNDEF[%s]: %s\n", p->name().c_str(), p->value().c_str());
+            }
+        }
+
         AsyncJsonResponse* response = new AsyncJsonResponse();
         JsonObject root = response->getRoot().to<JsonObject>();
-
-        //get body json params
         if (request->hasParam("ssid", true) && request->hasParam("password", true)) {
+            logger.logf(LOG_INFO, "Connecting to network %s", request->getParam("ssid", true)->value().c_str());
             const char* ssid = request->getParam("ssid", true)->value().c_str();
             const char* password = request->getParam("password", true)->value().c_str();
 
@@ -150,16 +160,15 @@ void startServer(PpcConnection *ppcConnection) {
 
             root["status"] = "connecting";
         } else {
+            logger.logf(LOG_INFO, "Missing ssid or password");
             root["status"] = "error";
         }
-
-        root["status"] = "test";
 
         response->setLength();
         request->send(response);
     });
 
-    server.on("/wifi-disconnect", HTTP_POST, [ppcConnection, logger](AsyncWebServerRequest *request){
+    server.on("/wifi-disconnect", HTTP_POST, [ppcConnection](AsyncWebServerRequest *request){
         logger.logf(LOG_INFO, "Disconnecting from network");
 
         AsyncJsonResponse* response = new AsyncJsonResponse();
