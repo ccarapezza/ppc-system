@@ -1,5 +1,4 @@
-//const API_HOST = 'http://192.168.0.16';
-const API_HOST = 'http://192.168.0.226';
+const API_HOST = location.origin;
 
 const API_ENDPOINTS = {
     WIFI_STATUS: '/wifi-status',
