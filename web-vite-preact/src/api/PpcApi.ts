@@ -21,12 +21,12 @@ export class PpcApi {
     }
 
     static async connectWifi(ssid: string, password: string) {
+        const formData = new FormData();
+        formData.append("ssid", ssid);
+        formData.append("password", password);
         const response = await fetch(API_HOST + API_ENDPOINTS.WIFI_CONNECT, {
             method: 'POST',
-            body: JSON.stringify({
-                ssid: ssid,
-                password: password
-            })  
+            body: formData
         });
         return response.json();
     }
