@@ -34,17 +34,17 @@ PPC System es un sistema de gestión para ESP8266 que permite administrar entrad
 
 ### Configuración del Módulo UI
 
-1. Navega al directorio `/web`:
+1. Navega al directorio `/web-vite-preact`
     ```bash
-    cd web
+    cd web-vite-preact
     ```
 2. Instala los paquetes necesarios:
     ```bash
     npm install
     ```
-3. Compila y minifica el código:
+3. Compila el código y lo copia a `/data` para ser grabado posteriormente a la flash.
     ```bash
-    npm run build
+    npm run build:copy-data
     ```
 4. Los archivos generados (`index.html`, `script.js`, `style.css`) se copiarán automáticamente a la carpeta `/data` para ser subidos a la memoria FLASH del dispositivo.
 
