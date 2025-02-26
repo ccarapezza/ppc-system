@@ -11,6 +11,10 @@
 
 extern Log logger;
 
+//const to save filenames in flash
+const char INDEX_JS[] PROGMEM = "/assets/index-DDqX1u3J.js";
+const char INDEX_CSS[] PROGMEM = "/assets/index-DaxZiNBP.css";
+
 AsyncWebServer server(80);
 
 //WiFiUDP udpClient;
@@ -42,12 +46,12 @@ void startServer(PpcConnection *ppcConnection) {
         request->send(LittleFS, "/index.html", "text/html");
     });
     
-    server.on("/assets/index-Bl7wJD4T.js", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(LittleFS, "/assets/index-Bl7wJD4T.js", "text/javascript");
+    server.on(INDEX_JS, HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, INDEX_JS, "text/javascript");
     });
 
-    server.on("/assets/index-CkZt9zC8.css", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(LittleFS, "/assets/index-CkZt9zC8.css", "text/css");
+    server.on(INDEX_CSS, HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, INDEX_CSS, "text/css");
     });
 
     server.on("/ppc-bot.jpg", HTTP_GET, [](AsyncWebServerRequest *request) {
