@@ -4,11 +4,14 @@ import { ConnectionState, ConnectionStatus, EncryptionType, EncryptionTypeLabel,
 import { FontAwesomeIcon } from '../FontAwesomeIcon';
 import { useEffect, useRef, useState } from "preact/hooks";
 import { PpcApi } from './../../api/PpcApi';
-import Loading from "../Loading";
+import { ModalMessage } from "./WiFiScan";
 
 export default function WiFiConnectModal({
     networkConnectionData,
-    closeModal
+    closeModal,
+    connectionStatus,
+    setConnectionStatus,
+    setLoading
 }: {
     networkConnectionData: {
         BSSID: string,
@@ -16,15 +19,12 @@ export default function WiFiConnectModal({
         encryptionType: number,
         ssid: string
     } | null,
-    closeModal: Function
-}) {
-    const [loading, setLoading] = useState(false);
-    const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus | null>(null);
+    connectionStatus: ConnectionStatus | null,
+    setConnectionStatus: (connectionStatus: ConnectionStatus | null) => void
+    setLoading: (loading: boolean) => void
+    closeModal: (message:ModalMessage | null) => void
+}) {   
     const passwordRef = useRef<HTMLInputElement>(null);
-
-    useEffect(() => {
-        checkConnectionStatus();
-    }, [])
 
     const passwordInputShake = () => {
         if (passwordRef?.current) {
@@ -37,55 +37,65 @@ export default function WiFiConnectModal({
         }
     }
 
-    const connectWifi = () => {
-        setLoading(true);
-        const password = passwordRef.current?.value;
+    const [loadingConnectWifi, setLoadingConnectWifi] = useState(false);
+    const [loadingCheckConnectionStatus, setLoadingCheckConnectionStatus] = useState(false);
 
+    const connectWifi = () => {
+        const password = passwordRef.current?.value;
+        
         if (password?.length! < 8) {
             passwordInputShake();
-            setLoading(false);
             return;
         }
+        setLoadingConnectWifi(true);
 
         PpcApi.connectWifi(networkConnectionData?.ssid!, password!).then((response: any) => {
             console.log("Connect WiFi", response);
-            setConnectionStatus(response);
+            if(response.status === "connecting"){
+                checkConnectionStatus();
+            }else{
+                throw new Error("")
+            }
+            //setConnectionStatus(response);
         }).catch((error: any) => {
             console.error(error);
         }).finally(() => {
-            setLoading(false);
+            setLoadingConnectWifi(false);
         })
     }
 
-    const checkConnectionStatus = () => {
-        setLoading(true);
-        PpcApi.getWifiStatus().then((response: any) => {
-            console.log("WiFi Status", response);
-            setConnectionStatus(response);
-            //if connection is still connecting, retry every 5 seconds
-            if (response.status == ConnectionState.CONNECTING) {
-                setInterval(() => {
-                    checkConnectionStatus();
-                }, 5000);
-            }
-        }).catch((error: any) => {
-            console.error(error);
-        }).finally(() => {
-            setLoading(false);
-        })
+    const checkConnectionStatus = async () => {
+        setLoadingCheckConnectionStatus(true);
+        let wifiStatusResponse: ConnectionStatus;
+        do{
+            //sleep 5 sec
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            wifiStatusResponse = await PpcApi.getWifiStatus();
+        }while(wifiStatusResponse.status == ConnectionState.CONNECTING)
+        setConnectionStatus(wifiStatusResponse);
+        setLoadingCheckConnectionStatus(false);
+        closeModal({
+            title: "Connection Status",
+            message: wifiStatusResponse.status == ConnectionState.CONNECTED ? "Connected to WiFi" : "Failed to connect to WiFi"
+        });
     }
+
+    console.log(connectionStatus);
+
+    useEffect(() => {
+        setLoading(loadingConnectWifi || loadingCheckConnectionStatus);
+    }, [loadingConnectWifi, loadingCheckConnectionStatus]);
 
     return (<>
-        {(loading || (connectionStatus?.status == ConnectionState.CONNECTING)) && <Loading />}
         <Modal
             title="WiFi Details"
             open={networkConnectionData != null}
-            onClose={() => closeModal()}
+            onClose={() => closeModal(null)}
             actions={<div class="w-full flex justify-between items-center gap-4">
                 <Button
                     label="Cancel"
                     onClick={() => {
-                        closeModal();
+                        closeModal(null);
                     }}
                     className="bg-gray-200 text-gray-800"
                 />

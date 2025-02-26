@@ -2,7 +2,7 @@ import Button from "../Button";
 import Card from "../Card";
 import { ConnectionState } from "./../../constants";
 import { FontAwesomeIcon } from "../FontAwesomeIcon";
-import { useEffect, useState } from "preact/hooks";
+import { useState } from "preact/hooks";
 import { PpcApi } from "./../../api/PpcApi";
 
 interface ConnectionStatus {
@@ -14,10 +14,15 @@ interface ConnectionStatus {
     }
   }
 
-export default function WiFiStatus() {
+  type ConnectionStatusProps = {
+    connectionStatus: ConnectionStatus | null
+    setConnectionStatus: (connectionStatus: ConnectionStatus | null) => void
+  }
+
+export default function WiFiStatus({connectionStatus, setConnectionStatus}: ConnectionStatusProps) {
 
     const [loading, setLoading] = useState(false);
-    const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus|null>(null);
+    //const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus|null>(null);
 
     const disconnectWifi = () => {
         setLoading(true);
@@ -30,19 +35,7 @@ export default function WiFiStatus() {
           setLoading(false);
         })
     }
-
-    useEffect(() => {
-        setLoading(true);
-        PpcApi.getWifiStatus().then((response: any) => {
-          console.log("WiFi Status", response);
-          setConnectionStatus(response);
-        }).catch((error: any) => {
-          console.error(error);
-        }).finally(() => {
-          setLoading(false);
-        })
-      }, [])
-
+    
     return (
         <Card title="Estado de conexión" icon="wifi" className="w-full">
             <div class="p-4">

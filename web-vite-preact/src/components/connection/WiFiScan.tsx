@@ -1,15 +1,29 @@
 import { useEffect, useState } from 'preact/hooks';
 import Card from '../Card'
 import { PpcApi } from './../../api/PpcApi';
-import { EncryptionType, EncryptionTypeLabel, Utils } from "./../../constants";
+import { ConnectionStatus, EncryptionType, EncryptionTypeLabel, Utils } from "./../../constants";
 import { FontAwesomeIcon } from '../FontAwesomeIcon';
 import Loading from '../Loading';
 import WiFiConnectModal from './WiFiConnectModal';
+import Modal from '../Modal';
+import Button from '../Button';
 
-export default function WiFiScan() {
+export type ModalMessage = {
+    title: string
+    message: string
+}
+
+type ConnectionStatusProps = {
+    connectionStatus: ConnectionStatus | null
+    setConnectionStatus: (connectionStatus: ConnectionStatus | null) => void
+}
+
+export default function WiFiScan({ connectionStatus, setConnectionStatus }: ConnectionStatusProps) {
 
     const [wifiList, setWifiList] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [loadingConnectWifi, setLoadingConnectWifi] = useState(false);
+    const [messageModal, setMessageModal] = useState<{ title: string, message: string }|null>(null);
     const [selectedWifi, setSelectedWifi] = useState<any>(null);
 
     const scanWifi = () => {
@@ -37,11 +51,41 @@ export default function WiFiScan() {
         return () => clearInterval(interval);
     }, [wifiList])
     
+    const onCloseMessageModal = () => {
+        setMessageModal(null);
+    }
+
+    const onCloseWifiConnectModal = (message: ModalMessage | null) => {
+        if (message) {
+            setMessageModal(message);
+        }
+        setSelectedWifi(null);
+    } 
 
     return (<>
-        {loading && <Loading /> }
-        <WiFiConnectModal networkConnectionData={selectedWifi} closeModal={() => setSelectedWifi(null)} />
-        
+        {(loading || loadingConnectWifi) && <Loading />}
+        <Modal
+            title={messageModal?.title || "Message"}
+            open={messageModal != null}
+            onClose={onCloseMessageModal}
+            actions={<div class="w-full flex justify-between items-center gap-4">
+                <Button
+                    label="OK"
+                    onClick={onCloseMessageModal}
+                    className="bg-primary text-white"
+                />
+            </div>}
+            onTop
+        >
+            <div>{messageModal?.message}</div>
+        </Modal>
+        <WiFiConnectModal
+            networkConnectionData={selectedWifi}
+            closeModal={onCloseWifiConnectModal}
+            connectionStatus={connectionStatus}
+            setConnectionStatus={setConnectionStatus}
+            setLoading={setLoadingConnectWifi}
+        />
         <p class="text-gray-800 font-bold text-lg">WiFi Networks</p>
 
         {wifiList.length > 0 &&

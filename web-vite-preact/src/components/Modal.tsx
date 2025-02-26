@@ -7,9 +7,10 @@ interface ModalProps {
     actions?: any
     open: boolean
     onClose?: any
+    onTop?: boolean
 }
 
-export default function Modal({ title, children, actions, open, onClose }: ModalProps) {
+export default function Modal({ title, children, actions, open, onClose, onTop }: ModalProps) {
 
     const onCloseHandler = () => {
         onClose && onClose()
@@ -19,7 +20,7 @@ export default function Modal({ title, children, actions, open, onClose }: Modal
         return (<></>)
     }
     return (
-        <div className="flex items-center justify-center min-h-screen bg-black absolute inset-0 z-50 bg-opacity-50">
+        <div className={`flex items-center justify-center min-h-screen bg-black absolute inset-0 bg-opacity-50 z-${onTop?"[999]":"50"}`}>
             <div id="default-modal" tabindex={-1} aria-hidden="true" className="fixed inset-0 z-50 overflow-auto flex items-center justify-center">
                 <div class="relative p-4 w-full max-w-2xl max-h-full">
                     {/* Modal content */}
