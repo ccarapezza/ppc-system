@@ -4,8 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host 192.168.0.10",
+    "start": "vite",
+    "dev": "vite --host 192.168.1.103",
     "build": "tsc -b && vite build",
+    "build:copy-data": "node tools/build-and-copy-bundle.js",
     "preview": "vite preview"
   },
   "dependencies": {
