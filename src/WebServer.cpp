@@ -9,7 +9,6 @@
 #include <WiFiUdp.h>
 #include "Log.h"
 #include <DNSServer.h>
-#include <ESP8266HTTPClient.h>
 
 DNSServer dnsServer;
 extern Log logger;
@@ -19,6 +18,9 @@ const char INDEX_JS[] PROGMEM = "/assets/index-yy0f4IWx.js";
 const char INDEX_CSS[] PROGMEM = "/assets/index-DaxZiNBP.css";
 
 AsyncWebServer server(80);
+
+// Estado del portal cautivo
+bool captive = true;
 
 class CaptiveRequestHandler : public AsyncWebHandler {
     public:
@@ -52,31 +54,24 @@ class CaptiveRequestHandler : public AsyncWebHandler {
 //WiFiUDP udpClient;
 //Syslog syslog(udpClient, "192.168.0.10", 5140, "esp8266", "syslog", LOG_KERN);
 
-String getCaptivePortalURI() {
-    // Simulación de obtener la URI desde DHCP/RA (debería implementarse correctamente)
-    return "https://example.org/captive-portal/api"; 
-}
+// Devuelve el estado del portal cautivo en JSON
+void handleCaptivePortalAPI(AsyncWebServerRequest *request) {
+    JsonDocument jsonDoc;  // Crea un JsonDocument dinámico
 
-bool isCaptive() {
-    HTTPClient http;
-    WiFiClient client;
-    String captivePortalURI = getCaptivePortalURI();
-    http.begin(client, captivePortalURI);
-    http.addHeader("Accept", "application/captive+json");
+    jsonDoc["captive"] = captive;
 
-    int httpCode = http.GET();
-    if (httpCode == 200) {
-        JsonDocument doc;  // Use base class JsonDocument for ArduinoJson 7+
-        // Alternative for ArduinoJson 6: JsonDocument doc(1024); or BasicJsonDocument<1024> doc;
-        deserializeJson(doc, http.getString());
-        bool captive = doc["captive"];
-        http.end();
-        return captive;
+    if (captive) {
+        jsonDoc["user-portal-url"] = "http://192.168.4.1/portal.html";
+    } else {
+        jsonDoc["seconds-remaining"] = 3600;  // 1 hora de acceso
     }
 
-    http.end();
-    return false;
+    String jsonResponse;
+    serializeJson(jsonDoc, jsonResponse);
+
+    request->send(200, "application/captive+json", jsonResponse);
 }
+
 
 void startServer(PpcConnection *ppcConnection) {
 
@@ -99,14 +94,16 @@ void startServer(PpcConnection *ppcConnection) {
         }
     });
 
+    server.on("/api", HTTP_GET, handleCaptivePortalAPI);
+
     // Captura las solicitudes de verificación de conexión (Xiaomi, Samsung, iPhone, Windows, etc.)
     server.on("/generate_204", HTTP_GET, [](AsyncWebServerRequest *request){
         request->send(200, "text/html", "<html><head><meta http-equiv='refresh' content='0; url=http://192.168.4.1/'></head><body>Redirigiendo...</body></html>");
     });
     
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        if (isCaptive()) {
-            request->redirect(getCaptivePortalURI()); // Redirigir al portal cautivo
+        if (captive) {
+            request->redirect("http://192.168.4.1/index.html");
         } else {
             request->send(LittleFS, "/index.html", "text/html");
         }
