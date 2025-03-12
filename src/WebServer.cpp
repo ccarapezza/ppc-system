@@ -9,6 +9,7 @@
 #include <WiFiUdp.h>
 #include "Log.h"
 #include <DNSServer.h>
+#include <ESP8266HTTPClient.h>
 
 DNSServer dnsServer;
 extern Log logger;
@@ -58,13 +59,15 @@ String getCaptivePortalURI() {
 
 bool isCaptive() {
     HTTPClient http;
+    WiFiClient client;
     String captivePortalURI = getCaptivePortalURI();
-    http.begin(captivePortalURI);
+    http.begin(client, captivePortalURI);
     http.addHeader("Accept", "application/captive+json");
 
     int httpCode = http.GET();
     if (httpCode == 200) {
-        DynamicJsonDocument doc(1024);
+        JsonDocument doc;  // Use base class JsonDocument for ArduinoJson 7+
+        // Alternative for ArduinoJson 6: JsonDocument doc(1024); or BasicJsonDocument<1024> doc;
         deserializeJson(doc, http.getString());
         bool captive = doc["captive"];
         http.end();
