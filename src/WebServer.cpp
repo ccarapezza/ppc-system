@@ -56,6 +56,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
 
 // Devuelve el estado del portal cautivo en JSON
 void handleCaptivePortalAPI(AsyncWebServerRequest *request) {
+    logger.logf(LOG_INFO, "handleCaptivePortalAPI");
     JsonDocument jsonDoc;  // Crea un JsonDocument dinámico
 
     jsonDoc["captive"] = captive;
@@ -84,7 +85,7 @@ void startServer(PpcConnection *ppcConnection) {
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "Content-Type");
 
     dnsServer.start(53, "*", WiFi.softAPIP());
-    server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
+    //server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
 
     server.onNotFound([](AsyncWebServerRequest *request) {
         if (request->method() == HTTP_OPTIONS) {
