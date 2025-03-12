@@ -11,7 +11,7 @@ extern Log logger;
 String apName = "PPC-AP_" + String(ESP.getChipId());
 const char* _apName = apName.c_str();
 
-const char*   _apPassword           = NULL;
+const char*   _apPassword           = "ppcbot123";
 
 String _ssid = "";
 String _pass = "";

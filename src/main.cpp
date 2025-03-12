@@ -27,16 +27,19 @@ void setup() {
   logger.logf(LOG_INFO, "Setup complete");
 }
 
-void loop() {
+
+void criticalLoop() {
   ppcConnection.run();
   Clock& clock = Clock::getInstance();
   clock.run(&ppcConnection);
-}
-
-void criticalLoop() {
-
+  loopServer();
 }
 
 void safeLoop() {
+  
+}
 
+void loop() {
+  criticalLoop();
+  //safeLoop();
 }

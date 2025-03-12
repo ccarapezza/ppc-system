@@ -8,14 +8,45 @@
 #include "Clock.h"
 #include <WiFiUdp.h>
 #include "Log.h"
+#include <DNSServer.h>
 
+DNSServer dnsServer;
 extern Log logger;
 
 //const to save filenames in flash
-const char INDEX_JS[] PROGMEM = "/assets/index-DDqX1u3J.js";
+const char INDEX_JS[] PROGMEM = "/assets/index-yy0f4IWx.js";
 const char INDEX_CSS[] PROGMEM = "/assets/index-DaxZiNBP.css";
 
 AsyncWebServer server(80);
+
+class CaptiveRequestHandler : public AsyncWebHandler {
+    public:
+      bool canHandle(__unused AsyncWebServerRequest* request) const {
+        //show request full info
+        logger.logf(LOG_INFO, "CaptiveRequestHandler::canHandle url: %s", request->url().c_str());
+
+        bool isCaptiveRequest = !request->url().operator==("/") &&
+        !request->url().startsWith("/ppc-bot.jpg") &&
+        !request->url().startsWith("/DSEG7Modern-BoldItalic.woff") &&
+        !request->url().startsWith("/fontawesome.js") &&
+        !request->url().startsWith("/get-time") &&
+        !request->url().startsWith("/wifi-status") &&
+        !request->url().startsWith("/wifi-scan") &&
+        !request->url().startsWith("/wifi-connect") &&
+        !request->url().startsWith("/wifi-disconnect") &&
+        !request->url().startsWith("/vite.svg") &&
+        !request->url().startsWith("/generate_204") &&
+        !request->url().startsWith(INDEX_JS) &&
+        !request->url().startsWith(INDEX_CSS);
+
+        logger.logf(LOG_INFO, "CaptiveRequestHandler::canHandle url: %s isCaptiveRequest: %d", request->url().c_str(), isCaptiveRequest);
+        return isCaptiveRequest;
+      }
+  
+      void handleRequest(AsyncWebServerRequest* request) {
+        request->send(LittleFS, "/index.html", "text/html");
+      }
+  };
 
 //WiFiUDP udpClient;
 //Syslog syslog(udpClient, "192.168.0.10", 5140, "esp8266", "syslog", LOG_KERN);
@@ -30,12 +61,20 @@ void startServer(PpcConnection *ppcConnection) {
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "GET, POST, PUT");
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "Content-Type");
 
+    dnsServer.start(53, "*", WiFi.softAPIP());
+    server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
+
     server.onNotFound([](AsyncWebServerRequest *request) {
         if (request->method() == HTTP_OPTIONS) {
             request->send(200);
         } else {
             request->send(404);
         }
+    });
+
+    // Captura las solicitudes de verificación de conexión (Xiaomi, Samsung, iPhone, Windows, etc.)
+    server.on("/generate_204", HTTP_GET, [](AsyncWebServerRequest *request){
+        request->send(200, "text/html", "<html><head><meta http-equiv='refresh' content='0; url=http://192.168.4.1/'></head><body>Redirigiendo...</body></html>");
     });
     
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -64,14 +103,6 @@ void startServer(PpcConnection *ppcConnection) {
 
      server.on("/fontawesome.js", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(LittleFS, "/fontawesome.js", "text/javascript");
-    });
-
-    server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(LittleFS, "/style.css", "text/css");
-    });
-
-    server.on("/script.js", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(LittleFS, "/script.js", "text/javascript");
     });
 
     server.on("/get-time", HTTP_GET, [&clock](AsyncWebServerRequest *request) {
@@ -187,4 +218,8 @@ void startServer(PpcConnection *ppcConnection) {
     });
 
     server.begin();
+}
+
+void loopServer() {
+    dnsServer.processNextRequest();
 }
