@@ -51,6 +51,30 @@ class CaptiveRequestHandler : public AsyncWebHandler {
 //WiFiUDP udpClient;
 //Syslog syslog(udpClient, "192.168.0.10", 5140, "esp8266", "syslog", LOG_KERN);
 
+String getCaptivePortalURI() {
+    // Simulación de obtener la URI desde DHCP/RA (debería implementarse correctamente)
+    return "https://example.org/captive-portal/api"; 
+}
+
+bool isCaptive() {
+    HTTPClient http;
+    String captivePortalURI = getCaptivePortalURI();
+    http.begin(captivePortalURI);
+    http.addHeader("Accept", "application/captive+json");
+
+    int httpCode = http.GET();
+    if (httpCode == 200) {
+        DynamicJsonDocument doc(1024);
+        deserializeJson(doc, http.getString());
+        bool captive = doc["captive"];
+        http.end();
+        return captive;
+    }
+
+    http.end();
+    return false;
+}
+
 void startServer(PpcConnection *ppcConnection) {
 
     Clock& clock = Clock::getInstance();
@@ -78,7 +102,11 @@ void startServer(PpcConnection *ppcConnection) {
     });
     
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(LittleFS, "/index.html", "text/html");
+        if (isCaptive()) {
+            request->redirect(getCaptivePortalURI()); // Redirigir al portal cautivo
+        } else {
+            request->send(LittleFS, "/index.html", "text/html");
+        }
     });
 
     server.on("/about", HTTP_GET, [](AsyncWebServerRequest *request) {
