@@ -10,69 +10,44 @@
 #include "Log.h"
 #include <DNSServer.h>
 
-DNSServer dnsServer;
 extern Log logger;
+extern IPAddress apIP;
 
 //const to save filenames in flash
 const char INDEX_JS[] PROGMEM = "/assets/index-yy0f4IWx.js";
 const char INDEX_CSS[] PROGMEM = "/assets/index-DaxZiNBP.css";
 
+const char *myHostname = "ppc.captiveportal";
+
+DNSServer dnsServer;
 AsyncWebServer server(80);
 
-// Estado del portal cautivo
-bool captive = true;
+boolean isIp(String str) {
+    for (size_t i = 0; i < str.length(); i++) {
+      int c = str.charAt(i);
+      if (c != '.' && (c < '0' || c > '9')) { return false; }
+    }
+    return true;
+}
 
 class CaptiveRequestHandler : public AsyncWebHandler {
-    public:
-      bool canHandle(__unused AsyncWebServerRequest* request) const {
-        //show request full info
-        logger.logf(LOG_INFO, "CaptiveRequestHandler::canHandle url: %s", request->url().c_str());
-
-        bool isCaptiveRequest = !request->url().operator==("/") &&
-        !request->url().startsWith("/ppc-bot.jpg") &&
-        !request->url().startsWith("/DSEG7Modern-BoldItalic.woff") &&
-        !request->url().startsWith("/fontawesome.js") &&
-        !request->url().startsWith("/get-time") &&
-        !request->url().startsWith("/wifi-status") &&
-        !request->url().startsWith("/wifi-scan") &&
-        !request->url().startsWith("/wifi-connect") &&
-        !request->url().startsWith("/wifi-disconnect") &&
-        !request->url().startsWith("/vite.svg") &&
-        !request->url().startsWith("/generate_204") &&
-        !request->url().startsWith(INDEX_JS) &&
-        !request->url().startsWith(INDEX_CSS);
-
-        logger.logf(LOG_INFO, "CaptiveRequestHandler::canHandle url: %s isCaptiveRequest: %d", request->url().c_str(), isCaptiveRequest);
-        return isCaptiveRequest;
-      }
+    bool canHandle(__unused AsyncWebServerRequest* request) const {
+        String host = request->getHeader("Host")->value();
+        boolean isIpHost = isIp(host);
+        boolean isMyHostname = host.equals(String(myHostname) + ".local");
+        return !isIpHost && !isMyHostname;
+    }
   
-      void handleRequest(AsyncWebServerRequest* request) {
-        request->send(LittleFS, "/index.html", "text/html");
-      }
-  };
+    void handleRequest(AsyncWebServerRequest* request) {
+        logger.logf(LOG_INFO, "CaptiveRequestHandler::handleRequest url: %s", request->url().c_str());
+        AsyncWebServerResponse *response = request->beginResponse(302, "text/plain", "");
+        response->addHeader("Location", String("http://") + myHostname + ".local/");
+        request->send(response);
+    }
+};
 
 //WiFiUDP udpClient;
 //Syslog syslog(udpClient, "192.168.0.10", 5140, "esp8266", "syslog", LOG_KERN);
-
-// Devuelve el estado del portal cautivo en JSON
-void handleCaptivePortalAPI(AsyncWebServerRequest *request) {
-    logger.logf(LOG_INFO, "handleCaptivePortalAPI");
-    JsonDocument jsonDoc;  // Crea un JsonDocument dinámico
-
-    jsonDoc["captive"] = captive;
-
-    if (captive) {
-        jsonDoc["user-portal-url"] = "http://192.168.4.1/portal.html";
-    } else {
-        jsonDoc["seconds-remaining"] = 3600;  // 1 hora de acceso
-    }
-
-    String jsonResponse;
-    serializeJson(jsonDoc, jsonResponse);
-
-    request->send(200, "application/captive+json", jsonResponse);
-}
-
 
 void startServer(PpcConnection *ppcConnection) {
 
@@ -84,30 +59,23 @@ void startServer(PpcConnection *ppcConnection) {
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "GET, POST, PUT");
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "Content-Type");
 
-    dnsServer.start(53, "*", WiFi.softAPIP());
-    //server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
+    dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
+    dnsServer.start(53, "*", apIP);
+    server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
 
     server.onNotFound([](AsyncWebServerRequest *request) {
+        logger.logf(LOG_INFO, "Not found: %s", request->url().c_str());
         if (request->method() == HTTP_OPTIONS) {
             request->send(200);
         } else {
             request->send(404);
         }
     });
-
-    server.on("/api", HTTP_GET, handleCaptivePortalAPI);
-
-    // Captura las solicitudes de verificación de conexión (Xiaomi, Samsung, iPhone, Windows, etc.)
-    server.on("/generate_204", HTTP_GET, [](AsyncWebServerRequest *request){
-        request->send(200, "text/html", "<html><head><meta http-equiv='refresh' content='0; url=http://192.168.4.1/'></head><body>Redirigiendo...</body></html>");
-    });
     
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        if (captive) {
-            request->redirect("http://192.168.4.1/index.html");
-        } else {
-            request->send(LittleFS, "/index.html", "text/html");
-        }
+        //capture all request to the captive portal
+        logger.logf(LOG_INFO, "CaptiveRequestHandler::handleRequest url: %s", request->url().c_str());
+        request->send(LittleFS, "/index.html", "text/html");
     });
 
     server.on("/about", HTTP_GET, [](AsyncWebServerRequest *request) {

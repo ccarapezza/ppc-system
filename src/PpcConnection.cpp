@@ -16,6 +16,9 @@ const char*   _apPassword           = "ppcbot123";
 String _ssid = "";
 String _pass = "";
 
+IPAddress apIP(172, 217, 28, 15);
+IPAddress netMsk(255, 255, 255, 0);
+
 //void(*_jobcallback)()                = NULL;
 
 PpcConnection::PpcConnection() {
@@ -82,6 +85,7 @@ void PpcConnection::disconnect() {
 void PpcConnection::startAP() {
     logger.logf(LOG_INFO, "Starting AP %s", _apName);
     static int channel = (MIN_WIFI_CHANNEL % MAX_WIFI_CHANNEL) + 1;
+    WiFi.softAPConfig(apIP, apIP, netMsk);
     WiFi.softAP(_apName, _apPassword, channel);
 }
 
