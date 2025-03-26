@@ -1,7 +1,7 @@
 import { icon, IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faCoffee, faCheckCircle, faCat, faAtom, faHome, faBars, faBell, faUser, faSun, faMoon, faWifi, faEnvelope, faSignal, faLock, faLockOpen, faCircleNotch, faPlugCircleXmark, faRobot, faSpinner } from '@fortawesome/free-solid-svg-icons';
-library.add(faCoffee, faCheckCircle, faCat, faAtom, faHome, faBars, faBell, faUser, faSun, faMoon, faWifi, faEnvelope, faSignal, faLock, faLockOpen, faCircleNotch, faPlugCircleXmark,faRobot, faSpinner);
+import { faCoffee, faCheckCircle, faCat, faAtom, faHome, faBars, faBell, faUser, faSun, faMoon, faWifi, faEnvelope, faSignal, faLock, faLockOpen, faCircleNotch, faPlugCircleXmark, faRobot, faSpinner, faStopwatch } from '@fortawesome/free-solid-svg-icons';
+library.add(faCoffee, faCheckCircle, faCat, faAtom, faHome, faBars, faBell, faUser, faSun, faMoon, faWifi, faStopwatch, faEnvelope, faSignal, faLock, faLockOpen, faCircleNotch, faPlugCircleXmark,faRobot, faSpinner);
 
 interface FontAwesomeIconProps {
   prefix?: IconPrefix;

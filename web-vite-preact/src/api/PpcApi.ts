@@ -4,19 +4,25 @@ const API_ENDPOINTS = {
     WIFI_STATUS: '/wifi-status',
     WIFI_SCAN: '/wifi-scan',
     WIFI_CONNECT: '/wifi-connect',
-    WIFI_DISCONNECT: '/wifi-disconnect'
+    WIFI_DISCONNECT: '/wifi-disconnect',
+    GET_TIME: '/get-time'
 };
 
 export class PpcApi {
 
+    static async getTime() {
+        const response = await fetch(new URL(API_ENDPOINTS.GET_TIME, API_HOST));
+        return response.json();
+    }
+
     static async getWifiStatus() {
-        const response = await fetch(API_HOST + API_ENDPOINTS.WIFI_STATUS);
+        const response = await fetch(new URL(API_ENDPOINTS.WIFI_STATUS, API_HOST));
         //responseNotOk(response);
         return response.json();
     }
 
     static async getWifiScan() {
-        const response = await fetch(API_HOST + API_ENDPOINTS.WIFI_SCAN);
+        const response = await fetch(new URL(API_ENDPOINTS.WIFI_SCAN, API_HOST));
         return response.json();
     }
 
@@ -24,7 +30,7 @@ export class PpcApi {
         const formData = new FormData();
         formData.append("ssid", ssid);
         formData.append("password", password);
-        const response = await fetch(API_HOST + API_ENDPOINTS.WIFI_CONNECT, {
+        const response = await fetch(new URL(API_ENDPOINTS.WIFI_CONNECT, API_HOST), {
             method: 'POST',
             body: formData
         });
@@ -32,7 +38,7 @@ export class PpcApi {
     }
 
     static async disconnectWifi() {
-        const response = await fetch(API_HOST + API_ENDPOINTS.WIFI_DISCONNECT,{
+        const response = await fetch(new URL(API_ENDPOINTS.WIFI_DISCONNECT, API_HOST), {
             method: 'POST'
         });
         return response.json();

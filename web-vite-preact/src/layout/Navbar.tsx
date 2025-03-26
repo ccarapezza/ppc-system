@@ -6,7 +6,8 @@ import ThemeSwitchButtons from "../components/ThemeSwitchButtons";
 
 const MENU = [
     { name: 'Dashboard', link: '/' },
-    { name: 'About', link: '/about' }
+    { name: 'About', link: '/about' },
+    { name: 'Timer', link: '/timer' }
 ];
 
 const Navbar = () => {
@@ -58,7 +59,7 @@ const Navbar = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">                       
+                    <div className="inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">                       
                         <div className='flex items-center gap-2'>
                             <ThemeSwitchButtons/>
                             <IconButton icon="bell" indicator={3}/>

@@ -4,6 +4,7 @@ import About from './page/about';
 import WifiManager from './page/wifiManager';
 import { FunctionalComponent } from 'preact';
 import { useEffect } from 'preact/hooks';
+import Timer from './page/timer';
 
 /** fall-back route (handles unroutable URLs) */
 interface ErrorProps {
@@ -39,6 +40,7 @@ export function App() {
               <Router>
                 <Route path="/" component={WifiManager} />
                 <Route path="/about" component={About} />
+                <Route path="/timer" component={Timer} />
                 <Route default component={() => <Error type={404} url={window.location.href} />} />
               </Router>
             </div>
