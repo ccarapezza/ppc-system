@@ -9,12 +9,13 @@
 #include <WiFiUdp.h>
 #include "Log.h"
 #include <DNSServer.h>
+#include "WifiCredentialStorage.h"
 
 extern Log logger;
 extern IPAddress apIP;
 
 //const to save filenames in flash
-const char INDEX_JS[] PROGMEM = "/assets/index-BeouLyNM.js";
+const char INDEX_JS[] PROGMEM = "/assets/index-CueeE-uZ.js";
 const char INDEX_CSS[] PROGMEM = "/assets/index-D_5QlPvm.css";
 
 const char *myHostname = "ppc.captiveportal";
@@ -192,6 +193,8 @@ void startServer(PpcConnection *ppcConnection) {
             const char* ssid = request->getParam("ssid", true)->value().c_str();
             const char* password = request->getParam("password", true)->value().c_str();
 
+            WifiCredentialStorage::saveCredentials(ssid, password);
+            logger.logf(LOG_INFO, "Saving credentials: %s %s", ssid, password);
             ppcConnection->connectToNetwork(ssid, password);
 
             root["status"] = "connecting";
