@@ -7,12 +7,18 @@
     src: url("/DSEG7Modern-BoldItalic.woff") format('woff');
 }
 
+@font-face {
+    font-family: "montserrat";
+    src: url("/Montserrat-VariableFont_wght.ttf") format('truetype');
+}
+
 .D7MBI {
     font-family: "D7MBI";
 }
 
 body {
     background: #ffffff;
+    font-family: "montserrat", sans-serif;
 }
 
 .dark body {
@@ -20,9 +26,11 @@ body {
 }
 
 .clock-background {
+    /*
     border: 3px solid #000;
     border-radius: 9px;
     box-shadow: 4px 4px 1px 0px rgba(0, 0, 0, 0.1) inset;
+    */
 }
 
 .default-lcd .text-clock {
@@ -92,11 +100,16 @@ body {
     color: #034245!important;
     background-color: #08e2ec!important;
 }
+/*
 .blue-lcd .clock-background {
     background-color: #034245!important;
 }
-.blue-lcd .clock-time{
+*/
+.dark .blue-lcd .clock-time{
     color: #08e2ec!important;
+}
+.blue-lcd .clock-time{
+    color: #3a4747!important;
 }
 .blue-lcd.inverse .text-clock{
     color: #08e2ec!important;
@@ -121,6 +134,22 @@ body {
 
 .disable-clock-background, .green-lcd .disable-clock-background, .red-lcd .disable-clock-background, .blue-lcd .disable-clock-background {
     background-color: rgba(0, 0, 0, 0.10)!important;
+}
+
+.bg-primary{
+    background-color: rgb(21, 87, 153, 0.8);
+}
+
+.bg-secondary{
+    background-color: #159957;
+}
+
+.text-primary{
+    color: #155799;
+}
+
+.text-secondary{
+    color: #159957;
 }
 
 .gradient-background {

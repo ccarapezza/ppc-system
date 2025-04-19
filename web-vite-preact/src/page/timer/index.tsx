@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { PpcApi } from "../../api/PpcApi";
-import Card from "../../components/Card";
 import { FontAwesomeIcon } from "../../components/FontAwesomeIcon"
+import DigitalPin from "../../components/DigitalPin";
 
 export default function Timer() {
 
@@ -9,11 +9,10 @@ export default function Timer() {
     const clockRef = useRef<HTMLSpanElement>(null);
     const clockSecRef = useRef<HTMLSpanElement>(null);
     const [time, setTime] = useState<number>(new Date().getTime());
-    const [retro, setRetro] = useState<'default'|'red'|'green'|'blue'>('default');
+    const [retro, setRetro] = useState<'default'|'red'|'green'|'blue'>('blue');
     const [inverse, setInverse] = useState(false);
 
     const [mode, setMode] = useState<'auto'|'manual'>('auto');
-    const [status, setStatus] = useState<boolean>(false);
 
     useEffect(() => {
         let interval: number;
@@ -47,8 +46,17 @@ export default function Timer() {
         renderClock();
     }, [time]);
 
-    return (
-        <Card title="Timer" icon="stopwatch" className="w-full">
+    return (<>
+            <div className="flex justify-between items-center p-2 mb-2">
+                <div className="flex items-center gap-2">
+                    <FontAwesomeIcon icon="stopwatch" className="text-gray-800 dark:text-white" />
+                    <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Timer</h1>
+                </div>
+                <div className="flex items-center gap-2 text-gray-800 dark:text-white">
+                    {new Intl.DateTimeFormat(undefined, { day:'2-digit', month: '2-digit', year: '2-digit' }).format(new Date(time)).replace(/\//g, "-")}
+                    <FontAwesomeIcon icon={"calendar"}/>
+                </div>
+            </div>
             <div class="p-2">
                 <div class="flex items-center justify-between">
                     <div class="text-gray-500 text-xs w-full">
@@ -61,107 +69,80 @@ export default function Timer() {
 
                         {!loading &&
                             <div class="flex flex-col gap-2 justify-center items-center">
-                                <div className="flex justify-center gap-2 m-4">
+                                <div className="hidden flex justify-center gap-2 m-4">
                                     <button 
                                         type="button"
                                         onClick={() => setRetro('default')}
-                                        className={`px-3 py-1 text-sm font-semibold rounded-md ${retro === 'default' ? 'bg-gray-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                                        className={`px-3 py-1 text-sm font-semibold rounded-md ${retro === 'default' ? 'bg-gray-600 text-gray-800 dark:text-white' : 'bg-gray-200 text-gray-700'}`}
                                     >
                                         Default
                                     </button>
                                     <button 
                                         type="button"
                                         onClick={() => setRetro('green')}
-                                        className={`px-3 py-1 text-sm font-semibold rounded-md ${retro === 'green' ? 'bg-green-600 text-white' : 'bg-green-100 text-green-700'}`}
+                                        className={`px-3 py-1 text-sm font-semibold rounded-md ${retro === 'green' ? 'bg-green-600 text-gray-800 dark:text-white' : 'bg-green-100 text-green-700'}`}
                                     >
                                         Green
                                     </button>
                                     <button 
                                         type="button"
                                         onClick={() => setRetro('red')}
-                                        className={`px-3 py-1 text-sm font-semibold rounded-md ${retro === 'red' ? 'bg-red-600 text-white' : 'bg-red-100 text-red-700'}`}
+                                        className={`px-3 py-1 text-sm font-semibold rounded-md ${retro === 'red' ? 'bg-red-600 text-gray-800 dark:text-white' : 'bg-red-100 text-red-700'}`}
                                     >
                                         Red
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setRetro('blue')}
-                                        className={`px-3 py-1 text-sm font-semibold rounded-md ${retro === 'blue' ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-700'}`}
+                                        className={`px-3 py-1 text-sm font-semibold rounded-md ${retro === 'blue' ? 'bg-blue-600 text-gray-800 dark:text-white' : 'bg-blue-100 text-blue-700'}`}
                                     >
                                         Blue
                                     </button>
                                 </div>
-                                <div class="flex justify-center m-2">
+                                <div class="hidden flex justify-center m-2">
                                     <button 
                                         type="button"
                                         onClick={() => setInverse(!inverse)}
-                                        className={`px-3 py-1 text-sm font-semibold rounded-md ${inverse ? 'bg-gray-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                                        className={`px-3 py-1 text-sm font-semibold rounded-md ${inverse ? 'bg-gray-600 text-gray-800 dark:text-white' : 'bg-gray-200 text-gray-700'}`}
                                     >
                                         Inverse
                                     </button>
                                 </div>
 
-                                <div class="flex flex-col gap-4 justify-center max-w-md rounded-md border border-gray-200 p-2 mb-2">
-                                    <div className="flex justify-center gap-2 mb-2">
+                                <div class="flex flex-col gap-4 justify-center p-2 mb-2 w-full items-center">
+                                    <div className="flex justify-center gap-2 mb-2 w-full xl:max-w-xl text-xl text-gray-800 dark:text-white">
                                         <button 
                                             type="button"
                                             onClick={() => setMode('auto')}
-                                            className={`px-3 py-1 text-sm font-semibold rounded-md ${mode === 'auto' ? 'bg-gray-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                                            className={`px-3 py-1 text-xl font-semibold rounded-md w-full ${mode === 'auto' ? 'border border-gray-500 text-gray-700' : 'border border-gray-100 bg-primary text-gray-800 dark:text-white'}`}
                                         >
                                             Auto
                                         </button>
                                         <button 
                                             type="button"
                                             onClick={() => setMode('manual')}
-                                            className={`px-3 py-1 text-sm font-semibold rounded-md ${mode === 'manual' ? 'bg-gray-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                                            className={`px-3 py-1 text-xl font-semibold rounded-md w-full ${mode === 'manual' ? 'border border-gray-500 text-gray-700' : 'border border-gray-100 bg-primary text-gray-800 dark:text-white'}`}
                                         >
                                             Manual
                                         </button>
                                     </div>
+
+                                    <DigitalPin id={0} name="Luz MAIN" disabled={mode === 'auto'} />
+
                                     <div className={`${retro}-lcd ${inverse ? 'inverse' : ''}`}>
                                         <div class="clock-background w-full">
-                                            <div class="flex gap-2 p-2 justify-between items-center">
-                                                <div class="D7MBI clock-time">{new Intl.DateTimeFormat(undefined, { day:'2-digit', month: '2-digit', year: '2-digit' }).format(new Date(time)).replace(/\//g, "-")}</div>
-                                                <div class="D7MBI clock-time-background">{"88-88-88"}</div>
-                                                <div class="flex gap-2">
-                                                    <div class={`rounded-full px-2 py-1 text-sm font-bold shadow-sm text-clock ${mode !== 'auto' && 'disable-clock-background'}`}>AUTO</div>
-                                                    <div class={`rounded-full px-2 py-1 text-sm font-bold shadow-sm text-clock ${mode !== 'manual' && 'disable-clock-background'}`}>MANUAL</div>
-                                                </div>
-                                            </div>
-
-                                            <div class="flex align-center p-2 justify-center items-center clock-wrapper w-full">
-                                                <div class="w-full text-center D7MBI clock-time"><span id="clock" class="text-6xl w-full" ref={clockRef}>!! !!</span><span id="clock-sec" class="ml-1 text-2xl" ref={clockSecRef}>!!</span></div>
-                                                <div class="w-full text-center D7MBI clock-time-background"><span class="text-6xl">88:88</span><span class="ml-1 text-2xl">88</span></div>
+                                            <div class="flex align-center p-4 justify-center items-center clock-wrapper w-full">
+                                                <div class="w-full text-center D7MBI clock-time"><span id="clock" class="text-8xl w-full" ref={clockRef}>!! !!</span><span id="clock-sec" class="ml-1 text-2xl hidden" ref={clockSecRef}>!!</span></div>
+                                                <div class="w-full text-center D7MBI clock-time-background"><span class="text-8xl">88:88</span><span class="ml-1 text-2xl hidden">88</span></div>
                                             </div>
                                         </div>
                                     </div>
-                                    <button id="switch-mode" type="button"
-                                        onClick={() => setStatus(!status)}
-                                        class={`rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm ${status ? 'bg-red-600 hover:bg-red-500' : 'bg-green-600 hover:bg-green-500'}`}
-                                    >
-                                        {status ? "OFF" : "ON"}
-                                    </button>
                                 </div>
-                                <div class="flex justify-center rounded-md border border-gray-200 p-2 mb-2">
-                                    <div class="border rounded-md border-gray-700 ml-2">
-                                        <div
-                                            class="border-b bg-gray-200 rounded-t-md px-2 font-bold text-center text-sm whitespace-nowrap">
-                                            Current State
-                                        </div>
-                                        <div id="currentState-off" class="flex hidden align-center p-2 justify-center items-center">
-                                            <div class="bg-red-500 w-5 h-5 rounded-full d-flex">&nbsp;</div> <span
-                                                class="text-red-500 font-bold pl-2">OFF</span>
-                                        </div>
-                                        <div id="currentState-on" class="flex hidden align-center p-2 justify-center items-center">
-                                            <div class="bg-green-500 w-5 h-5 rounded-full">&nbsp;</div> <span
-                                                class="text-green-500 font-bold pl-2">ON</span>
-                                        </div>
-                                    </div>
-                                    <div class="border rounded-md border-gray-700 ml-2">
-                                        <div
-                                            class="border-b bg-gray-200 rounded-t-md px-2 font-bold text-center text-sm whitespace-nowrap">
-                                            Next Event
-                                        </div>
+                                <div class="flex gap-2 justify-between items-center p-2 mb-2 w-full xl:max-w-xl text-xl text-gray-800 dark:text-white mt-12">
+                                    <div>
+                                        Next Event
+                                    </div> 
+                                    <div class="flex items-center gap-2">
                                         <div class="w-full text-center text-sm">
                                             13:45
                                         </div>
@@ -176,10 +157,12 @@ export default function Timer() {
                                     </div>
                                 </div>
 
+                                
+
                                 <button id="addEvent" type="button"
                                     //onclick="clickAddButton();"
-                                    class="mt-2 mb-4 inline-flex items-center justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500">
-                                    <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                    class="mt-2 mb-4 inline-flex items-center justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-gray-800 dark:text-white shadow-sm hover:bg-green-500">
+                                    <svg class="h-6 w-6 text-gray-800 dark:text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                         stroke="currentColor" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                     </svg>
@@ -190,6 +173,6 @@ export default function Timer() {
                     </div>
                 </div>
             </div>
-        </Card>
+        </>
     )
 }

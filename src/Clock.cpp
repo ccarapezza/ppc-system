@@ -23,7 +23,9 @@ WiFiUDP ntpUDP;
 // You can specify the time server pool and the offset (in seconds, can be
 // changed later with setTimeOffset() ). Additionally you can specify the
 // update interval (in milliseconds, can be changed using setUpdateInterval() ).
-NTPClient timeClient(ntpUDP, NTP_SERVER, -3600*3, 60000);
+int8_t timeZone = -3; // GMT-3
+int8_t updateInterval = 60000; // 1 minute
+NTPClient timeClient(ntpUDP, NTP_SERVER, 3600*timeZone, 60000); // 1 minute update interval
 
 // Definición de la variable estática.
 Clock *Clock::instance = nullptr;
@@ -114,8 +116,9 @@ void Clock::withInternet()
   bool timeUpdated = timeClient.update();
   if (timeUpdated)
   {
-    RtcDateTime compiled = RtcDateTime(timeClient.getEpochTime());
-    Rtc.SetDateTime(compiled);
+    RtcDateTime time = RtcDateTime();
+    time.InitWithUnix32Time(timeClient.getEpochTime());
+    Rtc.SetDateTime(time);
   }
 }
 

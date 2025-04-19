@@ -6,6 +6,16 @@
 #include <Syslog.h>
 #include <Log.h>
 #include "WifiCredentialStorage.h" // Add this include
+#include "DigitalOutput.h"
+
+// Definición de pines para salidas digitales
+#define RELAY1_PIN D0  // Ejemplo de pin para relay 1
+#define RELAY2_PIN D6  // Ejemplo de pin para relay 2
+#define RELAY3_PIN D7  // Ejemplo de pin para relay 3
+
+// Array de salidas digitales
+DigitalOutput* digitalOutputs[3];  // Cambia el tamaño según el número de salidas digitales
+int numDigitalOutputs = 3;  // Cambia el número según el número de salidas digitales
 
 PpcConnection ppcConnection;
 
@@ -34,6 +44,17 @@ void setup() {
   }
   
   // Continue with normal setup
+
+  // Inicialización de las salidas digitales
+  digitalOutputs[0] = new DigitalOutput(RELAY1_PIN, false);  // false si lógica normal, true si lógica invertida
+  digitalOutputs[1] = new DigitalOutput(RELAY2_PIN, false);  // false si lógica normal, true si lógica invertida
+  digitalOutputs[2] = new DigitalOutput(RELAY3_PIN, false);  // false si lógica normal, true si lógica invertida
+  
+  // Inicializar cada salida digital
+  for (int i = 0; i < numDigitalOutputs; i++) {
+    digitalOutputs[i]->begin();
+  }
+
   logger.logf(LOG_INFO, "Starting server...");
   startServer(&ppcConnection);
 

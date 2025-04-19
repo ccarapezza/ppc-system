@@ -10,13 +10,18 @@
 #include "Log.h"
 #include <DNSServer.h>
 #include "WifiCredentialStorage.h"
+#include "DigitalOutput.h"  // Añadir el header de DigitalOutput
+
+// Referencias externas a las salidas digitales
+extern DigitalOutput* digitalOutputs[];
+extern int numDigitalOutputs;
 
 extern Log logger;
 extern IPAddress apIP;
 
 //const to save filenames in flash
-const char INDEX_JS[] PROGMEM = "/assets/index-CueeE-uZ.js";
-const char INDEX_CSS[] PROGMEM = "/assets/index-D_5QlPvm.css";
+const char INDEX_JS[] PROGMEM = "/assets/index-CMZ83Kfa.js";
+const char INDEX_CSS[] PROGMEM = "/assets/index-eCh34K_f.css";
 
 const char *myHostname = "ppc.captiveportal";
 
@@ -79,6 +84,13 @@ void startServer(PpcConnection *ppcConnection) {
         request->send(LittleFS, "/index.html", "text/html");
     });
 
+    server.on("/vite.svg", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/vite.svg", "image/svg+xml");
+    });
+    server.on("/logo.svg", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/logo.svg", "image/svg+xml");
+    });
+    
     server.on("/about", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(LittleFS, "/index.html", "text/html");
     });
@@ -101,6 +113,10 @@ void startServer(PpcConnection *ppcConnection) {
 
     server.on("/DSEG7Modern-BoldItalic.woff", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(LittleFS, "/DSEG7Modern-BoldItalic.woff", "font/woff");
+    });
+
+    server.on("/Montserrat-VariableFont_wght.ttf", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/Montserrat-VariableFont_wght.ttf", "font/ttf");
     });
 
      server.on("/fontawesome.js", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -217,6 +233,104 @@ void startServer(PpcConnection *ppcConnection) {
 
         root["status"] = "disconnected";
 
+        response->setLength();
+        request->send(response);
+    });
+
+    // Endpoint para obtener el estado de todas las salidas digitales
+    server.on("/digital-outputs", HTTP_GET, [](AsyncWebServerRequest *request) {
+        AsyncJsonResponse* response = new AsyncJsonResponse();
+        JsonObject root = response->getRoot().to<JsonObject>();
+        JsonArray outputs = root["outputs"].to<JsonArray>();
+        
+        for (int i = 0; i < numDigitalOutputs; i++) {
+            JsonObject output = outputs.add<JsonObject>();
+            output["id"] = i;
+            output["pin"] = digitalOutputs[i]->getPin();
+            output["state"] = digitalOutputs[i]->getState();
+        }
+        
+        response->setLength();
+        request->send(response);
+    });
+
+    // Endpoint para obtener el estado de una salida digital específica
+    server.on("/digital-output", HTTP_GET, [](AsyncWebServerRequest *request) {
+        if (!request->hasParam("id")) {
+            logger.logf(LOG_INFO, "Missing id parameter");
+            AsyncJsonResponse* response = new AsyncJsonResponse();
+            JsonObject root = response->getRoot().to<JsonObject>();
+            root["success"] = false;
+            root["message"] = "Missing id parameter";
+            response->setLength();
+            request->send(response);
+            return;
+        }
+        logger.logf(LOG_INFO, "Getting state of digital output");
+        String idParam = request->getParam("id")->value();
+        logger.logf(LOG_INFO, "idParam: %s", idParam.c_str());
+        int id = idParam.toInt();
+        logger.logf(LOG_INFO, "Getting state of digital output %d", id);
+        
+
+        AsyncJsonResponse* response = new AsyncJsonResponse();
+        JsonObject root = response->getRoot().to<JsonObject>();
+        
+        if (id >= 0 && id < numDigitalOutputs) {
+            root["id"] = id;
+            root["pin"] = digitalOutputs[id]->getPin();
+            root["state"] = digitalOutputs[id]->getState();
+            root["success"] = true;
+        } else {
+            root["success"] = false;
+            root["message"] = "Invalid output ID";
+        }
+        
+        response->setLength();
+        request->send(response);
+    });
+
+    // Endpoint para cambiar el estado de una salida digital
+    server.on("/digital-output", HTTP_POST, [](AsyncWebServerRequest *request) {
+        if (!request->hasParam("id", true)) {
+            logger.logf(LOG_INFO, "Missing id parameter");
+            AsyncJsonResponse* response = new AsyncJsonResponse();
+            JsonObject root = response->getRoot().to<JsonObject>();
+            root["success"] = false;
+            root["message"] = "Missing id parameter";
+            response->setLength();
+            request->send(response);
+            return;
+        }
+        String idParam = request->getParam("id", true)->value();
+        int id = idParam.toInt();
+        logger.logf(LOG_INFO, "Setting state of digital output %d", id);
+        
+        AsyncJsonResponse* response = new AsyncJsonResponse();
+        JsonObject root = response->getRoot().to<JsonObject>();
+        
+        if (id >= 0 && id < numDigitalOutputs) {
+            bool newState = false;
+            
+            if (request->hasParam("state", true)) {
+                String stateParam = request->getParam("state", true)->value();
+                newState = (stateParam == "true" || stateParam == "1" || stateParam == "on");
+                digitalOutputs[id]->setState(newState);
+                
+                root["id"] = id;
+                root["pin"] = digitalOutputs[id]->getPin();
+                root["state"] = digitalOutputs[id]->getState();
+                root["success"] = true;
+                logger.logf(LOG_INFO, "Digital output %d set to %s", id, newState ? "ON" : "OFF");
+            } else {
+                root["success"] = false;
+                root["message"] = "Missing state parameter";
+            }
+        } else {
+            root["success"] = false;
+            root["message"] = "Invalid output ID";
+        }
+        
         response->setLength();
         request->send(response);
     });

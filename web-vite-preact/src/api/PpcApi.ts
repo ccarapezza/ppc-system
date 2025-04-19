@@ -5,7 +5,9 @@ const API_ENDPOINTS = {
     WIFI_SCAN: '/wifi-scan',
     WIFI_CONNECT: '/wifi-connect',
     WIFI_DISCONNECT: '/wifi-disconnect',
-    GET_TIME: '/get-time'
+    GET_TIME: '/get-time',
+    GET_DIGITAL_OUTPUTS: '/digital-outputs',
+    GET_DIGITAL_OUTPUT: '/digital-output',
 };
 
 export class PpcApi {
@@ -40,6 +42,29 @@ export class PpcApi {
     static async disconnectWifi() {
         const response = await fetch(new URL(API_ENDPOINTS.WIFI_DISCONNECT, API_HOST), {
             method: 'POST'
+        });
+        return response.json();
+    }
+
+    static async getDigitalOutputs() {
+        const response = await fetch(new URL(API_ENDPOINTS.GET_DIGITAL_OUTPUTS, API_HOST));
+        return response.json();
+    }
+
+    static async getDigitalOutput(pin: number) {
+        const response = await fetch(new URL(`${API_ENDPOINTS.GET_DIGITAL_OUTPUT}?id=${pin}`, API_HOST));
+        return response.json();
+    }
+
+    static async setDigitalOutput(pin: number, state: boolean) {
+        const formData = new FormData();
+        formData.append("id", String(pin));
+        formData.append("state", String(state));
+
+        const response = await fetch(new URL(`${API_ENDPOINTS.GET_DIGITAL_OUTPUT}`, API_HOST), {
+            method: 'POST',
+            body: formData
+            
         });
         return response.json();
     }

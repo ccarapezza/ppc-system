@@ -1,7 +1,10 @@
 import { FontAwesomeIcon } from "../../components/FontAwesomeIcon";
 import Card from "../../components/Card";
+import { useState } from "preact/hooks";
 
 export default function About() {
+    const [customLoading, setCustomLoading] = useState<boolean>(false);
+
     return (<div class="flex flex-col gap-6 w-full">
         <div class="flex gap-4">
             <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center">
@@ -11,14 +14,25 @@ export default function About() {
                 <span className="text-white">Secondary</span>
             </div>
         </div>
-        
-        <div class="fixed inset-0 bg-black bg-opacity-70 z-50">
-            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 rounded-lg">
-                <div class="flex items-center justify-between">
-                    <FontAwesomeIcon icon="robot" className="text-secondary animate-spin text-6xl" />
+
+        <div class="flex gap-4">
+            <button type="button" onClick={()=>{setCustomLoading(true);}} class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800">
+                Show Custom Loading
+            </button>
+        </div>
+        {customLoading &&
+            <div class="fixed inset-0 bg-black bg-opacity-70 z-50" onClick={()=>{setCustomLoading(false);}}>
+                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 rounded-lg">
+                    <div class="flex items-center justify-between flex-col ">
+                        <FontAwesomeIcon icon="robot" className="text-secondary animate-spin text-6xl" />
+                        <div class="text-center mt-4 text-white text-sm">
+                            Tap to close
+                        </div>
+                    </div>
+                    {/* tap to close legend */}
                 </div>
             </div>
-        </div>
+        }
 
 
         <Card title="WiFi" icon="wifi" className="w-full">
