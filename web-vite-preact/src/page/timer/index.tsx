@@ -131,7 +131,7 @@ export default function Timer() {
 
                                     <div className={`${retro}-lcd ${inverse ? 'inverse' : ''}`}>
                                         <div class="clock-background w-full">
-                                            <div class="flex align-center p-4 justify-center items-center clock-wrapper w-full">
+                                            <div class="flex align-center p-4 justify-center items-center clock-wrapper w-full text-nowrap">
                                                 <div class="w-full text-center D7MBI clock-time"><span id="clock" class="text-8xl w-full" ref={clockRef}>!! !!</span><span id="clock-sec" class="ml-1 text-2xl hidden" ref={clockSecRef}>!!</span></div>
                                                 <div class="w-full text-center D7MBI clock-time-background"><span class="text-8xl">88:88</span><span class="ml-1 text-2xl hidden">88</span></div>
                                             </div>
