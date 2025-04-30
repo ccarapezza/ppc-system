@@ -125,7 +125,7 @@ body {
 .clock-time-background {
     z-index: 50;
     position: absolute;
-    color: rgba(0, 0, 0, 0.10);
+    color: rgba(0, 0, 0, 0.05);
 }
 
 .disable-clock-text, .green-lcd .disable-clock-text, .red-lcd .disable-clock-text, .blue-lcd .disable-clock-text {

@@ -5,6 +5,7 @@ import DigitalPin from "../../components/DigitalPin";
 import Modal from "../../components/Modal";
 import Button from "../../components/Button";
 
+
 export default function Timer() {
 
     const [loading, setLoading] = useState(false);
@@ -25,6 +26,19 @@ export default function Timer() {
     const [showModal, setShowModal] = useState(false);
     const [alarms, setAlarms] = useState<any[]>([]);
     const [errorMessage, setErrorMessage] = useState("");
+    
+    // State to track which accordion items are open
+    const [openAccordion, setOpenAccordion] = useState<{[key: string]: boolean}>({
+        'accordion-1': false,
+    });
+
+    // Function to toggle accordion items
+    const toggleAccordion = (id: string) => {
+        setOpenAccordion(prev => ({
+            ...prev,
+            [id]: !prev[id]
+        }));
+    };
 
     useEffect(() => {
         let interval: number;
@@ -227,8 +241,8 @@ export default function Timer() {
                                     <div className={`${retro}-lcd ${inverse ? 'inverse' : ''}`}>
                                         <div class="clock-background w-full">
                                             <div class="flex align-center p-4 justify-center items-center clock-wrapper w-full text-nowrap">
-                                                <div class="w-full text-center D7MBI clock-time"><span id="clock" class="text-8xl w-full" ref={clockRef}>!! !!</span><span id="clock-sec" class="ml-1 text-2xl hidden" ref={clockSecRef}>!!</span></div>
-                                                <div class="w-full text-center D7MBI clock-time-background"><span class="text-8xl">88:88</span><span class="ml-1 text-2xl hidden">88</span></div>
+                                                <div class="w-full text-center D7MBI clock-time"><span id="clock" class="text-7xl md:text-8xl w-full" ref={clockRef}>!! !!</span><span id="clock-sec" class="ml-1 text-2xl hidden" ref={clockSecRef}>!!</span></div>
+                                                <div class="w-full text-center D7MBI clock-time-background"><span class="text-7xl md:text-8xl">88:88</span><span class="ml-1 text-2xl hidden">88</span></div>
                                             </div>
                                         </div>
                                     </div>
@@ -256,38 +270,59 @@ export default function Timer() {
                                         </div>
                                     </div>
                                 }
-                                {/* List of alarms */}
-                                {alarms.length > 0 && (
-                                    <div className="w-full xl:max-w-xl mb-4 border rounded p-4">
-                                        <h3 className="font-bold mb-2">Current Alarms</h3>
-                                        <ul className="divide-y divide-gray-200">
-                                            {alarms.map((alarm, index) => (
-                                                <li key={index} className="py-2 flex justify-between items-center">
-                                                    <div>
-                                                        {alarm.extraParams[1] === 1 ?
-                                                            <div id="currentState-on" class="flex align-center px-2 justify-center items-center">
-                                                                <div class="bg-green-500 w-3 h-3 rounded-full">&nbsp;</div>
-                                                                <span class="text-green-500 font-bold pl-2 text-sm">ON</span>
+                                
+                                <div id="accordion-example" class={"w-full"}>
+                                    <h2 id="accordion-example-heading-1">
+                                        <button 
+                                            type="button" 
+                                            class="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 border-gray-200 rounded-t-xl focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800" 
+                                            aria-expanded={openAccordion['accordion-1'] ? "true" : "false"} 
+                                            aria-controls="accordion-example-body-1"
+                                            onClick={() => toggleAccordion('accordion-1')}
+                                        >
+                                            <div class="flex justify-center items-center gap-2"><FontAwesomeIcon icon="bell" className={"w-4 h-4"} />Current Alarms</div>
+                                            <FontAwesomeIcon icon="chevron-down" className={`w-4 h-4 ${openAccordion['accordion-1'] ? 'rotate-180' : 'rotate-0'} shrink-0 transition-transform`}  />
+                                        </button>
+                                    </h2>
+                                    <div 
+                                        id="accordion-example-body-1" 
+                                        class={openAccordion['accordion-1'] ? "block" : "hidden"}
+                                        aria-labelledby="accordion-example-heading-1"
+                                    >
+                                        {/* List of alarms */}
+                                        {alarms.length > 0 && (
+                                            <div className="w-full xl:max-w-xl mb-4 border rounded p-4">
+                                                <ul className="divide-y divide-gray-200">
+                                                    {alarms.map((alarm, index) => (
+                                                        <li key={index} className="py-2 flex justify-between items-center">
+                                                            <div>
+                                                                {alarm.extraParams[1] === 1 ?
+                                                                    <div id="currentState-on" class="flex align-center px-2 justify-center items-center">
+                                                                        <div class="bg-green-500 w-3 h-3 rounded-full">&nbsp;</div>
+                                                                        <span class="text-green-500 font-bold pl-2 text-sm">ON</span>
+                                                                    </div>
+                                                                    : 
+                                                                    <div id="currentState-off" class="flex align-center px-2 justify-center items-center">
+                                                                        <div class="bg-red-500 w-3 h-3 rounded-full d-flex">&nbsp;</div>
+                                                                        <span class="text-red-500 font-bold pl-2 text-sm">OFF</span>
+                                                                    </div>
+                                                                }
+                                                                <span className="font-medium">{alarm.name}</span>
+                                                                <div className="text-sm text-gray-600">
+                                                                    {alarm.hour.toString().padStart(2, '0')}:{alarm.minute.toString().padStart(2, '0')}
+                                                                </div>
                                                             </div>
-                                                            : 
-                                                            <div id="currentState-off" class="flex align-center px-2 justify-center items-center">
-                                                                <div class="bg-red-500 w-3 h-3 rounded-full d-flex">&nbsp;</div>
-                                                                <span class="text-red-500 font-bold pl-2 text-sm">OFF</span>
+                                                            <div className={`px-2 py-1 rounded-md text-sm ${alarm.executed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                                                {alarm.executed ? 'Executed' : 'Pending'}
                                                             </div>
-                                                        }
-                                                        <span className="font-medium">{alarm.name}</span>
-                                                        <div className="text-sm text-gray-600">
-                                                            {alarm.hour.toString().padStart(2, '0')}:{alarm.minute.toString().padStart(2, '0')}
-                                                        </div>
-                                                    </div>
-                                                    <div className={`px-2 py-1 rounded-md text-sm ${alarm.executed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                                                        {alarm.executed ? 'Executed' : 'Pending'}
-                                                    </div>
-                                                </li>
-                                            ))}
-                                        </ul>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
                                     </div>
-                                )}
+                                </div>
+
 
                                 <button id="addEvent" type="button"
                                     onClick={() => setShowModal(true)}
