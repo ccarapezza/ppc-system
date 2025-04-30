@@ -60,7 +60,7 @@ export default function WiFiScan({ connectionStatus, setConnectionStatus }: Conn
             setMessageModal(message);
         }
         setSelectedWifi(null);
-    } 
+    }
 
     return (<>
         {(loading || loadingConnectWifi) && <Loading />}

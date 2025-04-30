@@ -7,6 +7,7 @@
 #include <Log.h>
 #include "WifiCredentialStorage.h" // Add this include
 #include "DigitalOutput.h"
+#include "AlarmsManager.h"
 
 // Definición de pines para salidas digitales
 #define RELAY1_PIN D0  // Ejemplo de pin para relay 1
@@ -20,6 +21,8 @@ int numDigitalOutputs = 3;  // Cambia el número según el número de salidas di
 PpcConnection ppcConnection;
 
 Log logger("192.168.0.10", 5140, "syslog", "esp8266", 115200);
+
+AlarmsManager& alarmManager = AlarmsManager::getInstance();  // Get the alarm manager instance
 
 void setup() {
   // Initialize serial and logging
@@ -70,6 +73,7 @@ void criticalLoop() {
   Clock& clock = Clock::getInstance();
   clock.run(&ppcConnection);
   loopServer();
+  alarmManager.alarmLoop();
 }
 
 void safeLoop() {

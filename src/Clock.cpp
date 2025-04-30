@@ -24,8 +24,8 @@ WiFiUDP ntpUDP;
 // changed later with setTimeOffset() ). Additionally you can specify the
 // update interval (in milliseconds, can be changed using setUpdateInterval() ).
 int8_t timeZone = -3; // GMT-3
-int8_t updateInterval = 60000; // 1 minute
-NTPClient timeClient(ntpUDP, NTP_SERVER, 3600*timeZone, 60000); // 1 minute update interval
+uint16_t updateInterval = 60000; // 1 minute - changed from int8_t to uint16_t
+NTPClient timeClient(ntpUDP, NTP_SERVER, 3600*timeZone, updateInterval); // 1 minute update interval
 
 // Definición de la variable estática.
 Clock *Clock::instance = nullptr;
@@ -72,6 +72,18 @@ void Clock::start()
   logger.logf(LOG_INFO, "Clock started!");
 }
 
+void Clock::run(PpcConnection *ppcConn)
+{
+  if (ppcConn != NULL && ppcConn->getCurrentState()->getType() == CONNECTED)
+  {
+    withInternet();
+  }
+  else
+  {
+    withoutInternet();
+  }
+}
+
 String Clock::getCurrentDate()
 {
   if (!Rtc.IsDateTimeValid())
@@ -99,16 +111,15 @@ String Clock::getCurrentDate()
   return currentTime;
 }
 
-void Clock::run(PpcConnection *ppcConn)
+RtcDateTime Clock::getCurrentDateTime()
 {
-  if (ppcConn != NULL && ppcConn->getCurrentState()->getType() == CONNECTED)
+  if (!Rtc.IsDateTimeValid())
   {
-    withInternet();
+    logger.logf(LOG_ERR, "RTC lost confidence in the DateTime! Clock::getCurrentDateTime");
+    return RtcDateTime(0, 0, 0, 0, 0, 0);
   }
-  else
-  {
-    withoutInternet();
-  }
+  RtcDateTime now = Rtc.GetDateTime();
+  return now;
 }
 
 void Clock::withInternet()

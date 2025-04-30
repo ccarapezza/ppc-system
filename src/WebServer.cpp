@@ -6,6 +6,7 @@
 #include "ArduinoJson.h"
 #include "PpcConnection.h"
 #include "Clock.h"
+#include "AlarmsManager.h"  // Add AlarmsManager header
 #include <WiFiUdp.h>
 #include "Log.h"
 #include <DNSServer.h>
@@ -20,8 +21,8 @@ extern Log logger;
 extern IPAddress apIP;
 
 //const to save filenames in flash
-const char INDEX_JS[] PROGMEM = "/assets/index-CMZ83Kfa.js";
-const char INDEX_CSS[] PROGMEM = "/assets/index-eCh34K_f.css";
+const char INDEX_JS[] PROGMEM = "/assets/index-wY2pnt3T.js";
+const char INDEX_CSS[] PROGMEM = "/assets/index-DRPiaVAQ.css";
 
 const char *myHostname = "ppc.captiveportal";
 
@@ -58,6 +59,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
 void startServer(PpcConnection *ppcConnection) {
 
     Clock& clock = Clock::getInstance();
+    AlarmsManager& alarmManager = AlarmsManager::getInstance();  // Get the alarm manager instance
 
     LittleFS.begin();
 
@@ -329,6 +331,90 @@ void startServer(PpcConnection *ppcConnection) {
         } else {
             root["success"] = false;
             root["message"] = "Invalid output ID";
+        }
+        
+        response->setLength();
+        request->send(response);
+    });
+
+    // GET endpoint to retrieve all alarms
+    server.on("/alarms", HTTP_GET, [&alarmManager](AsyncWebServerRequest *request) {
+        logger.logf(LOG_INFO, "Fetching all alarms");
+        
+        // Get the JSON representation of alarms from AlarmsManager
+        String alarmsJson = alarmManager.getAlarms();
+        
+        // Send the raw JSON as response
+        AsyncWebServerResponse *response = request->beginResponse(200, "application/json", alarmsJson);
+        request->send(response);
+    });
+
+    // POST endpoint to create a new alarm
+    server.on("/alarm", HTTP_POST, [&alarmManager](AsyncWebServerRequest *request) {
+        logger.logf(LOG_INFO, "Creating a new alarm");
+        
+        AsyncJsonResponse* response = new AsyncJsonResponse();
+        JsonObject root = response->getRoot().to<JsonObject>();
+        
+        // Check that all required parameters are present
+        if (request->hasParam("name", true) && 
+            request->hasParam("hour", true) && 
+            request->hasParam("minute", true) &&
+            request->hasParam("channel", true) &&
+            request->hasParam("action", true) 
+        ) {
+            String name = request->getParam("name", true)->value();
+            int hour = request->getParam("hour", true)->value().toInt();
+            int minute = request->getParam("minute", true)->value().toInt();
+            int channel = request->getParam("channel", true)->value().toInt();
+            bool state = request->getParam("action", true)->value().toInt() == 1;
+
+            //if channel is 1,2 or 3
+            if (channel < 1 || channel > 3) {
+                root["success"] = false;
+                root["message"] = "Invalid channel. Must be 1, 2 or 3";
+                response->setLength();
+                request->send(response);
+                return;
+            }
+
+            // Validate the parameters
+            if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+                root["success"] = false;
+                root["message"] = "Invalid time values. Hour must be 0-23, minute must be 0-59";
+                response->setLength();
+                request->send(response);
+                return;
+            }
+
+            // Create the alarm execution function
+            std::function<void(int)> alarmExecution = [channel, state](int) {
+                digitalOutputs[channel - 1]->setState(state);
+            };
+
+            std::vector<int> extraParams;
+            extraParams.push_back(channel);
+            extraParams.push_back(state ? 1 : 0);
+
+            // Add the alarm using the AlarmsManager
+            int count = alarmManager.addAlarm(name, hour, minute, alarmExecution, extraParams);
+            
+            root["success"] = true;
+            root["message"] = "Alarm created successfully";
+            root["name"] = name;
+            root["hour"] = hour;
+            root["minute"] = minute;
+            root["alarmCount"] = count;
+            //show extraParams in the response
+            JsonArray extraParamsJson = root["extraParams"].to<JsonArray>();
+            for (unsigned int i = 0; i < extraParams.size(); i++) {
+                extraParamsJson.add(extraParams[i]);
+            }
+            root["channel"] = channel;
+            root["state"] = state ? "ON" : "OFF";
+        } else {
+            root["success"] = false;
+            root["message"] = "Missing required parameters (name, hour, minute)";
         }
         
         response->setLength();

@@ -3,6 +3,7 @@
 
 #include <Wire.h>
 #include <RtcDS1307.h>
+#include <PpcConnection.h>
 
 class Clock {
 public:
@@ -13,6 +14,7 @@ public:
     void start();
     void run(PpcConnection *ppcConn);
     String getCurrentDate();
+    RtcDateTime getCurrentDateTime();
 
     // Eliminar el constructor, el operador de asignación y el constructor de copia para prevenir la creación de múltiples instancias.
     Clock(const Clock&) = delete;
