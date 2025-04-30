@@ -1,4 +1,4 @@
-const API_HOST = location.origin;
+const API_HOST = import.meta.env.DEV ? import.meta.env.VITE_API_HOST : location.origin;
 
 const API_ENDPOINTS = {
     WIFI_STATUS: '/wifi-status',
@@ -10,6 +10,8 @@ const API_ENDPOINTS = {
     GET_DIGITAL_OUTPUT: '/digital-output',
     GET_ALARMS: '/alarms',
     CREATE_ALARM: '/alarm',
+    ENABLE_ALARM: '/alarm-enable',
+    SET_ALARM_DAYS: '/alarm-days',
 };
 
 export class PpcApi {
@@ -66,7 +68,6 @@ export class PpcApi {
         const response = await fetch(new URL(`${API_ENDPOINTS.GET_DIGITAL_OUTPUT}`, API_HOST), {
             method: 'POST',
             body: formData
-            
         });
         return response.json();
     }
@@ -82,6 +83,7 @@ export class PpcApi {
         minute: number,
         channel: number,
         action: boolean,
+        days?: boolean[],  // Añadir parámetro opcional de días
     }) {
         const formData = new FormData();
         formData.append("name", alarm.name);
@@ -89,7 +91,35 @@ export class PpcApi {
         formData.append("minute", String(alarm.minute));
         formData.append("channel", String(alarm.channel));
         formData.append("action", String(alarm.action ? 1 : 0));
+        
+        // Si se proporcionan los días, los agregamos al formData
+        if (alarm.days && alarm.days.length === 7) {
+            formData.append("days", alarm.days.map(day => day ? '1' : '0').join(','));
+        }
+        
         const response = await fetch(new URL(API_ENDPOINTS.CREATE_ALARM, API_HOST), {
+            method: 'POST',
+            body: formData
+        });
+        return response.json();
+    }
+
+    static async enableAlarm(name: string, enabled: boolean) {
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("enabled", String(enabled ? 1 : 0));
+        const response = await fetch(new URL(API_ENDPOINTS.ENABLE_ALARM, API_HOST), {
+            method: 'POST',
+            body: formData
+        });
+        return response.json();
+    }
+
+    static async setAlarmDays(name: string, days: boolean[]) {
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("days", days.map(day => day ? '1' : '0').join(','));
+        const response = await fetch(new URL(API_ENDPOINTS.SET_ALARM_DAYS, API_HOST), {
             method: 'POST',
             body: formData
         });

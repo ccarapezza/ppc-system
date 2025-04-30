@@ -21,8 +21,8 @@ extern Log logger;
 extern IPAddress apIP;
 
 //const to save filenames in flash
-const char INDEX_JS[] PROGMEM = "/assets/index-wY2pnt3T.js";
-const char INDEX_CSS[] PROGMEM = "/assets/index-DRPiaVAQ.css";
+const char INDEX_JS[] PROGMEM = "/assets/index-CvCLEkrC.js";
+const char INDEX_CSS[] PROGMEM = "/assets/index-CJ1DAhc8.css";
 
 const char *myHostname = "ppc.captiveportal";
 
@@ -399,6 +399,34 @@ void startServer(PpcConnection *ppcConnection) {
             // Add the alarm using the AlarmsManager
             int count = alarmManager.addAlarm(name, hour, minute, alarmExecution, extraParams);
             
+            // Check if days parameter is provided
+            if (request->hasParam("days", true)) {
+                String daysParam = request->getParam("days", true)->value();
+                bool daysOfWeek[7] = {true, true, true, true, true, true, true}; // Default all days to true
+                
+                int startPos = 0;
+                int commaPos = daysParam.indexOf(',');
+                int dayIndex = 0;
+                
+                // Parse the comma-separated list of days
+                while (commaPos >= 0 && dayIndex < 7) {
+                    String dayValue = daysParam.substring(startPos, commaPos);
+                    daysOfWeek[dayIndex++] = (dayValue == "1" || dayValue == "true");
+                    
+                    startPos = commaPos + 1;
+                    commaPos = daysParam.indexOf(',', startPos);
+                }
+                
+                // Handle the last day (or single day if no commas)
+                if (dayIndex < 7) {
+                    String dayValue = daysParam.substring(startPos);
+                    daysOfWeek[dayIndex] = (dayValue == "1" || dayValue == "true");
+                }
+                
+                // Set the days of week for the alarm
+                alarmManager.setAlarmDays(name, daysOfWeek);
+            }
+            
             root["success"] = true;
             root["message"] = "Alarm created successfully";
             root["name"] = name;
@@ -415,6 +443,95 @@ void startServer(PpcConnection *ppcConnection) {
         } else {
             root["success"] = false;
             root["message"] = "Missing required parameters (name, hour, minute)";
+        }
+        
+        response->setLength();
+        request->send(response);
+    });
+    
+    // POST endpoint to enable/disable an alarm
+    server.on("/alarm-enable", HTTP_POST, [&alarmManager](AsyncWebServerRequest *request) {
+        logger.logf(LOG_INFO, "Modifying alarm state");
+        
+        AsyncJsonResponse* response = new AsyncJsonResponse();
+        JsonObject root = response->getRoot().to<JsonObject>();
+        
+        if (request->hasParam("name", true) && request->hasParam("enabled", true)) {
+            String name = request->getParam("name", true)->value();
+            String enabledParam = request->getParam("enabled", true)->value();
+            bool enabled = (enabledParam == "true" || enabledParam == "1");
+            
+            if (alarmManager.enableAlarm(name, enabled)) {
+                root["success"] = true;
+                root["message"] = "Alarm " + name + " " + (enabled ? "enabled" : "disabled") + " successfully";
+            } else {
+                root["success"] = false;
+                root["message"] = "Alarm not found: " + name;
+            }
+        } else {
+            root["success"] = false;
+            root["message"] = "Missing required parameters (name, enabled)";
+        }
+        
+        response->setLength();
+        request->send(response);
+    });
+    
+    // POST endpoint to set days of week for an alarm
+    server.on("/alarm-days", HTTP_POST, [&alarmManager](AsyncWebServerRequest *request) {
+        logger.logf(LOG_INFO, "Setting alarm days of week");
+        
+        AsyncJsonResponse* response = new AsyncJsonResponse();
+        JsonObject root = response->getRoot().to<JsonObject>();
+        
+        if (request->hasParam("name", true) && request->hasParam("days", true)) {
+            String name = request->getParam("name", true)->value();
+            String daysParam = request->getParam("days", true)->value();
+            
+            // Parse the days parameter which should be in format "1,1,1,1,1,1,1"
+            // representing Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday
+            bool daysOfWeek[7] = {false, false, false, false, false, false, false};
+            int index = 0;
+            int commaPos = -1;
+            
+            // Parse the comma-separated list
+            do {
+                int nextCommaPos = daysParam.indexOf(',', commaPos + 1);
+                String dayValue;
+                
+                if (nextCommaPos == -1) {
+                    // Last item or single item
+                    dayValue = daysParam.substring(commaPos + 1);
+                } else {
+                    dayValue = daysParam.substring(commaPos + 1, nextCommaPos);
+                }
+                
+                // Set the day value if within valid range
+                if (index < 7) {
+                    daysOfWeek[index] = (dayValue == "1" || dayValue == "true");
+                }
+                
+                commaPos = nextCommaPos;
+                index++;
+            } while (commaPos != -1 && index < 7);
+            
+            // Update the alarm with the new days
+            if (alarmManager.setAlarmDays(name, daysOfWeek)) {
+                root["success"] = true;
+                root["message"] = "Alarm days updated successfully for: " + name;
+                
+                // Include the parsed days in the response
+                JsonArray daysJson = root["days"].to<JsonArray>();
+                for (int i = 0; i < 7; i++) {
+                    daysJson.add(daysOfWeek[i]);
+                }
+            } else {
+                root["success"] = false;
+                root["message"] = "Alarm not found: " + name;
+            }
+        } else {
+            root["success"] = false;
+            root["message"] = "Missing required parameters (name, days)";
         }
         
         response->setLength();
