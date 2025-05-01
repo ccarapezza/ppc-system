@@ -40,14 +40,14 @@ export default function WiFiStatus({connectionStatus, setConnectionStatus}: Conn
         <Card title="Estado de conexión" icon="wifi" className="w-full">
             <div class="p-4">
                 <div class="flex items-center justify-between">
-                    <div class="text-gray-500 text-xs w-full">
-                      {loading &&
-                        <div class="flex items-center gap-2">
-                          <FontAwesomeIcon icon="circle-notch" className="animate-spin text-gray-800" />
-                          <span>Cargando...</span>
-                        </div>
-                      }
-                    </div>
+                    {(loading || connectionStatus == null) &&
+                      <div class="text-gray-500 text-xs w-full">
+                          <div class="flex items-center gap-2">
+                            <FontAwesomeIcon icon="circle-notch" className="animate-spin text-gray-800" />
+                            <span>Cargando...</span>
+                          </div>
+                      </div>
+                    }
                     <div class="text-gray-500 text-xs w-full">
                         {ConnectionState.DISCONNECTED==connectionStatus?.status&&
                         <>

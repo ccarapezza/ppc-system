@@ -8,10 +8,12 @@ import WiFiStatus from "../../components/connection/WiFiStatus";
 import WiFiScan from "../../components/connection/WiFiScan";
 
 export default function WifiManager() {
+  const [loading, setLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus|null>(null);
 
   const RETRY_INTERVAL = 5000;
   useEffect(() => {
+    setLoading(true);
     if(connectionStatus?.status==ConnectionState.CONNECTING || connectionStatus == null){
       const interval = setInterval(() => {
         PpcApi.getWifiStatus().then((response: any) => {
@@ -22,7 +24,9 @@ export default function WifiManager() {
           setConnectionStatus(response);
         }).catch((error: any) => {
           console.error(error);
-        })
+        }).finally(() => {
+          setLoading(false);
+        });
       }, RETRY_INTERVAL);
       
     }
@@ -65,9 +69,10 @@ export default function WifiManager() {
           </div>
         </div>
       </Modal>
-      <WiFiStatus connectionStatus={connectionStatus} setConnectionStatus={setConnectionStatus} />    
-      <WiFiScan connectionStatus={connectionStatus} setConnectionStatus={setConnectionStatus}/>
-      
+      <WiFiStatus connectionStatus={connectionStatus} setConnectionStatus={setConnectionStatus} />
+      {connectionStatus?.status !== ConnectionState.CONNECTED && !loading &&
+        <WiFiScan connectionStatus={connectionStatus} setConnectionStatus={setConnectionStatus}/>
+      }
     </div>
   )
 }

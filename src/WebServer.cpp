@@ -21,8 +21,8 @@ extern Log logger;
 extern IPAddress apIP;
 
 //const to save filenames in flash
-const char INDEX_JS[] PROGMEM = "/assets/index-CvCLEkrC.js";
-const char INDEX_CSS[] PROGMEM = "/assets/index-CJ1DAhc8.css";
+const char INDEX_JS[] PROGMEM = "/assets/index-DbCBPAxY.js";
+const char INDEX_CSS[] PROGMEM = "/assets/index-CWYTIsFi.css";
 
 const char *myHostname = "ppc.captiveportal";
 
