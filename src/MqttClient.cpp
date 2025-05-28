@@ -96,6 +96,7 @@ void MqttClient::subscribe(const char* topic, std::function<void(String)> callba
 void MqttClient::attemptConnect() {
     String clientId = "PPC-" + deviceId;
     logger.logf(LOG_INFO, "Attempting MQTT connection as %s...", clientId.c_str());
+    logger.logf(LOG_INFO, "MQTT Host: %s, Port: %d", mqttHost, mqttPort);
     
     // Preparar mensaje de Last Will Testament (LWT) para detectar desconexiones
     String willTopic = "devices/" + deviceId + "/presence";
