@@ -1,4 +1,4 @@
-const API_HOST = import.meta.env.DEV ? import.meta.env.VITE_API_HOST : location.origin;
+const API_HOST = import.meta.env.MODE === 'development' ? import.meta.env.VITE_API_HOST : location.origin;
 
 const API_ENDPOINTS = {
     WIFI_STATUS: '/wifi-status',
@@ -10,6 +10,7 @@ const API_ENDPOINTS = {
     GET_DIGITAL_OUTPUT: '/digital-output',
     GET_ALARMS: '/alarms',
     CREATE_ALARM: '/alarm',
+    CREATE_ALARM_ON_OFF: '/alarm-on-off',
     ENABLE_ALARM: '/alarm-enable',
     SET_ALARM_DAYS: '/alarm-days',
 };
@@ -120,6 +121,35 @@ export class PpcApi {
         formData.append("name", name);
         formData.append("days", days.map(day => day ? '1' : '0').join(','));
         const response = await fetch(new URL(API_ENDPOINTS.SET_ALARM_DAYS, API_HOST), {
+            method: 'POST',
+            body: formData
+        });
+        return response.json();
+    }
+
+    static async createAlarmOnOff(alarm: {
+        name: string,
+        onHour: number,
+        onMinute: number,
+        offHour: number,
+        offMinute: number,
+        channel: number,
+        days?: boolean[],  // Optional days parameter
+    }) {
+        const formData = new FormData();
+        formData.append("name", alarm.name);
+        formData.append("onHour", String(alarm.onHour));
+        formData.append("onMinute", String(alarm.onMinute));
+        formData.append("offHour", String(alarm.offHour));
+        formData.append("offMinute", String(alarm.offMinute));
+        formData.append("channel", String(alarm.channel));
+        
+        // If days are provided, add them to formData
+        if (alarm.days && alarm.days.length === 7) {
+            formData.append("days", alarm.days.map(day => day ? '1' : '0').join(','));
+        }
+        
+        const response = await fetch(new URL(API_ENDPOINTS.CREATE_ALARM_ON_OFF, API_HOST), {
             method: 'POST',
             body: formData
         });

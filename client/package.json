@@ -1,0 +1,15 @@
+{
+  "name": "socket-io-test-client",
+  "version": "1.0.0",
+  "description": "Cliente simple para probar la conexión con el servidor Socket.IO",
+  "main": "socket-client.js",
+  "scripts": {
+    "start": "node mqtt-client.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mqtt": "^5.13.0",
+    "socket.io-client": "^4.7.2"
+  }
+}

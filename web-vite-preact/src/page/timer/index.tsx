@@ -26,14 +26,21 @@ export default function Timer() {
     const [inverse, setInverse] = useState(false);
 
     const alarmNameRef = useRef<HTMLInputElement>(null);
-    const alarmHourRef = useRef<HTMLInputElement>(null);
-    const alarmMinuteRef = useRef<HTMLInputElement>(null);
+    const alarmTimeOnRef = useRef<HTMLInputElement>(null);
+    const alarmTimeOffRef = useRef<HTMLInputElement>(null);
     const alarmChannelRef = useRef<HTMLSelectElement>(null);
     const alarmActionRef = useRef<HTMLSelectElement>(null);
+
+    // References for the ON-OFF alarm modal
+    const onOffAlarmNameRef = useRef<HTMLInputElement>(null);
+    const onOffAlarmTimeOnRef = useRef<HTMLInputElement>(null);
+    const onOffAlarmTimeOffRef = useRef<HTMLInputElement>(null);
+    const onOffAlarmChannelRef = useRef<HTMLSelectElement>(null);
 
     const [mode, setMode] = useState<'auto'|'manual'>('auto');
 
     const [showModal, setShowModal] = useState(false);
+    const [showOnOffModal, setShowOnOffModal] = useState(false); // State for ON-OFF alarm modal
     const [alarms, setAlarms] = useState<Alarm[]>([]);
     const [error, setError] = useState<any>({});
     const [errorMessage, setErrorMessage] = useState("");
@@ -47,6 +54,8 @@ export default function Timer() {
 
     // Estado para los días de la semana al crear una nueva alarma
     const [newAlarmDays, setNewAlarmDays] = useState<boolean[]>([true, true, true, true, true, true, true]); // Predeterminado: todos los días activos
+    // Estado para los días de la semana al crear una alarma ON-OFF
+    const [onOffAlarmDays, setOnOffAlarmDays] = useState<boolean[]>([true, true, true, true, true, true, true]); // Predeterminado: todos los días activos
 
     // Function to toggle accordion items
     const toggleAccordion = (id: string) => {
@@ -107,8 +116,8 @@ export default function Timer() {
 
     const resetForm = () => {
         if (alarmNameRef.current) alarmNameRef.current.value = "";
-        if (alarmHourRef.current) alarmHourRef.current.value = "";
-        if (alarmMinuteRef.current) alarmMinuteRef.current.value = "";
+        if (alarmTimeOnRef.current) alarmTimeOnRef.current.value = ""; // Esto limpiará el input de tipo time
+        if (alarmTimeOffRef.current) alarmTimeOffRef.current.value = "";
         if (alarmChannelRef.current) alarmChannelRef.current.value = "1";
         if (alarmActionRef.current) alarmActionRef.current.value = "on";
         setNewAlarmDays([true, true, true, true, true, true, true]); // Reset to all days active
@@ -119,10 +128,20 @@ export default function Timer() {
         // Validate inputs
         setErrorMessage("");
         const alarmName = alarmNameRef.current?.value.trim() || "";
-        const hour = parseInt(alarmHourRef.current?.value.trim() || "", 10);
-        const minute = parseInt(alarmMinuteRef.current?.value.trim() || "", 10);
+        const timeOnValue = alarmTimeOnRef.current?.value.trim() || "";
+        const [hourStr, minuteStr] = timeOnValue.split(":");
+        const hour = parseInt(hourStr || "0", 10);
+        const minute = parseInt(minuteStr || "0", 10);
         const channel = parseInt(alarmChannelRef.current?.value.trim() || "", 10);
         const action = alarmActionRef.current?.value.trim() === "on" ? true : false;
+
+        /*
+        const timeOffValue = alarmTimeOffRef.current?.value.trim() || "";
+        const [hourOffStr, minuteOffStr] = timeOffValue.split(":");
+        const hourOff = parseInt(hourOffStr || "0", 10);
+        const minuteOff = parseInt(minuteOffStr || "0", 10);
+        */
+        
 
         let valid = true;
         
@@ -136,11 +155,11 @@ export default function Timer() {
             valid = false;
         }
         
-        if (isNaN(hour) || hour < 0 || hour > 23) {
+        if (!timeOnValue || isNaN(hour) || hour < 0 || hour > 23) {
             setError( (oldError: any) => {
                 return {
                     ...oldError,
-                    hour: "Hour must be a number between 0 and 23."
+                    hour: "Valid time is required (00-23 hours)."
                 }
             })
             valid = false;
@@ -150,7 +169,7 @@ export default function Timer() {
             setError( (oldError: any) => {
                 return {
                     ...oldError,
-                    minute: "Minute must be a number between 0 and 59."
+                    minute: "Valid time is required (00-59 minutes)."
                 }
             })
             valid = false;
@@ -213,6 +232,130 @@ export default function Timer() {
         });
     }
 
+    // Reset form for ON-OFF alarm
+    const resetOnOffForm = () => {
+        if (onOffAlarmNameRef.current) onOffAlarmNameRef.current.value = "";
+        if (onOffAlarmTimeOnRef.current) onOffAlarmTimeOnRef.current.value = "";
+        if (onOffAlarmTimeOffRef.current) onOffAlarmTimeOffRef.current.value = "";
+        if (onOffAlarmChannelRef.current) onOffAlarmChannelRef.current.value = "1";
+        setOnOffAlarmDays([true, true, true, true, true, true, true]); // Reset to all days active
+        clearErrors();
+    }
+
+    const createOnOffAlarm = () => {
+        // Validate inputs
+        setErrorMessage("");
+        const alarmName = onOffAlarmNameRef.current?.value.trim() || "";
+        
+        // Time ON validation
+        const timeOnValue = onOffAlarmTimeOnRef.current?.value.trim() || "";
+        const [onHourStr, onMinuteStr] = timeOnValue.split(":");
+        const onHour = parseInt(onHourStr || "0", 10);
+        const onMinute = parseInt(onMinuteStr || "0", 10);
+        
+        // Time OFF validation
+        const timeOffValue = onOffAlarmTimeOffRef.current?.value.trim() || "";
+        const [offHourStr, offMinuteStr] = timeOffValue.split(":");
+        const offHour = parseInt(offHourStr || "0", 10);
+        const offMinute = parseInt(offMinuteStr || "0", 10);
+        
+        const channel = parseInt(onOffAlarmChannelRef.current?.value.trim() || "", 10);
+
+        let valid = true;
+        
+        if (!alarmName) {
+            setError((oldError: any) => ({
+                ...oldError,
+                alarmName: "Alarm name is required."
+            }));
+            valid = false;
+        }
+        
+        if (!timeOnValue || isNaN(onHour) || onHour < 0 || onHour > 23) {
+            setError((oldError: any) => ({
+                ...oldError,
+                onHour: "Valid time is required (00-23 hours)."
+            }));
+            valid = false;
+        }
+        
+        if (isNaN(onMinute) || onMinute < 0 || onMinute > 59) {
+            setError((oldError: any) => ({
+                ...oldError,
+                onMinute: "Valid time is required (00-59 minutes)."
+            }));
+            valid = false;
+        }
+        
+        if (!timeOffValue || isNaN(offHour) || offHour < 0 || offHour > 23) {
+            setError((oldError: any) => ({
+                ...oldError,
+                offHour: "Valid time is required (00-23 hours)."
+            }));
+            valid = false;
+        }
+        
+        if (isNaN(offMinute) || offMinute < 0 || offMinute > 59) {
+            setError((oldError: any) => ({
+                ...oldError,
+                offMinute: "Valid time is required (00-59 minutes)."
+            }));
+            valid = false;
+        }
+        
+        if (isNaN(channel) || channel < 1 || channel > 3) {
+            setError((oldError: any) => ({
+                ...oldError,
+                channel: "Channel must be a number between 1 and 3."
+            }));
+            valid = false;
+        }
+
+        if (onOffAlarmDays.every((day) => !day)) {
+            setError((oldError: any) => ({
+                ...oldError,
+                daysOfWeek: "At least one day must be selected."
+            }));
+            valid = false;
+        }
+
+        if (!valid) {
+            return;
+        }
+
+        setLoading(true);
+        
+        // Crear alarmas ON/OFF
+        PpcApi.createAlarmOnOff({
+            name: alarmName,
+            onHour: onHour,
+            onMinute: onMinute,
+            offHour: offHour,
+            offMinute: offMinute,
+            channel: channel,
+            days: onOffAlarmDays
+        })
+        .then((response: any) => {
+            if (response.success) {
+                // Limpiar formulario y cerrar modal al tener éxito
+                resetOnOffForm();
+                setErrorMessage("");
+                setShowOnOffModal(false);
+                // Actualizar lista de alarmas
+                getAlarms();
+            } else {
+                setErrorMessage(response.message || "Failed to create ON/OFF alarms");
+            }
+        })
+        .catch((error: any) => {
+            console.error(error);
+            setErrorMessage(error.message || "Error creating ON/OFF alarms");
+        })
+        .finally(() => {
+            setLoading(false);
+        });
+    }
+
     useEffect(() => {
         renderClock();
     }, [time]);
@@ -248,13 +391,13 @@ export default function Timer() {
         setShowEditModal(true);
         clearErrors();
     };
-
-    const openNewModal = () => {
-        setShowModal(true);
+    
+    const openOnOffModal = () => {
+        setShowOnOffModal(true);
         clearErrors();
-        resetForm();
+        resetOnOffForm();
     }
-
+    
     // Function to update alarm days
     const updateAlarmDays = (days: boolean[]) => {
         if (!selectedAlarm) return;
@@ -279,7 +422,7 @@ export default function Timer() {
     };
 
     // Week day names for the UI
-    const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const weekDays = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"];
 
     const nextEvent = alarms.filter((alarm) => !alarm?.executed)[0] || null;
 
@@ -346,8 +489,8 @@ export default function Timer() {
                                     </button>
                                 </div>
 
-                                <div class="flex flex-col gap-4 justify-center p-2 mb-2 w-full items-center">
-                                    <div className="flex justify-center gap-2 mb-2 w-full xl:max-w-xl text-xl text-gray-800 dark:text-white">
+                                <div class="flex flex-col gap-4 justify-center py-2 mb-2 w-full items-center">
+                                    <div className="flex justify-center gap-2 mb-2 w-full xl:max-w-xl text-xl text-gray-800 dark:text-white hidden">
                                         <button 
                                             type="button"
                                             onClick={() => setMode('auto')}
@@ -364,7 +507,55 @@ export default function Timer() {
                                         </button>
                                     </div>
 
-                                    <DigitalPin id={0} name="Luz MAIN" disabled={mode === 'auto'} />
+                                    <div className={`flex w-full justify-between items-center px-4 mb-2 border rounded-md ${mode === 'auto' ? 'border-gray-200' : 'border-gray-700'}`}>
+                                        <div className="w-fit">
+                                            <DigitalPin id={0} name="Sala 1" hideControl={mode === 'auto'} hideState={mode === 'manual'} />
+                                            <DigitalPin id={1} name="Sala 2" hideControl={mode === 'auto'} hideState={mode === 'manual'} />
+                                            <DigitalPin id={2} name="Sala 3" hideControl={mode === 'auto'} hideState={mode === 'manual'} />
+                                        </div>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => {
+                                                const dropdown = document.getElementById('timer-dropdown');
+                                                if (dropdown) {
+                                                    dropdown.classList.toggle('hidden');
+                                                }
+                                            }}
+                                            className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                                        >
+                                            <FontAwesomeIcon icon="ellipsis-vertical" className="text-xl" />
+                                        </button>
+                                        <div id="timer-dropdown" className="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                                            <div className="py-1">
+                                                {mode === 'auto' && (
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => {
+                                                            setMode('manual');
+                                                            const dropdown = document.getElementById('timer-dropdown');
+                                                            if (dropdown) dropdown.classList.add('hidden');
+                                                        }}
+                                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                    >
+                                                        Modo Manual
+                                                    </button>
+                                                )}
+                                                {mode === 'manual' && (
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => {
+                                                            setMode('auto');
+                                                            const dropdown = document.getElementById('timer-dropdown');
+                                                            if (dropdown) dropdown.classList.add('hidden');
+                                                        }}
+                                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                    >
+                                                        Modo Auto
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>    
+                                    </div>
 
                                     <div className={`${retro}-lcd ${inverse ? 'inverse' : ''}`}>
                                         <div class="clock-background w-full">
@@ -373,7 +564,7 @@ export default function Timer() {
                                                     <span class="text-7xl md:text-8xl">88:88</span>
                                                     <span class="ml-1 text-2xl hidden">88</span>
                                                 </div>
-                                                <div class="relative w-full text-center D7MBI clock-time z-10">
+                                                <div class="relative w-full text-center D7MBI clock-time z-1">
                                                     <span id="clock" class="text-7xl md:text-8xl w-full" ref={clockRef}>!! !!</span>
                                                     <span id="clock-sec" class="ml-1 text-2xl hidden" ref={clockSecRef}>!!</span>
                                                 </div>
@@ -382,9 +573,9 @@ export default function Timer() {
                                     </div>
                                 </div>
                                 {nextEvent && 
-                                    <div class="flex gap-2 justify-between items-center p-2 mb-2 w-full xl:max-w-xl text-xl text-gray-800 dark:text-white mt-12">
+                                    <div class="flex gap-2 justify-between items-center p-2 mb-2 w-full xl:max-w-xl text-xl text-gray-800 dark:text-white mt-2 border rounded-lg bg-gray-100 dark:bg-gray-800 drop-shadow-md">
                                         <div class={'flex'}>
-                                            Next Event {nextEvent ? ` - ${nextEvent.name}` : ''}
+                                            Próximo evento {nextEvent ? ` - ${nextEvent.name}` : ''}
                                         </div> 
                                         <div class="flex items-center gap-2">
                                             <div class="w-full text-center text-sm">
@@ -416,10 +607,10 @@ export default function Timer() {
                                             disabled={loading || alarms.length === 0}
                                         >
                                             {alarms.length === 0 ? 
-                                                <div class="flex justify-center items-center gap-2"><FontAwesomeIcon icon="bell" className={"w-4 h-4"} />No alarms set</div>
+                                                <div class="flex justify-center items-center gap-2"><FontAwesomeIcon icon="bell" className={"w-4 h-4"} />No hay eventos</div>
                                                 :
                                                 <>
-                                                    <div class="flex justify-center items-center gap-2"><FontAwesomeIcon icon="bell" className={"w-4 h-4"} />Current Alarms <span className={"bg-gray-300 px-2 rounded font-bold text-gray-800 dark:text-white"}>{alarms.length}</span></div>
+                                                    <div class="flex justify-center items-center text-xl gap-2"><FontAwesomeIcon icon="bell" className={"w-4 h-4"} /> Eventos <span className={"bg-gray-300 px-2 rounded font-bold text-gray-800 dark:text-white"}>{alarms.length}</span></div>
                                                     <FontAwesomeIcon icon="chevron-down" className={`w-4 h-4 ${openAccordion['accordion-1'] ? 'rotate-180' : 'rotate-0'} shrink-0 transition-transform`}  />
                                                 </>
                                             }
@@ -441,14 +632,14 @@ export default function Timer() {
                                                     {alarms.map((alarm, index) => (
                                                         <li key={index} className="py-2">
                                                             <div className="flex justify-between items-center mb-2">
-                                                                <div className={"flex flex-col gap-1"}>
+                                                                <div className={"flex flex-col gap-1 p-2 w-full justify-center items-center"}>
                                                                     <span className="text-xl">{alarm.name}</span>
-                                                                    <div className={"flex gap-2 items-center"}>
+                                                                    <div className={"flex flex-col gap-2 items-center"}>
                                                                         <div className="text-sm text-gray-600 flex items-center gap-2 text-xl">
                                                                             <FontAwesomeIcon icon="clock"/><time>{alarm.hour.toString().padStart(2, '0')}:{alarm.minute.toString().padStart(2, '0')}</time>
                                                                         </div>
                                                                         <div className="text-sm text-gray-600 flex items-center gap-1 border-2 border-gray-200 px-2 rounded-md w-fit">
-                                                                            <span className={"px-2"}>CH {alarm.extraParams[0]}</span>
+                                                                            <span className={"px-2"}>Sala {alarm.extraParams[0]}</span>
                                                                             <FontAwesomeIcon icon="right-long" />
                                                                             {alarm.extraParams[1] === 1 ?
                                                                                 <div id="currentState-on" class="flex align-center px-2 justify-center items-center">
@@ -481,37 +672,52 @@ export default function Timer() {
                                                                         ))}
                                                                     </div>
                                                                 </div>
-                                                                <div className="flex flex-col items-end gap-2">
-                                                                    <div>
-                                                                        <div className={`flex gap-1 items-center px-2 py-1 rounded-md text-sm ${alarm.executed ? 'text-green-600' : 'text-yellow-800'}`}>
-                                                                            <FontAwesomeIcon icon="check" />{alarm.executed ? 'Executed' : 'Pending'}
+                                                                
+                                                            </div>
+                                                            <div className="flex items-end gap-2 w-full justify-between">
+                                                                <div>
+                                                                    <div className={`flex gap-1 items-center px-2 py-1 rounded-md text-sm ${alarm.executed ? 'text-green-600' : 'text-yellow-800'}`}>
+                                                                        <FontAwesomeIcon icon="check" />{alarm.executed ? 'Executed' : 'Pending'}
+                                                                    </div>
+                                                                    {!alarm.enabled && (
+                                                                        <div className={`flex gap-1 items-center px-2 py-1 rounded-md text-sm text-red-600`}>
+                                                                            <FontAwesomeIcon icon="exclamation-triangle" />Disabled
                                                                         </div>
-                                                                        {!alarm.enabled && (
-                                                                            <div className={`flex gap-1 items-center px-2 py-1 rounded-md text-sm text-red-600`}>
-                                                                                <FontAwesomeIcon icon="exclamation-triangle" />Disabled
-                                                                            </div>
-                                                                        )}
-                                                                        
+                                                                    )}
+                                                                    
+                                                                </div>
+                                                                <div className="flex gap-2">
+                                                                    {/*
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => toggleAlarmEnabled(alarm)}
+                                                                        className={`px-2 py-1 rounded-md text-sm ${alarm.enabled ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`}
+                                                                    >
+                                                                        {alarm.enabled ? 'Disable' : 'Enable'}
+                                                                    </button>
+                                                                    */}
+                                                                    {/* new Checkbox Implementation */}
+                                                                    <div className="flex items-center">
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={alarm.enabled}
+                                                                            onChange={() => toggleAlarmEnabled(alarm)}
+                                                                            className={`form-checkbox h-5 w-5 ${alarm.enabled ? 'text-green-600' : 'text-red-600'} focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 rounded`}
+                                                                        />
+                                                                        <span className={`ml-2 text-sm ${alarm.enabled ? 'text-green-600' : 'text-red-600'}`}>
+                                                                            {alarm.enabled ? 'Enabled' : 'Disabled'}
+                                                                        </span>
                                                                     </div>
-                                                                    <div className="flex gap-2">
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() => toggleAlarmEnabled(alarm)}
-                                                                            className={`px-2 py-1 rounded-md text-sm ${alarm.enabled ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`}
-                                                                        >
-                                                                            {alarm.enabled ? 'Disable' : 'Enable'}
-                                                                        </button>
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() => openEditModal(alarm)}
-                                                                            className="px-2 py-1 rounded-md text-sm bg-blue-600 text-white"
-                                                                        >
-                                                                            Edit
-                                                                        </button>
-                                                                    </div>
+                                                                    
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => openEditModal(alarm)}
+                                                                        className="px-2 py-1 rounded-md text-sm text-blue-600"
+                                                                    >
+                                                                        <FontAwesomeIcon icon="edit" className="text-xl" />
+                                                                    </button>
                                                                 </div>
                                                             </div>
-                                                            
                                                             
                                                             
                                                             {/* Action buttons */}
@@ -525,17 +731,12 @@ export default function Timer() {
                                         )}
                                     </div>
                                 </div>
-
-
-                                <button id="addEvent" type="button"
-                                    onClick={() => openNewModal()}
-                                    class="mt-2 mb-4 inline-flex items-center justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-gray-800 dark:text-white shadow-sm hover:bg-green-500">
-                                    <svg class="h-6 w-6 text-gray-800 dark:text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                        stroke="currentColor" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                    </svg>
-                                    <span class="ml-2">Add Event</span>
-                                </button>
+                                <div className="flex gap-2 mt-2 mb-4">
+                                    <button id="addEvent" type="button" onClick={() => openOnOffModal()} class="inline-flex items-center justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 w-full">
+                                        <FontAwesomeIcon icon="plus" className={"w-4 h-4"} />
+                                        <span class="ml-2">Crear Alarma</span>
+                                    </button>
+                                </div>
                             </div>
                         }
                     </div>
@@ -544,7 +745,7 @@ export default function Timer() {
 
             {/* Add Event Modal */}
             <Modal
-                title="Add New Alarm"
+                title="Nuevo"
                 open={showModal}
                 onClose={() => {
                     setShowModal(false);
@@ -554,12 +755,12 @@ export default function Timer() {
                 actions={
                     <div class="w-full flex justify-between items-center gap-4">
                         <Button
-                            label="Cancel"
+                            label="Cancelar"
                             onClick={() => setShowModal(false)}
                             className="bg-gray-200 text-gray-800"
                         />
                         <Button
-                            label="Create Alarm"
+                            label="Crear"
                             onClick={createAlarm}
                             className="bg-green-600 text-white"
                         />
@@ -575,91 +776,112 @@ export default function Timer() {
                     
                     <div>
                         <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="alarm-name">
-                            Alarm Name
+                            Nombre
                         </label>
                         <input
                             ref={alarmNameRef}
                             id="alarm-name"
                             type="text"
-                            placeholder="Enter alarm name"
+                            placeholder="Nombre"
                             className={`w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 ${error.alarmName ? 'border-red-500' : ''}`}
                             
                         />
                     </div>
-                    
-                    <div className="flex gap-4">
-                        <div className="w-1/2">
-                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="alarm-hour">
-                                Hour (0-23)
-                            </label>
-                            <input
-                                ref={alarmHourRef}
-                                id="alarm-hour"
-                                type="number"
-                                min={0}
-                                max={23}
-                                placeholder="Hour"
-                                className={`w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 ${error.hour ? 'border-red-500' : ''}`}
-                            />
-                        </div>
-                        <div className="w-1/2">
-                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="alarm-minute">
-                                Minute (0-59)
-                            </label>
-                            <input
-                                ref={alarmMinuteRef}
-                                id="alarm-minute"
-                                type="number"
-                                min={0}
-                                max={59}
-                                placeholder="Minute"
-                                className={`w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 ${error.minute ? 'border-red-500' : ''}`}
-                            />
-                        </div>
+                    <div className="w-full">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="alarm-time">
+                            Encendido
+                        </label>
+                        <input
+                            ref={alarmTimeOnRef} 
+                            id="alarm-time"
+                            type="time"
+                            className={`w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 ${error.hour || error.minute ? 'border-red-500' : ''}`}
+                        />
+                        {(error.hour || error.minute) && (
+                            <p className="text-red-500 text-xs italic mt-1">{error.hour || error.minute}</p>
+                        )}
+                    </div>
+                    <div className="w-full">
+                        <input type="checkbox" checked={false} class="sr-only peer" />
+
+                    </div>
+                    <div className="w-full">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="alarm-time">
+                            Apagado
+                        </label>
+                        <input
+                            ref={alarmTimeOffRef} 
+                            id="alarm-time"
+                            type="time"
+                            className={`w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 ${error.hour || error.minute ? 'border-red-500' : ''}`}
+                        />
+                        {(error.hour || error.minute) && (
+                            <p className="text-red-500 text-xs italic mt-1">{error.hour || error.minute}</p>
+                        )}
                     </div>
                     <hr />
-                    <div className="flex gap-4">
-                        <div className="w-1/2">
-                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="alarm-type">
-                                Choose Channel
-                            </label>
-                            <select
-                                ref={alarmChannelRef}
-                                id="alarm-type"
-                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-                            >
-                                <option value="1">Channel 1</option>
-                                <option value="2">Channel 2</option>
-                                <option value="3">Channel 3</option>
-                            </select>
-                        </div>
-                        {/*Select with options ON/OFF*/}
-                        <div className="w-1/2">
-                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="alarm-type">
-                                Choose Action
-                            </label>
-                            <select
-                                ref={alarmActionRef}
-                                id="alarm-type"
-                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-                            >
-                                <option value="on">ON</option>
-                                <option value="off">OFF</option>
-                            </select>
-                        </div>
-                    </div>
+                    
 
                     {/* Active Days Section */}
                     <div>
-                        <label className="block text-gray-700 text-sm font-bold mb-2">
-                            Active Days
-                        </label>
-                        <p className="text-sm text-gray-600 mb-2">
-                            Select the days on which this alarm should be active:
-                            <div className="text-red-500 h-4"> {error.daysOfWeek && error.daysOfWeek}</div>
-                        </p>
+                        <div className="flex items-center justify-between">
+                            <label className="block text-gray-700 text-sm font-bold mb-6 flex justify-between items-center w-full">
+                                <span>Días Activos</span>
+                                <button 
+                                    type="button" 
+                                    onClick={() => {
+                                        const dropdown = document.getElementById('days-preset-dropdown');
+                                        if (dropdown) {
+                                            dropdown.classList.toggle('hidden');
+                                        }
+                                    }}
+                                    className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                                >
+                                    <FontAwesomeIcon icon="ellipsis-vertical" className="text-xl" />
+                                </button>
+                            </label>
+                            <div className="relative">
+                                <div id="days-preset-dropdown" className="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                                    <div className="py-1">
+                                        <button 
+                                            type="button" 
+                                            onClick={() => {
+                                                setNewAlarmDays([true, true, true, true, true, true, true]);
+                                                const dropdown = document.getElementById('days-preset-dropdown');
+                                                if (dropdown) dropdown.classList.add('hidden');
+                                            }}
+                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                            Todos los Días
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => {
+                                                setNewAlarmDays([false, true, true, true, true, true, false]);
+                                                const dropdown = document.getElementById('days-preset-dropdown');
+                                                if (dropdown) dropdown.classList.add('hidden');
+                                            }}
+                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                            Lunes a Viernes
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => {
+                                                setNewAlarmDays([true, false, false, false, false, false, true]);
+                                                const dropdown = document.getElementById('days-preset-dropdown');
+                                                if (dropdown) dropdown.classList.add('hidden');
+                                            }}
+                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                            Fines de Semana
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         
-                        <div className="flex flex-wrap gap-2 mb-3">
+                        <div className="flex flex-nowrap justify-center gap-2 mb-3">
                             {weekDays.map((day, index) => (
                                 <button
                                     key={day}
@@ -669,7 +891,7 @@ export default function Timer() {
                                         newDays[index] = !newDays[index];
                                         setNewAlarmDays(newDays);
                                     }}
-                                    className={`px-3 py-1 text-sm font-semibold rounded-md ${
+                                    className={`px-1.5 py-1 text-sm font-semibold rounded-md ${
                                         newAlarmDays[index] 
                                             ? 'bg-blue-600 text-white' 
                                             : 'bg-gray-200 text-gray-700'
@@ -678,30 +900,6 @@ export default function Timer() {
                                     {day}
                                 </button>
                             ))}
-                        </div>
-
-                        <div className="flex gap-2">
-                            <button
-                                type="button"
-                                onClick={() => setNewAlarmDays([true, true, true, true, true, true, true])}
-                                className="px-3 py-1 text-sm font-semibold rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300"
-                            >
-                                All Days
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setNewAlarmDays([false, true, true, true, true, true, false])}
-                                className="px-3 py-1 text-sm font-semibold rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300"
-                            >
-                                Weekdays
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setNewAlarmDays([true, false, false, false, false, false, true])}
-                                className="px-3 py-1 text-sm font-semibold rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300"
-                            >
-                                Weekends
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -735,9 +933,77 @@ export default function Timer() {
                     )}
                     
                     <div>
-                        <label className="block text-gray-700 text-sm font-bold mb-2">
-                            Active Days
-                        </label>
+                        <div className="flex items-center justify-between">
+                            <label className="block text-gray-700 text-sm font-bold mb-2">
+                                Active Days
+                            </label>
+                            <div className="relative">
+                                <button 
+                                    type="button" 
+                                    onClick={() => {
+                                        const dropdown = document.getElementById('edit-days-preset-dropdown');
+                                        if (dropdown) {
+                                            dropdown.classList.toggle('hidden');
+                                        }
+                                    }}
+                                    className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                                >
+                                    <FontAwesomeIcon icon="ellipsis-vertical" />
+                                </button>
+                                <div id="edit-days-preset-dropdown" className="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                                    <div className="py-1">
+                                        <button 
+                                            type="button" 
+                                            onClick={() => {
+                                                if (selectedAlarm) {
+                                                    setSelectedAlarm({
+                                                        ...selectedAlarm,
+                                                        daysOfWeek: [true, true, true, true, true, true, true]
+                                                    });
+                                                    const dropdown = document.getElementById('edit-days-preset-dropdown');
+                                                    if (dropdown) dropdown.classList.add('hidden');
+                                                }
+                                            }}
+                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                            Todos los Días
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => {
+                                                if (selectedAlarm) {
+                                                    setSelectedAlarm({
+                                                        ...selectedAlarm,
+                                                        daysOfWeek: [false, true, true, true, true, true, false]
+                                                    });
+                                                    const dropdown = document.getElementById('edit-days-preset-dropdown');
+                                                    if (dropdown) dropdown.classList.add('hidden');
+                                                }
+                                            }}
+                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                            Lunes a Viernes
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => {
+                                                if (selectedAlarm) {
+                                                    setSelectedAlarm({
+                                                        ...selectedAlarm,
+                                                        daysOfWeek: [true, false, false, false, false, false, true]
+                                                    });
+                                                    const dropdown = document.getElementById('edit-days-preset-dropdown');
+                                                    if (dropdown) dropdown.classList.add('hidden');
+                                                }
+                                            }}
+                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                            Fines de Semana
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <p className="text-sm text-gray-600 mb-2">
                             Select the days on which this alarm should be active:
                         </p>
@@ -755,7 +1021,7 @@ export default function Timer() {
                                             daysOfWeek: newDays
                                         });
                                     }}
-                                    className={`px-3 py-1 text-sm font-semibold rounded-md ${
+                                    className={`px-3 py-1 text-xs font-semibold rounded-md ${
                                         selectedAlarm.daysOfWeek[index] 
                                             ? 'bg-blue-600 text-white' 
                                             : 'bg-gray-200 text-gray-700'
@@ -764,44 +1030,6 @@ export default function Timer() {
                                     {day}
                                 </button>
                             ))}
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold mb-2">
-                            Quick Select
-                        </label>
-                        <div className="flex gap-2">
-                            <button
-                                type="button"
-                                onClick={() => selectedAlarm && setSelectedAlarm({
-                                    ...selectedAlarm,
-                                    daysOfWeek: [true, true, true, true, true, true, true]
-                                })}
-                                className="px-3 py-1 text-sm font-semibold rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300"
-                            >
-                                All Days
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => selectedAlarm && setSelectedAlarm({
-                                    ...selectedAlarm,
-                                    daysOfWeek: [false, true, true, true, true, true, false]
-                                })}
-                                className="px-3 py-1 text-sm font-semibold rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300"
-                            >
-                                Weekdays
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => selectedAlarm && setSelectedAlarm({
-                                    ...selectedAlarm,
-                                    daysOfWeek: [true, false, false, false, false, false, true]
-                                })}
-                                className="px-3 py-1 text-sm font-semibold rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300"
-                            >
-                                Weekends
-                            </button>
                         </div>
                     </div>
 
@@ -822,6 +1050,137 @@ export default function Timer() {
                                 {selectedAlarm?.enabled ? 'Disable Alarm' : 'Enable Alarm'}
                             </button>
                         </div>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* ON-OFF Alarm Modal */}
+            <Modal
+                title="Crear alarma ON/OFF"
+                open={showOnOffModal}
+                onClose={() => {
+                    setShowOnOffModal(false);
+                    clearErrors();
+                    resetOnOffForm();
+                }}
+                actions={
+                    <div class="w-full flex justify-between items-center gap-4">
+                        <Button
+                            label="Cancelar"
+                            onClick={() => setShowOnOffModal(false)}
+                            className="bg-gray-200 text-gray-800"
+                        />
+                        <Button
+                            label="Crear"
+                            onClick={createOnOffAlarm}
+                            className="bg-blue-600 text-white"
+                        />
+                    </div>
+                }
+            >
+                <div className="space-y-4">
+                    {errorMessage && (
+                        <div className="p-3 bg-red-100 text-red-700 rounded-md">
+                            {errorMessage}
+                        </div>
+                    )}
+                    
+                    <div>
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="onoff-alarm-name">
+                            Nombre
+                        </label>
+                        <input
+                            ref={onOffAlarmNameRef}
+                            id="onoff-alarm-name"
+                            type="text"
+                            placeholder="Nombre"
+                            className={`w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 ${error.alarmName ? 'border-red-500' : ''}`}
+                        />
+                        {error.alarmName && (
+                            <p className="text-red-500 text-xs italic mt-1">{error.alarmName}</p>
+                        )}
+                    </div>
+                    
+                    <div className="w-full">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="onoff-alarm-time-on">
+                            Hora de encendido
+                        </label>
+                        <input
+                            ref={onOffAlarmTimeOnRef} 
+                            id="onoff-alarm-time-on"
+                            type="time"
+                            className={`w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 ${error.onHour || error.onMinute ? 'border-red-500' : ''}`}
+                        />
+                        {(error.onHour || error.onMinute) && (
+                            <p className="text-red-500 text-xs italic mt-1">{error.onHour || error.onMinute}</p>
+                        )}
+                    </div>
+                    
+                    <div className="w-full">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="onoff-alarm-time-off">
+                            Hora de apagado
+                        </label>
+                        <input
+                            ref={onOffAlarmTimeOffRef} 
+                            id="onoff-alarm-time-off"
+                            type="time"
+                            className={`w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 ${error.offHour || error.offMinute ? 'border-red-500' : ''}`}
+                        />
+                        {(error.offHour || error.offMinute) && (
+                            <p className="text-red-500 text-xs italic mt-1">{error.offHour || error.offMinute}</p>
+                        )}
+                    </div>
+                    
+                    <div className="w-full">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="onoff-alarm-channel">
+                            Canal
+                        </label>
+                        <select
+                            ref={onOffAlarmChannelRef}
+                            id="onoff-alarm-channel"
+                            className={`w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 ${error.channel ? 'border-red-500' : ''}`}
+                        >
+                            <option value="1">Canal 1</option>
+                            <option value="2">Canal 2</option>
+                            <option value="3">Canal 3</option>
+                        </select>
+                        {error.channel && (
+                            <p className="text-red-500 text-xs italic mt-1">{error.channel}</p>
+                        )}
+                    </div>
+                    
+                    <hr />
+                    
+                    {/* Active Days Section */}
+                    <div>
+                        <div className="flex items-center justify-between">
+                            <label className="block text-gray-700 text-sm font-bold mb-2">
+                                Días Activos
+                            </label>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                            {weekDays.map((day, index) => (
+                                <button
+                                    key={`onoff-day-${index}`}
+                                    type="button"
+                                    onClick={() => {
+                                        const newDays = [...onOffAlarmDays];
+                                        newDays[index] = !newDays[index];
+                                        setOnOffAlarmDays(newDays);
+                                    }}
+                                    className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${
+                                        onOffAlarmDays[index]
+                                            ? 'bg-blue-600 text-white'
+                                            : 'bg-gray-200 text-gray-700'
+                                    }`}
+                                >
+                                    {day}
+                                </button>
+                            ))}
+                        </div>
+                        {error.daysOfWeek && (
+                            <p className="text-red-500 text-xs italic mt-1">{error.daysOfWeek}</p>
+                        )}
                     </div>
                 </div>
             </Modal>

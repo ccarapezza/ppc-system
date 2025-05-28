@@ -12,6 +12,8 @@
 #include <DNSServer.h>
 #include "WifiCredentialStorage.h"
 #include "DigitalOutput.h"  // Añadir el header de DigitalOutput
+#include <ESP8266HTTPClient.h>
+#include "MqttClient.h"  // Include MqttClient to access the linkDevice method
 
 // Referencias externas a las salidas digitales
 extern DigitalOutput* digitalOutputs[];
@@ -21,8 +23,8 @@ extern Log logger;
 extern IPAddress apIP;
 
 //const to save filenames in flash
-const char INDEX_JS[] PROGMEM = "/assets/index-DbCBPAxY.js";
-const char INDEX_CSS[] PROGMEM = "/assets/index-CWYTIsFi.css";
+const char INDEX_JS[] PROGMEM = "/assets/index-Qcs1Yhoh.js";
+const char INDEX_CSS[] PROGMEM = "/assets/index-mDld0kGi.css";
 
 const char *myHostname = "ppc.captiveportal";
 
@@ -109,16 +111,16 @@ void startServer(PpcConnection *ppcConnection) {
         request->send(LittleFS, INDEX_CSS, "text/css");
     });
 
-    server.on("/ppc-bot.jpg", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(LittleFS, "/ppc-bot.jpg", "image/jpeg");
+    server.on("/robot-avatar.png", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/robot-avatar.png", "image/png");
     });
 
     server.on("/DSEG7Modern-BoldItalic.woff", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(LittleFS, "/DSEG7Modern-BoldItalic.woff", "font/woff");
     });
 
-    server.on("/Montserrat-VariableFont_wght.ttf", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(LittleFS, "/Montserrat-VariableFont_wght.ttf", "font/ttf");
+    server.on("/Montserrat.woff2", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/Montserrat.woff2", "font/woff2");
     });
 
      server.on("/fontawesome.js", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -349,6 +351,111 @@ void startServer(PpcConnection *ppcConnection) {
         request->send(response);
     });
 
+    // POST endpoint to create two alarms (ON and OFF) for a specific channel
+    server.on("/alarm-on-off", HTTP_POST, [&alarmManager](AsyncWebServerRequest *request) {
+        logger.logf(LOG_INFO, "Creating ON and OFF alarms");
+        
+        AsyncJsonResponse* response = new AsyncJsonResponse();
+        JsonObject root = response->getRoot().to<JsonObject>();
+        
+        // Check that all required parameters are present
+        if (request->hasParam("name", true) && 
+            request->hasParam("onHour", true) &&
+            request->hasParam("onMinute", true) &&
+            request->hasParam("offHour", true) &&
+            request->hasParam("offMinute", true) &&
+            request->hasParam("channel", true))
+        {
+            String name = request->getParam("name", true)->value();
+            int onHour = request->getParam("onHour", true)->value().toInt();
+            int onMinute = request->getParam("onMinute", true)->value().toInt();
+            int offHour = request->getParam("offHour", true)->value().toInt();
+            int offMinute = request->getParam("offMinute", true)->value().toInt();
+            int channel = request->getParam("channel", true)->value().toInt();
+    
+            // Validate the parameters
+            if (channel < 1 || channel > 3) {
+                root["success"] = false;
+                root["message"] = "Invalid channel. Must be 1, 2 or 3";
+                response->setLength();
+                request->send(response);
+                return;
+            }
+    
+            if (onHour < 0 || onHour > 23 || onMinute < 0 || onMinute > 59 ||
+                offHour < 0 || offHour > 23 || offMinute < 0 || offMinute > 59) {
+                root["success"] = false;
+                root["message"] = "Invalid time values. Hour must be 0-23, minute must be 0-59";
+                response->setLength();
+                request->send(response);
+                return;
+            }
+    
+            // Create the alarm execution function
+            std::function<void(int)> alarmExecutionOn = [channel](int) {
+                digitalOutputs[channel - 1]->setState(true);
+            };
+            std::function<void(int)> alarmExecutionOff = [channel](int) {
+                digitalOutputs[channel - 1]->setState(false);
+            };
+    
+            std::vector<int> extraParams;
+            extraParams.push_back(channel);
+            extraParams.push_back(1); // ON state
+    
+            // Add the ON alarm using the AlarmsManager
+            alarmManager.addAlarm(name + "_ON", onHour, onMinute, alarmExecutionOn, extraParams);
+            extraParams[1] = 0; // OFF state
+            // Add the OFF alarm using the AlarmsManager
+            int count = alarmManager.addAlarm(name + "_OFF", offHour, offMinute, alarmExecutionOff, extraParams);
+            root["success"] = true;
+            root["message"] = "Alarms created successfully";
+    
+            // Check if days parameter is provided
+            if (request->hasParam("days", true)) {
+                String daysParam = request->getParam("days", true)->value();
+                bool daysOfWeek[7] = {true, true, true, true, true, true, true}; // Default all days to true
+                
+                int startPos = 0;
+                int commaPos = daysParam.indexOf(',');
+                int dayIndex = 0;
+                
+                // Parse the comma-separated list of days
+                while (commaPos >= 0 && dayIndex < 7) {
+                    String dayValue = daysParam.substring(startPos, commaPos);
+                    daysOfWeek[dayIndex++] = (dayValue == "1" || dayValue == "true");
+                    
+                    startPos = commaPos + 1;
+                    commaPos = daysParam.indexOf(',', startPos);
+                }
+                
+                // Handle the last day (or single day if no commas)
+                if (dayIndex < 7) {
+                    String dayValue = daysParam.substring(startPos);
+                    daysOfWeek[dayIndex] = (dayValue == "1" || dayValue == "true");
+                }
+                
+                // Set the days of week for both alarms
+                alarmManager.setAlarmDays(name + "_ON", daysOfWeek);
+                alarmManager.setAlarmDays(name + "_OFF", daysOfWeek);
+            }
+    
+            root["success"] = true;
+            root["message"] = "Alarms created successfully";
+            root["name"] = name;
+            root["onTime"] = String(onHour) + ":" + String(onMinute);
+            root["offTime"] = String(offHour) + ":" + String(offMinute);
+            root["alarmCount"] = count;
+            root["channel"] = channel;
+        } else {
+            root["success"] = false;
+            root["message"] = "Missing required parameters (name, onHour, onMinute, offHour, offMinute, channel)";
+        }
+        
+        response->setLength();
+        request->send(response);
+    });
+
     // POST endpoint to create a new alarm
     server.on("/alarm", HTTP_POST, [&alarmManager](AsyncWebServerRequest *request) {
         logger.logf(LOG_INFO, "Creating a new alarm");
@@ -536,6 +643,97 @@ void startServer(PpcConnection *ppcConnection) {
         
         response->setLength();
         request->send(response);
+    });
+
+    server.on("/link-device", HTTP_POST, [ppcConnection](AsyncWebServerRequest *request){
+
+        WiFiClient client;
+        HTTPClient http;
+        //get token param
+        if (!request->hasParam("token", true)) {
+            logger.logf(LOG_INFO, "Missing token parameter");
+            AsyncJsonResponse* response = new AsyncJsonResponse();
+            JsonObject root = response->getRoot().to<JsonObject>();
+            root["success"] = false;
+            root["message"] = "Missing token parameter";
+            response->setLength();
+            request->send(response);
+            return;
+        }
+        String tokenToVerify = request->getParam("token", true)->value();
+        logger.logf(LOG_INFO, "Verifying token: %s", tokenToVerify.c_str());
+        // Set up the HTTP request
+        //http.begin("https://api.clerk.dev/v1/tokens/verify");
+        http.begin(client, "https://api.clerk.dev/v1/tokens/verify");
+        http.addHeader("Content-Type", "application/json");
+        // Add the authorization header with the API key
+        http.addHeader("Authorization", String("Bearer sk_test_BeysHgpCk6XnSw3wgGWKAZtrqh4OwtluBJQBZLcW32"));
+        // Set the request body
+        String body = "{\"token\":\"" + String(tokenToVerify) + "\"}";
+
+        int httpResponseCode = http.POST(body);
+
+        logger.logf(LOG_INFO, "HTTP response code: %d", httpResponseCode);
+
+        if (httpResponseCode > 0) {
+            String responseBody = http.getString();
+            logger.logf(LOG_INFO, "Response code: %d", httpResponseCode);
+            logger.logf(LOG_INFO, "Response body: %s", responseBody.c_str());
+            // Parse the JSON response
+            JsonDocument doc;
+            DeserializationError error = deserializeJson(doc, responseBody);
+            if (error) {
+                logger.logf(LOG_ERR, "Failed to parse JSON: %s", error.c_str());
+                AsyncJsonResponse* response = new AsyncJsonResponse();
+                JsonObject root = response->getRoot().to<JsonObject>();
+                root["success"] = false;
+                root["message"] = "Failed to parse JSON";
+                response->setLength();
+                request->send(response);
+                return;
+            }
+            JsonObject jsonResponse = doc.as<JsonObject>();
+            bool success = jsonResponse["success"];            if (success) {
+                // Token is valid
+                
+                // Get access to the external mqttClient instance
+                extern MqttClient mqttClient;
+                
+                // Send MQTT message to link the device
+                mqttClient.linkDevice(tokenToVerify, [](bool success, String user_id) {
+                    if (success) {
+                        logger.logf(LOG_INFO, "Device linked successfully to user: %s", user_id.c_str());
+                    } else {
+                        logger.log(LOG_ERR, "Failed to link device");
+                    }
+                });
+                
+                AsyncJsonResponse* response = new AsyncJsonResponse();
+                JsonObject root = response->getRoot().to<JsonObject>();
+                root["success"] = true;
+                root["message"] = "Token verified successfully and device linking initiated";
+                response->setLength();
+                request->send(response);
+            } else {
+                // Token is invalid
+                AsyncJsonResponse* response = new AsyncJsonResponse();
+                JsonObject root = response->getRoot().to<JsonObject>();
+                root["success"] = false;
+                root["message"] = "Invalid token";
+                response->setLength();
+                request->send(response);
+            }
+        } else {
+            logger.logf(LOG_ERR, "HTTP request failed: %s", http.errorToString(httpResponseCode).c_str());
+            AsyncJsonResponse* response = new AsyncJsonResponse();
+            JsonObject root = response->getRoot().to<JsonObject>();
+            root["success"] = false;
+            root["message"] = "HTTP request failed";
+            response->setLength();
+            request->send(response);
+        }
+
+        
     });
 
     server.begin();

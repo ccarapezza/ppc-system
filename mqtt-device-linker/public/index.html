@@ -1,0 +1,593 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark" data-set-preferred-mode-onload="true">
+
+<head>  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestor de Dispositivos PPC</title>
+  <!-- Halfmoon CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/halfmoon@2.0.2/css/halfmoon.min.css" rel="stylesheet"
+    integrity="sha256-RjeFzczeuZHCyS+Gvz+kleETzBF/o84ZRHukze/yv6o=" crossorigin="anonymous">
+  <!-- Clerk Script -->
+  <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@4/dist/clerk.browser.js"></script>
+
+  <style>
+    .stat-card {
+      height: 100%;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 0.75rem;
+      height: 0.75rem;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+    }
+
+    .status-online {
+      background-color: var(--bs-success);
+    }
+
+    .status-offline {
+      background-color: var(--bs-danger);
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+      border-radius: 8px;
+    }
+
+    .linked {
+      background-color: rgba(var(--bs-primary-rgb), 0.1);
+    }
+
+    .timestamp {
+      font-size: 0.875rem;
+      opacity: 0.75;
+    }
+
+    .empty-message {
+      text-align: center;
+      padding: 2rem;
+      opacity: 0.6;
+    }
+
+    /* Animación de pulso para iconos */
+    .animate-pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.6;
+      }
+    }
+
+    /* Animación de giro para loader */
+    .animate-spin {
+      animation: spin 1.5s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Spinner animation for loading states */
+    .loading-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(var(--bs-primary-rgb), 0.3);
+      border-radius: 50%;
+      border-top-color: var(--bs-primary);
+      animation: spinner 1s linear infinite;
+    }
+
+    .sticky-alert {
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    .close {
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .close:hover {
+      transform: scale(1.1);
+    }
+
+    @keyframes spinner {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .filters {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filter-group {
+        margin-bottom: 0.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body class="with-custom-webkit-scrollbars with-custom-css-scrollbars" data-dm-shortcut-enabled="true" data-sidebar-shortcut-enabled="true">
+  <!-- Page wrapper -->
+  <div class="page-wrapper with-navbar">
+    <!-- Navbar -->
+    <nav class="navbar px-2 shadow-sm">
+      <a href="#" class="navbar-brand me-auto">
+        <div class="d-flex align-items-center gap-2">
+          <i data-lucide="circuit-board" class="text-primary me-10" style="width:32px;height:32px"></i>
+          <span class="fw-bold">Gestor de Dispositivos IoT</span>
+        </div>
+      </a>
+      <div class="navbar-content">
+        <button class="btn btn-square" type="button" onclick="">
+          <i data-lucide="moon-star" class="icon" style="width:24px;height:24px"></i>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Content wrapper -->
+    <div class="container-md">
+      <div class="content">
+        <div class="vstack gap-4 m-3">
+          <div class="d-flex justify-content-between align-items-center gap-4 flex-column flex-md-row">
+            <!-- Stats Cards -->
+            <div class="card stat-card w-100">
+              <div class="card-body">
+                <div class="d-flex align-items-center gap-4">
+                  <div>
+                    <i data-lucide="microchip" class="text-primary" style="width:64px;height:64px"></i>
+                  </div>
+                  <div>
+                    <div class="stat-value text-primary" id="total-devices">-</div>
+                    <div class="text-muted">Total de dispositivos</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card stat-card w-100">
+              <div class="card-body">
+                <div class="d-flex align-items-center gap-4">
+                  <div>
+                    <i data-lucide="wifi" class="text-success" style="width:64px;height:64px"></i>
+                  </div>
+                  <div>
+                    <div class="stat-value text-success" id="online-devices">-</div>
+                    <div class="text-muted">Dispositivos online</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card stat-card w-100">
+              <div class="card-body">
+                <div class="d-flex align-items-center gap-4">
+                  <div>
+                    <i data-lucide="link" class="text-info" style="width:64px;height:64px"></i>
+                  </div>
+                  <div>
+                    <div class="stat-value text-info" id="linked-devices">-</div>
+                    <div class="text-muted">Dispositivos vinculados</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Filters -->
+          <div class="card">
+            <div class="card-header">
+              <div class="d-flex gap-2 align-items-center">
+                <i data-lucide="filter" class="text-primary me-10" style="width:30px;height:30px"></i>
+                <h5 class="card-title mb-0">Filtros</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="row g-15 filters">
+                <div class="col-lg-4 col-md-6 col-sm-12">
+                  <div class="form-group">
+                    <label for="filter-status" class="form-label">Estado:</label>
+                    <div class="input-group"> <span class="input-group-text">
+                        <i data-lucide="activity-square" class="text-primary" style="width:20px;height:20px"></i>
+                      </span>
+                      <select id="filter-status" class="form-select">
+                        <option value="all">Todos</option>
+                        <option value="online">Online</option>
+                        <option value="offline">Offline</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12">
+                  <div class="form-group">
+                    <label for="filter-linked" class="form-label">Vinculación:</label>
+                    <div class="input-group"> <span class="input-group-text">
+                        <i data-lucide="link-2" class="text-primary" style="width:20px;height:20px"></i>
+                      </span>
+                      <select id="filter-linked" class="form-select">
+                        <option value="all">Todos</option>
+                        <option value="linked">Vinculados</option>
+                        <option value="unlinked">No vinculados</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-4 col-md-12 col-sm-12">
+                  <div class="form-group">
+                    <label for="filter-search" class="form-label">Buscar:</label>
+                    <div class="input-group"> <span class="input-group-text">
+                        <i data-lucide="search" class="text-primary" style="width:20px;height:20px"></i>
+                      </span>
+                      <input type="text" id="filter-search" class="form-control" placeholder="ID o nombre...">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Device Table -->
+
+          </div>
+          <!-- Device Table -->
+          <div class="card">
+            <div class="card-header">
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex gap-2 align-items-center">
+                  <i data-lucide="list" class="text-primary me-10" style="width:30px;height:30px"></i>
+                  <h5 class="card-title mb-0">Dispositivos Registrados</h5>
+                </div>
+                <div id="connection-status" class="d-flex align-items-center"> <i data-lucide="check-circle"
+                    class="text-success me-5" style="width:24px;height:24px"></i>
+                  <span class="badge badge-success">Conectado</span>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table device-table">
+                  <!-- Table header Desktop -->
+                  <thead>
+                    <tr class="d-none d-md-table-row">
+                      <th>Estado</th>
+                      <th>Device ID</th>
+                      <th>Nombre</th>
+                      <th>User ID</th>
+                      <th>Última conexión</th>
+                      <th>Primera detección</th>
+                      <th>Vinculación</th>
+                    </tr>
+                  </thead>
+                  <tbody id="device-table-body">
+                    <tr>
+                      <td colspan="7">
+                        <div class="loading-container">
+                          <div class="text-center">
+                            <div class="d-flex justify-content-center mb-15">
+                              <i data-lucide="loader-2" class="text-primary animate-spin"
+                                style="width:50px;height:50px"></i>
+                            </div>
+                            <p class="mb-0">Conectando al servidor MQTT...</p>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div id="sticky-alert-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;"></div>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+      lucide.createIcons();
+    </script>
+    <script>
+      function initStickyAlert({ content = "", title = "", className = "alert-primary", timeout = 5000 }) {
+        const container = document.getElementById("sticky-alert-container");
+
+        // Crear el div de la alerta
+        const alert = document.createElement("div");
+        alert.className = `alert sticky-alert ${className} d-flex justify-content-between align-items-center`;
+        alert.role = "alert";
+        alert.innerHTML = `
+          <div class="mx-2">
+            ${title ? `<h5 class="alert-heading">${title}</h5>` : ""}
+            <div>${content}</div>
+          </div>
+          <i class="close" data-lucide="x" style="width:24px;height:24px" onclick="this.parentElement.remove()"></i>
+        `;
+
+        lucide.createIcons();
+
+        // Cerrar alerta manualmente
+        alert.querySelector(".close").onclick = () => {
+          alert.style.opacity = "0";
+          setTimeout(() => alert.remove(), 500);
+        };
+
+        container.appendChild(alert);
+
+        // Eliminar automáticamente después de timeout
+        setTimeout(() => {
+          alert.style.opacity = "0";
+          setTimeout(() => alert.remove(), 500);
+        }, timeout);
+      }
+    </script>
+    <script>
+      // Elements
+      const tbody = document.getElementById("device-table-body");
+      const totalDevicesEl = document.getElementById("total-devices");
+      const onlineDevicesEl = document.getElementById("online-devices");
+      const linkedDevicesEl = document.getElementById("linked-devices");
+      const filterStatus = document.getElementById("filter-status");
+      const filterLinked = document.getElementById("filter-linked");
+      const filterSearch = document.getElementById("filter-search");
+
+      // Store all devices
+      let allDevices = [];
+
+      function convertUTCtoGMT3(utcDate) {
+        const date = new Date(utcDate);
+      // GMT-3 es 3 horas detrás de UTC, así que restamos 180 minutos (3*60)
+          date.setMinutes(date.getMinutes() - 180);
+        return date;
+      }
+
+      // Update statistics based on current device list
+      function updateStats(devices) {
+        const total = devices.length;
+        const online = devices.filter(device => device.is_online).length;
+        const linked = devices.filter(device => device.linked).length;
+
+        totalDevicesEl.textContent = total;
+        onlineDevicesEl.textContent = online;
+        linkedDevicesEl.textContent = linked;
+      }
+
+      // Apply filters to the device list
+      function applyFilters() {
+        const statusFilter = filterStatus.value;
+        const linkedFilter = filterLinked.value;
+        const searchText = filterSearch.value.toLowerCase();
+
+        let filteredDevices = [...allDevices];
+
+        // Filter by online status
+        if (statusFilter === 'online') {
+          filteredDevices = filteredDevices.filter(device => device.is_online);
+        } else if (statusFilter === 'offline') {
+          filteredDevices = filteredDevices.filter(device => !device.is_online);
+        }
+
+        // Filter by linked status
+        if (linkedFilter === 'linked') {
+          filteredDevices = filteredDevices.filter(device => device.linked);
+        } else if (linkedFilter === 'unlinked') {
+          filteredDevices = filteredDevices.filter(device => !device.linked);
+        }
+
+        // Filter by search text
+        if (searchText) {
+          filteredDevices = filteredDevices.filter(device =>
+            (device.device_id && device.device_id.toLowerCase().includes(searchText)) ||
+            (device.device_name && device.device_name.toLowerCase().includes(searchText))
+          );
+        }
+
+        renderDevices(filteredDevices);
+      }
+      // Render the device table
+      function renderDevices(devices) {
+        tbody.innerHTML = "";
+
+        if (devices.length === 0) {
+          tbody.innerHTML = `
+          <tr>
+            <td colspan='7'>
+              <div class="loading-container">
+                <div class="text-center">                  <div class="d-flex justify-content-center mb-15">
+                    <i data-lucide="search-x" class="text-primary" style="width:60px;height:60px"></i>
+                  </div>
+                  <p class="mb-0 text-muted">No se encontraron dispositivos que coincidan con los filtros</p>
+                </div>
+              </div>
+            </td>
+          </tr>
+        `;
+          return;
+        }
+
+        // Sort devices: online first, then by last_seen
+        devices.sort((a, b) => {
+          if (a.is_online && !b.is_online) return -1;
+          if (!a.is_online && b.is_online) return 1;
+
+          // Both online or both offline - sort by last_seen
+          const dateA = new Date(a.last_seen || 0);
+          const dateB = new Date(b.last_seen || 0);
+          return dateB - dateA;
+        });
+
+        for (const device of devices) {
+          const row = document.createElement("tr");
+          const mobileRow = document.createElement("tr");
+          row.classList.add("d-none", "d-md-table-row");
+          mobileRow.classList.add("d-md-none");
+          if (device.linked) {
+            row.classList.add('linked');
+            mobileRow.classList.add('linked');
+          }
+
+          // Create badges for status
+          const statusBadgeClass = device.is_online ? 'badge-success' : 'badge-danger';
+          const statusText = device.is_online ? 'Online' : 'Offline';
+
+          // Create badges for linked status
+          const linkedBadgeClass = device.linked ? 'badge-primary' : 'badge-secondary';
+          const linkedText = device.linked ? 'Vinculado' : 'No vinculado';
+
+          row.innerHTML = `
+          <td>
+            <span class="badge ${statusBadgeClass}">
+              <span class="status-indicator ${device.is_online ? 'status-online' : 'status-offline'}"></span>
+              ${statusText}
+            </span>
+          </td>
+          <td><span class="fw-medium">${device.device_id || '-'}</span></td>
+          <td>${device.device_name || '-'}</td>
+          <td>${device.user_id || '-'}</td>
+          <td class="timestamp">${convertUTCtoGMT3(device.last_seen).toLocaleString()}</td>
+          <td class="timestamp">${convertUTCtoGMT3(device.first_seen).toLocaleString()}</td>
+          <td><span class="badge ${linkedBadgeClass}">${linkedText}</span></td>
+        `;
+          mobileRow.innerHTML = `
+          <td>
+            <div class="d-flex gap-1">
+              <div class="d-flex flex-column gap-1">
+                <strong>${device.device_name || '-'}</strong>
+                <small class="text-muted"><span class="fw-bold text-white">ID:</span> ${device.device_id || '-'}</small>
+                <div>
+                  <span class="badge ${statusBadgeClass}">
+                    <span class="status-indicator ${device.is_online ? 'status-online' : 'status-offline'}"></span>
+                    ${statusText}
+                  </span>
+                </div>
+                <div>
+                  <span class="badge ${linkedBadgeClass}"><i data-lucide="user" class="me-1" style="width:20px;height:20px"></i>${linkedText} ${device.user_id ? `(${device.user_id})` : ''}</span>
+                </div>
+              </div>
+              <div class="d-flex justify-content-end flex-grow-1 align-items-center">
+              <div>
+                  <div class="vstack align-items-end my-2">
+                    <small>Última conexión</small>
+                    <small class="text-muted">
+                      ${convertUTCtoGMT3(device.last_seen).toLocaleString()}
+                    </small>
+                  </div>
+                  <div class="vstack align-items-end my-2">
+                    <small>Primera detección</small>
+                    <small class="text-muted">
+                      ${convertUTCtoGMT3(device.first_seen).toLocaleString()}
+                    </small>
+                  </div>
+              </div>
+              </div>
+            </div>
+          </td>
+        `;
+
+          tbody.appendChild(row);
+          tbody.appendChild(mobileRow);
+
+          // Create a new row for mobile view
+          lucide.createIcons();
+        }
+      }
+
+      // Set up event listeners for filters
+      filterStatus.addEventListener('change', applyFilters);
+      filterLinked.addEventListener('change', applyFilters);
+      filterSearch.addEventListener('input', applyFilters);
+
+      // Connect to WebSocket
+      const ws = new WebSocket(`ws://${location.host}`); ws.onopen = () => {
+        console.log("[WS] Conectado");
+
+        // Actualizar el indicador de estado de conexión a "Conectado"
+        document.getElementById("connection-status").innerHTML = `        <i data-lucide="check-circle" class="text-success me-5 animate-pulse" style="width:24px;height:24px"></i>
+        <span class="badge badge-success">Conectado</span>
+      `;
+      };
+
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.type === "device_list") {
+          // Store all devices and update stats
+          allDevices = msg.devices;
+          updateStats(allDevices);
+
+          // Apply any active filters
+          applyFilters();
+        }
+      };
+
+      ws.onclose = () => {
+        console.log("[WS] Desconectado");
+
+        // Actualizar el indicador de estado de conexión a "Desconectado"
+        document.getElementById("connection-status").innerHTML = `        <i data-lucide="wifi-off" class="text-danger me-5 animate-pulse" style="width:24px;height:24px"></i>
+        <span class="badge badge-danger">Desconectado</span>
+      `;
+
+        // Mostrar mensaje de desconexión en la tabla
+        tbody.innerHTML = `
+        <tr>
+          <td colspan='7'>
+            <div class="loading-container">
+              <div class="text-center">
+                <div class="d-flex justify-content-center mb-15">                    <i data-lucide="alert-triangle" class="text-danger animate-pulse" style="width:60px;height:60px"></i>
+                </div>
+                <p class="mb-10 text-danger fw-medium">Conexión cerrada</p>
+                <p class="mb-0 text-muted">Intentando reconectar automáticamente...</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+      `;
+
+        // Reset stats
+        totalDevicesEl.textContent = "-";
+        onlineDevicesEl.textContent = "-";
+        linkedDevicesEl.textContent = "-";
+        // Show toast notification for disconnect
+        initStickyAlert({
+          content: "La conexión con el servidor se ha perdido. Intentando reconectar...",
+          title: "Desconectado",
+          className: "alert-danger",
+          timeout: 10000
+        });
+        lucide.createIcons();
+      };
+    </script>
+  </div>
+</body>
+
+</html>

@@ -1,13 +1,16 @@
 #include <Arduino.h>
+#include <ESP8266WiFi.h>
 #include "PpcConnection.h"
 #include "WebServer.h"
 #include "Clock.h"
 #include <WiFiUdp.h>
 #include <Syslog.h>
 #include <Log.h>
-#include "WifiCredentialStorage.h" // Add this include
+#include "WifiCredentialStorage.h"
 #include "DigitalOutput.h"
 #include "AlarmsManager.h"
+#include "MqttClient.h"
+#include "ArduinoJson.h"
 
 // Definición de pines para salidas digitales
 #define RELAY1_PIN D0  // Ejemplo de pin para relay 1
@@ -24,6 +27,12 @@ Log logger("192.168.0.10", 5140, "syslog", "esp8266", 115200);
 
 AlarmsManager& alarmManager = AlarmsManager::getInstance();  // Get the alarm manager instance
 
+MqttClient mqttClient;
+
+// ID único del dispositivo (usar MAC por defecto)
+String deviceId = "";
+String deviceName = "PPC-T1000"; // Cambia esto según necesites
+
 void setup() {
   // Initialize serial and logging
   logger.init();
@@ -33,6 +42,18 @@ void setup() {
   if (!WifiCredentialStorage::init()) {
     logger.log(LOG_ERR, "Failed to initialize WiFi credential storage");
   }
+  
+  // Generar ID único del dispositivo basado en la dirección MAC
+  deviceId = WiFi.macAddress();
+  deviceId.replace(":", ""); // Eliminar los dos puntos para un ID limpio
+  logger.logf(LOG_INFO, "Device ID: %s", deviceId.c_str());
+  
+  //mqttClient.begin("mqtt.powerplantcontrol.com.ar", 8883, &ppcConnection);  // o IP/broker local
+  mqttClient.begin("192.168.0.10", 1883, &ppcConnection);  // o IP/broker local
+  mqttClient.setDeviceInfo(deviceId, deviceName);
+  mqttClient.subscribe((String("ppc/") + deviceId).c_str(), [](String message) {
+    logger.logf(LOG_INFO, "MQTT Message: %s", message.c_str());
+  });
   
   // Try to load saved WiFi credentials
   ppcConnection.startAP();
@@ -74,6 +95,7 @@ void criticalLoop() {
   clock.run(&ppcConnection);
   loopServer();
   alarmManager.alarmLoop();
+  mqttClient.loop();
 }
 
 void safeLoop() {

@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from "../components/FontAwesomeIcon";
 import IconButton from "../components/IconButton";
 import ThemeSwitchButtons from "../components/ThemeSwitchButtons";
-import { useState, useRef, useEffect } from 'preact/hooks';
+import { useRef, useEffect } from 'preact/hooks';
 
 const MENU = [
     { name: 'Dashboard', link: '/' },
@@ -10,14 +10,14 @@ const MENU = [
 ];
 
 const Navbar = () => {
-    const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+    //const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
     const profileMenuRef = useRef<HTMLDivElement | null>(null);
     const profileButtonRef = useRef<HTMLButtonElement | null>(null);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node) && profileButtonRef.current && !profileButtonRef.current.contains(event.target as Node)) {
-                setIsProfileMenuOpen(false);
+                //setIsProfileMenuOpen(false);
             }
         };
 
@@ -27,9 +27,11 @@ const Navbar = () => {
         };
     }, []);
 
+    /*
     const toggleProfileMenu = () => {
         setIsProfileMenuOpen(!isProfileMenuOpen);
     };
+    */
 
     return (
         <nav className="gradient-background" >
@@ -62,9 +64,6 @@ const Navbar = () => {
                             </div>
                         </label>
                     </div>
-
-
-
                     <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                         <div className="flex flex-shrink-0 items-center text-white font-bold text-3xl">
                             <img className="h-14 w-14" src="/logo.svg" alt="Logo" />
@@ -83,35 +82,6 @@ const Navbar = () => {
                         <div className='flex items-center gap-2'>
                             <ThemeSwitchButtons/>
                             <IconButton icon="bell" indicator={3}/>
-
-                            <div className="relative ml-8">
-                                <div>
-                                    <button 
-                                        ref={profileButtonRef}
-                                        type="button" 
-                                        className="user-menu-button flex" 
-                                        aria-expanded={isProfileMenuOpen} 
-                                        aria-haspopup="true"
-                                        onClick={toggleProfileMenu}
-                                    >
-                                        <FontAwesomeIcon icon="user" className="text-white" />
-                                    </button>
-                                </div>
-                                <div 
-                                    ref={profileMenuRef}
-                                    className={`menu-profile transition ease-in duration-300 absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none ${isProfileMenuOpen ? 'block' : 'hidden'}`}
-                                    role="menu" 
-                                    aria-orientation="vertical" 
-                                    aria-labelledby="user-menu-button"
-                                >
-                                    <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" tabIndex={-1}
-                                        id="user-menu-item-0">Your Profile</a>
-                                    <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" tabIndex={-1}
-                                        id="user-menu-item-1">Settings</a>
-                                    <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" tabIndex={-1}
-                                        id="user-menu-item-2">Sign out</a>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>

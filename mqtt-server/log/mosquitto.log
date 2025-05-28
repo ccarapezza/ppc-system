@@ -1,0 +1,764 @@
+1747460573: mosquitto version 2.0.21 starting
+1747460573: Config loaded from /mosquitto/config/mosquitto.conf.
+1747460573: Opening ipv4 listen socket on port 1883.
+1747460573: Opening ipv6 listen socket on port 1883.
+1747460573: mosquitto version 2.0.21 running
+1747462374: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747463298: New connection from 172.24.0.1:59520 on port 1883.
+1747463298: New client connected from 172.24.0.1:59520 as mqttjs_8bee3347 (p2, c1, k60).
+1747464175: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747465976: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747467777: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747469578: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747471379: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747473180: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747474981: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747476782: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747478583: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747480384: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747482185: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747483986: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747485787: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747487588: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747489389: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747491190: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747492991: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747494792: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747496593: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747498394: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747500195: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747501996: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747503797: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747505598: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747507399: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747509200: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747511001: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747512802: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747514603: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747516404: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747518205: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747520006: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747521173: New connection from 172.24.0.1:49158 on port 1883.
+1747521173: Client <unknown> disconnected due to protocol error.
+1747521175: New connection from 172.24.0.1:49164 on port 1883.
+1747521175: Client <unknown> disconnected due to protocol error.
+1747521177: New connection from 172.24.0.1:49166 on port 1883.
+1747521177: Client <unknown> disconnected due to protocol error.
+1747521179: New connection from 172.24.0.1:49180 on port 1883.
+1747521179: Client <unknown> disconnected due to protocol error.
+1747521181: New connection from 172.24.0.1:49182 on port 1883.
+1747521181: Client <unknown> disconnected due to protocol error.
+1747521183: New connection from 172.24.0.1:55452 on port 1883.
+1747521183: Client <unknown> disconnected due to protocol error.
+1747521185: New connection from 172.24.0.1:55460 on port 1883.
+1747521185: Client <unknown> disconnected due to protocol error.
+1747521187: New connection from 172.24.0.1:55464 on port 1883.
+1747521187: Client <unknown> disconnected due to protocol error.
+1747521190: New connection from 172.24.0.1:55476 on port 1883.
+1747521190: Client <unknown> disconnected due to protocol error.
+1747521192: New connection from 172.24.0.1:56936 on port 1883.
+1747521192: Client <unknown> disconnected due to protocol error.
+1747521194: New connection from 172.24.0.1:56952 on port 1883.
+1747521194: Client <unknown> disconnected due to protocol error.
+1747521196: New connection from 172.24.0.1:56956 on port 1883.
+1747521196: Client <unknown> disconnected due to protocol error.
+1747521198: New connection from 172.24.0.1:56962 on port 1883.
+1747521198: Client <unknown> disconnected due to protocol error.
+1747521200: New connection from 172.24.0.1:56972 on port 1883.
+1747521200: Client <unknown> disconnected due to protocol error.
+1747521202: New connection from 172.24.0.1:38314 on port 1883.
+1747521202: Client <unknown> disconnected due to protocol error.
+1747521204: New connection from 172.24.0.1:38326 on port 1883.
+1747521204: Client <unknown> disconnected due to protocol error.
+1747521206: New connection from 172.24.0.1:38332 on port 1883.
+1747521206: Client <unknown> disconnected due to protocol error.
+1747521208: New connection from 172.24.0.1:38348 on port 1883.
+1747521208: Client <unknown> disconnected due to protocol error.
+1747521210: New connection from 172.24.0.1:38350 on port 1883.
+1747521210: Client <unknown> disconnected due to protocol error.
+1747521212: New connection from 172.24.0.1:50818 on port 1883.
+1747521212: Client <unknown> disconnected due to protocol error.
+1747521214: New connection from 172.24.0.1:50832 on port 1883.
+1747521214: Client <unknown> disconnected due to protocol error.
+1747521216: New connection from 172.24.0.1:50848 on port 1883.
+1747521216: Client <unknown> disconnected due to protocol error.
+1747521218: New connection from 172.24.0.1:50858 on port 1883.
+1747521218: Client <unknown> disconnected due to protocol error.
+1747521220: New connection from 172.24.0.1:50864 on port 1883.
+1747521221: Client <unknown> disconnected due to protocol error.
+1747521223: New connection from 172.24.0.1:56912 on port 1883.
+1747521223: Client <unknown> disconnected due to protocol error.
+1747521225: New connection from 172.24.0.1:56918 on port 1883.
+1747521225: Client <unknown> disconnected due to protocol error.
+1747521227: New connection from 172.24.0.1:56934 on port 1883.
+1747521227: Client <unknown> disconnected due to protocol error.
+1747521229: New connection from 172.24.0.1:56938 on port 1883.
+1747521229: Client <unknown> disconnected due to protocol error.
+1747521231: New connection from 172.24.0.1:56944 on port 1883.
+1747521231: Client <unknown> disconnected due to protocol error.
+1747521233: New connection from 172.24.0.1:48920 on port 1883.
+1747521233: Client <unknown> disconnected due to protocol error.
+1747521235: New connection from 172.24.0.1:48926 on port 1883.
+1747521235: Client <unknown> disconnected due to protocol error.
+1747521237: New connection from 172.24.0.1:48928 on port 1883.
+1747521237: Client <unknown> disconnected due to protocol error.
+1747521239: New connection from 172.24.0.1:48934 on port 1883.
+1747521239: Client <unknown> disconnected due to protocol error.
+1747521241: New connection from 172.24.0.1:48950 on port 1883.
+1747521241: Client <unknown> disconnected due to protocol error.
+1747521243: New connection from 172.24.0.1:44058 on port 1883.
+1747521243: Client <unknown> disconnected due to protocol error.
+1747521245: New connection from 172.24.0.1:44068 on port 1883.
+1747521245: Client <unknown> disconnected due to protocol error.
+1747521247: New connection from 172.24.0.1:44082 on port 1883.
+1747521247: Client <unknown> disconnected due to protocol error.
+1747521249: New connection from 172.24.0.1:44094 on port 1883.
+1747521249: Client <unknown> disconnected due to protocol error.
+1747521251: New connection from 172.24.0.1:44096 on port 1883.
+1747521252: Client <unknown> disconnected due to protocol error.
+1747521254: New connection from 172.24.0.1:41626 on port 1883.
+1747521254: Client <unknown> disconnected due to protocol error.
+1747521256: New connection from 172.24.0.1:41638 on port 1883.
+1747521256: Client <unknown> disconnected due to protocol error.
+1747521258: New connection from 172.24.0.1:41640 on port 1883.
+1747521258: Client <unknown> disconnected due to protocol error.
+1747521260: New connection from 172.24.0.1:41648 on port 1883.
+1747521260: Client <unknown> disconnected due to protocol error.
+1747521262: New connection from 172.24.0.1:59528 on port 1883.
+1747521262: Client <unknown> disconnected due to protocol error.
+1747521264: New connection from 172.24.0.1:59530 on port 1883.
+1747521264: Client <unknown> disconnected due to protocol error.
+1747521266: New connection from 172.24.0.1:59546 on port 1883.
+1747521266: Client <unknown> disconnected due to protocol error.
+1747521268: New connection from 172.24.0.1:59556 on port 1883.
+1747521268: Client <unknown> disconnected due to protocol error.
+1747521270: New connection from 172.24.0.1:59568 on port 1883.
+1747521270: Client <unknown> disconnected due to protocol error.
+1747521272: New connection from 172.24.0.1:56866 on port 1883.
+1747521272: Client <unknown> disconnected due to protocol error.
+1747521274: New connection from 172.24.0.1:56880 on port 1883.
+1747521274: Client <unknown> disconnected due to protocol error.
+1747521276: New connection from 172.24.0.1:56894 on port 1883.
+1747521276: Client <unknown> disconnected due to protocol error.
+1747521278: New connection from 172.24.0.1:56906 on port 1883.
+1747521278: Client <unknown> disconnected due to protocol error.
+1747521280: New connection from 172.24.0.1:56922 on port 1883.
+1747521280: Client <unknown> disconnected due to protocol error.
+1747521282: New connection from 172.24.0.1:36284 on port 1883.
+1747521283: Client <unknown> disconnected due to protocol error.
+1747521285: New connection from 172.24.0.1:36288 on port 1883.
+1747521285: Client <unknown> disconnected due to protocol error.
+1747521287: New connection from 172.24.0.1:36290 on port 1883.
+1747521287: Client <unknown> disconnected due to protocol error.
+1747521289: New connection from 172.24.0.1:36300 on port 1883.
+1747521289: Client <unknown> disconnected due to protocol error.
+1747521291: New connection from 172.24.0.1:36304 on port 1883.
+1747521291: Client <unknown> disconnected due to protocol error.
+1747521293: New connection from 172.24.0.1:40752 on port 1883.
+1747521293: Client <unknown> disconnected due to protocol error.
+1747521295: New connection from 172.24.0.1:40758 on port 1883.
+1747521295: Client <unknown> disconnected due to protocol error.
+1747521297: New connection from 172.24.0.1:40760 on port 1883.
+1747521297: Client <unknown> disconnected due to protocol error.
+1747521299: New connection from 172.24.0.1:40766 on port 1883.
+1747521299: Client <unknown> disconnected due to protocol error.
+1747521301: New connection from 172.24.0.1:40778 on port 1883.
+1747521301: Client <unknown> disconnected due to protocol error.
+1747521303: New connection from 172.24.0.1:38108 on port 1883.
+1747521303: Client <unknown> disconnected due to protocol error.
+1747521305: New connection from 172.24.0.1:38120 on port 1883.
+1747521305: Client <unknown> disconnected due to protocol error.
+1747521307: New connection from 172.24.0.1:38124 on port 1883.
+1747521307: Client <unknown> disconnected due to protocol error.
+1747521309: New connection from 172.24.0.1:38126 on port 1883.
+1747521309: Client <unknown> disconnected due to protocol error.
+1747521311: New connection from 172.24.0.1:38128 on port 1883.
+1747521311: Client <unknown> disconnected due to protocol error.
+1747521313: New connection from 172.24.0.1:57916 on port 1883.
+1747521314: Client <unknown> disconnected due to protocol error.
+1747521316: New connection from 172.24.0.1:57932 on port 1883.
+1747521316: Client <unknown> disconnected due to protocol error.
+1747521318: New connection from 172.24.0.1:57938 on port 1883.
+1747521318: Client <unknown> disconnected due to protocol error.
+1747521320: New connection from 172.24.0.1:57944 on port 1883.
+1747521320: Client <unknown> disconnected due to protocol error.
+1747521322: New connection from 172.24.0.1:58644 on port 1883.
+1747521322: Client <unknown> disconnected due to protocol error.
+1747521324: New connection from 172.24.0.1:58646 on port 1883.
+1747521324: Client <unknown> disconnected due to protocol error.
+1747521326: New connection from 172.24.0.1:58652 on port 1883.
+1747521326: Client <unknown> disconnected due to protocol error.
+1747521328: New connection from 172.24.0.1:58664 on port 1883.
+1747521328: Client <unknown> disconnected due to protocol error.
+1747521330: New connection from 172.24.0.1:58676 on port 1883.
+1747521330: Client <unknown> disconnected due to protocol error.
+1747521332: New connection from 172.24.0.1:50586 on port 1883.
+1747521332: Client <unknown> disconnected due to protocol error.
+1747521334: New connection from 172.24.0.1:50600 on port 1883.
+1747521334: Client <unknown> disconnected due to protocol error.
+1747521336: New connection from 172.24.0.1:50610 on port 1883.
+1747521336: Client <unknown> disconnected due to protocol error.
+1747521338: New connection from 172.24.0.1:50618 on port 1883.
+1747521338: Client <unknown> disconnected due to protocol error.
+1747521340: New connection from 172.24.0.1:50626 on port 1883.
+1747521340: Client <unknown> disconnected due to protocol error.
+1747521342: New connection from 172.24.0.1:52466 on port 1883.
+1747521342: Client <unknown> disconnected due to protocol error.
+1747521344: New connection from 172.24.0.1:52472 on port 1883.
+1747521344: Client <unknown> disconnected due to protocol error.
+1747521347: New connection from 172.24.0.1:52484 on port 1883.
+1747521347: Client <unknown> disconnected due to protocol error.
+1747521349: New connection from 172.24.0.1:52496 on port 1883.
+1747521349: Client <unknown> disconnected due to protocol error.
+1747521351: New connection from 172.24.0.1:52504 on port 1883.
+1747521351: Client <unknown> disconnected due to protocol error.
+1747521353: New connection from 172.24.0.1:49078 on port 1883.
+1747521353: Client <unknown> disconnected due to protocol error.
+1747521355: New connection from 172.24.0.1:49090 on port 1883.
+1747521355: Client <unknown> disconnected due to protocol error.
+1747521357: New connection from 172.24.0.1:49092 on port 1883.
+1747521357: Client <unknown> disconnected due to protocol error.
+1747521359: New connection from 172.24.0.1:49094 on port 1883.
+1747521359: Client <unknown> disconnected due to protocol error.
+1747521361: New connection from 172.24.0.1:49104 on port 1883.
+1747521361: Client <unknown> disconnected due to protocol error.
+1747521363: New connection from 172.24.0.1:33468 on port 1883.
+1747521363: Client <unknown> disconnected due to protocol error.
+1747521365: New connection from 172.24.0.1:33476 on port 1883.
+1747521365: Client <unknown> disconnected due to protocol error.
+1747521367: New connection from 172.24.0.1:33492 on port 1883.
+1747521367: Client <unknown> disconnected due to protocol error.
+1747521369: New connection from 172.24.0.1:33502 on port 1883.
+1747521369: Client <unknown> disconnected due to protocol error.
+1747521807: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747523299: New connection from 172.24.0.1:42982 on port 1883.
+1747523299: Client <unknown> disconnected due to protocol error.
+1747523304: New connection from 172.24.0.1:34372 on port 1883.
+1747523304: Client <unknown> disconnected due to protocol error.
+1747523309: New connection from 172.24.0.1:34376 on port 1883.
+1747523309: Client <unknown> disconnected due to protocol error.
+1747523314: New connection from 172.24.0.1:49890 on port 1883.
+1747523314: Client <unknown> disconnected due to protocol error.
+1747523319: New connection from 172.24.0.1:49892 on port 1883.
+1747523319: Client <unknown> disconnected due to protocol error.
+1747523324: New connection from 172.24.0.1:41440 on port 1883.
+1747523324: Client <unknown> disconnected due to protocol error.
+1747523329: New connection from 172.24.0.1:41446 on port 1883.
+1747523329: Client <unknown> disconnected due to protocol error.
+1747523334: New connection from 172.24.0.1:42800 on port 1883.
+1747523334: Client <unknown> disconnected due to protocol error.
+1747523339: New connection from 172.24.0.1:42804 on port 1883.
+1747523339: Client <unknown> disconnected due to protocol error.
+1747523344: New connection from 172.24.0.1:39800 on port 1883.
+1747523344: Client <unknown> disconnected due to protocol error.
+1747523349: New connection from 172.24.0.1:39806 on port 1883.
+1747523349: Client <unknown> disconnected due to protocol error.
+1747523354: New connection from 172.24.0.1:45502 on port 1883.
+1747523354: Client <unknown> disconnected due to protocol error.
+1747523359: New connection from 172.24.0.1:45504 on port 1883.
+1747523359: Client mqttjs_8bee3347 closed its connection.
+1747523359: Client <unknown> disconnected due to protocol error.
+1747523364: New connection from 172.24.0.1:52306 on port 1883.
+1747523364: Client <unknown> disconnected due to protocol error.
+1747523369: New connection from 172.24.0.1:52310 on port 1883.
+1747523369: Client <unknown> disconnected due to protocol error.
+1747523374: New connection from 172.24.0.1:44536 on port 1883.
+1747523374: Client <unknown> disconnected due to protocol error.
+1747523379: New connection from 172.24.0.1:44540 on port 1883.
+1747523379: Client <unknown> disconnected due to protocol error.
+1747523384: New connection from 172.24.0.1:52826 on port 1883.
+1747523384: Client <unknown> disconnected due to protocol error.
+1747523389: New connection from 172.24.0.1:52832 on port 1883.
+1747523389: Client <unknown> disconnected due to protocol error.
+1747523394: New connection from 172.24.0.1:44114 on port 1883.
+1747523394: Client <unknown> disconnected due to protocol error.
+1747523399: New connection from 172.24.0.1:44122 on port 1883.
+1747523399: Client <unknown> disconnected due to protocol error.
+1747523404: New connection from 172.24.0.1:46890 on port 1883.
+1747523404: Client <unknown> disconnected due to protocol error.
+1747523409: New connection from 172.24.0.1:46906 on port 1883.
+1747523409: Client <unknown> disconnected due to protocol error.
+1747523414: New connection from 172.24.0.1:33094 on port 1883.
+1747523414: Client <unknown> disconnected due to protocol error.
+1747523419: New connection from 172.24.0.1:33104 on port 1883.
+1747523419: Client <unknown> disconnected due to protocol error.
+1747523424: New connection from 172.24.0.1:39668 on port 1883.
+1747523424: Client <unknown> disconnected due to protocol error.
+1747523429: New connection from 172.24.0.1:39684 on port 1883.
+1747523429: Client <unknown> disconnected due to protocol error.
+1747523434: New connection from 172.24.0.1:59628 on port 1883.
+1747523434: Client <unknown> disconnected due to protocol error.
+1747523439: New connection from 172.24.0.1:59644 on port 1883.
+1747523439: Client <unknown> disconnected due to protocol error.
+1747523444: New connection from 172.24.0.1:38192 on port 1883.
+1747523444: Client <unknown> disconnected due to protocol error.
+1747523449: New connection from 172.24.0.1:38206 on port 1883.
+1747523449: Client <unknown> disconnected due to protocol error.
+1747523454: New connection from 172.24.0.1:59406 on port 1883.
+1747523454: Client <unknown> disconnected due to protocol error.
+1747523459: New connection from 172.24.0.1:59410 on port 1883.
+1747523459: Client <unknown> disconnected due to protocol error.
+1747523464: New connection from 172.24.0.1:58364 on port 1883.
+1747523464: Client <unknown> disconnected due to protocol error.
+1747523469: New connection from 172.24.0.1:58374 on port 1883.
+1747523469: Client <unknown> disconnected due to protocol error.
+1747523471: New connection from 172.24.0.1:58378 on port 1883.
+1747523471: New client connected from 172.24.0.1:58378 as mqttjs_466c3f4c (p2, c1, k60).
+1747523473: Client mqttjs_466c3f4c closed its connection.
+1747523474: New connection from 172.24.0.1:52846 on port 1883.
+1747523474: Client <unknown> disconnected due to protocol error.
+1747523479: New connection from 172.24.0.1:52852 on port 1883.
+1747523479: Client <unknown> disconnected due to protocol error.
+1747523484: New connection from 172.24.0.1:38648 on port 1883.
+1747523484: Client <unknown> disconnected due to protocol error.
+1747523489: New connection from 172.24.0.1:38658 on port 1883.
+1747523489: Client <unknown> disconnected due to protocol error.
+1747523494: New connection from 172.24.0.1:37614 on port 1883.
+1747523494: Client <unknown> disconnected due to protocol error.
+1747523499: New connection from 172.24.0.1:37618 on port 1883.
+1747523499: Client <unknown> disconnected due to protocol error.
+1747523504: New connection from 172.24.0.1:60208 on port 1883.
+1747523504: Client <unknown> disconnected due to protocol error.
+1747523509: New connection from 172.24.0.1:60224 on port 1883.
+1747523509: Client <unknown> disconnected due to protocol error.
+1747523514: New connection from 172.24.0.1:55736 on port 1883.
+1747523514: Client <unknown> disconnected due to protocol error.
+1747523519: New connection from 172.24.0.1:55744 on port 1883.
+1747523519: Client <unknown> disconnected due to protocol error.
+1747523524: New connection from 172.24.0.1:52408 on port 1883.
+1747523524: Client <unknown> disconnected due to protocol error.
+1747523529: New connection from 172.24.0.1:52424 on port 1883.
+1747523529: Client <unknown> disconnected due to protocol error.
+1747523534: New connection from 172.24.0.1:43114 on port 1883.
+1747523534: Client <unknown> disconnected due to protocol error.
+1747523539: New connection from 172.24.0.1:43118 on port 1883.
+1747523539: Client <unknown> disconnected due to protocol error.
+1747523544: New connection from 172.24.0.1:51514 on port 1883.
+1747523544: Client <unknown> disconnected due to protocol error.
+1747523549: New connection from 172.24.0.1:51526 on port 1883.
+1747523549: Client <unknown> disconnected due to protocol error.
+1747523554: New connection from 172.24.0.1:42232 on port 1883.
+1747523554: Client <unknown> disconnected due to protocol error.
+1747523559: New connection from 172.24.0.1:42246 on port 1883.
+1747523559: Client <unknown> disconnected due to protocol error.
+1747523564: New connection from 172.24.0.1:37058 on port 1883.
+1747523564: Client <unknown> disconnected due to protocol error.
+1747523569: New connection from 172.24.0.1:37070 on port 1883.
+1747523569: Client <unknown> disconnected due to protocol error.
+1747523574: New connection from 172.24.0.1:39102 on port 1883.
+1747523574: Client <unknown> disconnected due to protocol error.
+1747523579: New connection from 172.24.0.1:39116 on port 1883.
+1747523579: Client <unknown> disconnected due to protocol error.
+1747523584: New connection from 172.24.0.1:36306 on port 1883.
+1747523584: Client <unknown> disconnected due to protocol error.
+1747523589: New connection from 172.24.0.1:36308 on port 1883.
+1747523589: Client <unknown> disconnected due to protocol error.
+1747523594: New connection from 172.24.0.1:41002 on port 1883.
+1747523594: Client <unknown> disconnected due to protocol error.
+1747523599: New connection from 172.24.0.1:41012 on port 1883.
+1747523599: Client <unknown> disconnected due to protocol error.
+1747523604: New connection from 172.24.0.1:52956 on port 1883.
+1747523604: Client <unknown> disconnected due to protocol error.
+1747523608: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747523609: New connection from 172.24.0.1:52966 on port 1883.
+1747523609: Client <unknown> disconnected due to protocol error.
+1747523614: New connection from 172.24.0.1:42842 on port 1883.
+1747523614: Client <unknown> disconnected due to protocol error.
+1747523619: New connection from 172.24.0.1:42852 on port 1883.
+1747523619: Client <unknown> disconnected due to protocol error.
+1747523624: New connection from 172.24.0.1:51662 on port 1883.
+1747523624: Client <unknown> disconnected due to protocol error.
+1747523629: New connection from 172.24.0.1:51668 on port 1883.
+1747523629: Client <unknown> disconnected due to protocol error.
+1747523634: New connection from 172.24.0.1:51934 on port 1883.
+1747523634: Client <unknown> disconnected due to protocol error.
+1747523639: New connection from 172.24.0.1:51940 on port 1883.
+1747523639: Client <unknown> disconnected due to protocol error.
+1747523644: New connection from 172.24.0.1:39454 on port 1883.
+1747523644: Client <unknown> disconnected due to protocol error.
+1747523649: New connection from 172.24.0.1:39468 on port 1883.
+1747523649: Client <unknown> disconnected due to protocol error.
+1747523654: New connection from 172.24.0.1:40230 on port 1883.
+1747523654: Client <unknown> disconnected due to protocol error.
+1747523659: New connection from 172.24.0.1:40246 on port 1883.
+1747523659: Client <unknown> disconnected due to protocol error.
+1747523664: New connection from 172.24.0.1:58288 on port 1883.
+1747523664: Client <unknown> disconnected due to protocol error.
+1747523669: New connection from 172.24.0.1:58302 on port 1883.
+1747523669: Client <unknown> disconnected due to protocol error.
+1747523674: New connection from 172.24.0.1:37720 on port 1883.
+1747523674: Client <unknown> disconnected due to protocol error.
+1747523679: New connection from 172.24.0.1:37728 on port 1883.
+1747523679: Client <unknown> disconnected due to protocol error.
+1747523684: New connection from 172.24.0.1:52936 on port 1883.
+1747523684: Client <unknown> disconnected due to protocol error.
+1747523689: New connection from 172.24.0.1:52946 on port 1883.
+1747523689: Client <unknown> disconnected due to protocol error.
+1747523694: New connection from 172.24.0.1:45910 on port 1883.
+1747523694: Client <unknown> disconnected due to protocol error.
+1747523699: New connection from 172.24.0.1:45920 on port 1883.
+1747523699: Client <unknown> disconnected due to protocol error.
+1747523704: New connection from 172.24.0.1:46868 on port 1883.
+1747523704: Client <unknown> disconnected due to protocol error.
+1747523709: New connection from 172.24.0.1:46872 on port 1883.
+1747523709: Client <unknown> disconnected due to protocol error.
+1747523714: New connection from 172.24.0.1:51116 on port 1883.
+1747523714: Client <unknown> disconnected due to protocol error.
+1747523719: New connection from 172.24.0.1:51128 on port 1883.
+1747523719: Client <unknown> disconnected due to protocol error.
+1747523724: New connection from 172.24.0.1:54838 on port 1883.
+1747523724: Client <unknown> disconnected due to protocol error.
+1747523729: New connection from 172.24.0.1:54848 on port 1883.
+1747523729: Client <unknown> disconnected due to protocol error.
+1747523734: New connection from 172.24.0.1:44408 on port 1883.
+1747523734: Client <unknown> disconnected due to protocol error.
+1747523739: New connection from 172.24.0.1:44422 on port 1883.
+1747523739: Client <unknown> disconnected due to protocol error.
+1747523744: New connection from 172.24.0.1:54816 on port 1883.
+1747523744: Client <unknown> disconnected due to protocol error.
+1747523749: New connection from 172.24.0.1:54830 on port 1883.
+1747523749: Client <unknown> disconnected due to protocol error.
+1747523754: New connection from 172.24.0.1:40572 on port 1883.
+1747523754: Client <unknown> disconnected due to protocol error.
+1747523759: New connection from 172.24.0.1:40586 on port 1883.
+1747523759: Client <unknown> disconnected due to protocol error.
+1747523764: New connection from 172.24.0.1:41024 on port 1883.
+1747523764: Client <unknown> disconnected due to protocol error.
+1747523769: New connection from 172.24.0.1:41032 on port 1883.
+1747523769: Client <unknown> disconnected due to protocol error.
+1747523774: New connection from 172.24.0.1:40276 on port 1883.
+1747523774: Client <unknown> disconnected due to protocol error.
+1747523779: New connection from 172.24.0.1:40288 on port 1883.
+1747523779: Client <unknown> disconnected due to protocol error.
+1747523784: New connection from 172.24.0.1:47946 on port 1883.
+1747523784: Client <unknown> disconnected due to protocol error.
+1747523789: New connection from 172.24.0.1:47952 on port 1883.
+1747523789: Client <unknown> disconnected due to protocol error.
+1747523794: New connection from 172.24.0.1:33916 on port 1883.
+1747523794: Client <unknown> disconnected due to protocol error.
+1747523799: New connection from 172.24.0.1:33920 on port 1883.
+1747523799: Client <unknown> disconnected due to protocol error.
+1747523804: New connection from 172.24.0.1:38026 on port 1883.
+1747523804: Client <unknown> disconnected due to protocol error.
+1747523809: New connection from 172.24.0.1:38034 on port 1883.
+1747523809: Client <unknown> disconnected due to protocol error.
+1747523814: New connection from 172.24.0.1:43154 on port 1883.
+1747523814: Client <unknown> disconnected due to protocol error.
+1747523819: New connection from 172.24.0.1:43158 on port 1883.
+1747523819: Client <unknown> disconnected due to protocol error.
+1747523824: New connection from 172.24.0.1:57876 on port 1883.
+1747523824: Client <unknown> disconnected due to protocol error.
+1747523829: New connection from 172.24.0.1:57888 on port 1883.
+1747523829: Client <unknown> disconnected due to protocol error.
+1747523834: New connection from 172.24.0.1:40558 on port 1883.
+1747523834: Client <unknown> disconnected due to protocol error.
+1747523839: New connection from 172.24.0.1:40572 on port 1883.
+1747523839: Client <unknown> disconnected due to protocol error.
+1747523844: New connection from 172.24.0.1:52720 on port 1883.
+1747523844: Client <unknown> disconnected due to protocol error.
+1747523849: New connection from 172.24.0.1:52728 on port 1883.
+1747523849: Client <unknown> disconnected due to protocol error.
+1747523854: New connection from 172.24.0.1:44674 on port 1883.
+1747523854: Client <unknown> disconnected due to protocol error.
+1747523859: New connection from 172.24.0.1:44678 on port 1883.
+1747523859: Client <unknown> disconnected due to protocol error.
+1747523864: New connection from 172.24.0.1:57064 on port 1883.
+1747523864: Client <unknown> disconnected due to protocol error.
+1747523869: New connection from 172.24.0.1:57078 on port 1883.
+1747523869: Client <unknown> disconnected due to protocol error.
+1747523874: New connection from 172.24.0.1:47224 on port 1883.
+1747523874: Client <unknown> disconnected due to protocol error.
+1747523879: New connection from 172.24.0.1:47226 on port 1883.
+1747523879: Client <unknown> disconnected due to protocol error.
+1747523884: New connection from 172.24.0.1:49860 on port 1883.
+1747523884: Client <unknown> disconnected due to protocol error.
+1747523889: New connection from 172.24.0.1:49872 on port 1883.
+1747523889: Client <unknown> disconnected due to protocol error.
+1747523894: New connection from 172.24.0.1:37556 on port 1883.
+1747523894: Client <unknown> disconnected due to protocol error.
+1747523899: New connection from 172.24.0.1:37560 on port 1883.
+1747523899: Client <unknown> disconnected due to protocol error.
+1747523904: New connection from 172.24.0.1:45078 on port 1883.
+1747523904: Client <unknown> disconnected due to protocol error.
+1747523909: New connection from 172.24.0.1:45088 on port 1883.
+1747523909: Client <unknown> disconnected due to protocol error.
+1747523914: New connection from 172.24.0.1:47470 on port 1883.
+1747523914: Client <unknown> disconnected due to protocol error.
+1747523919: New connection from 172.24.0.1:47480 on port 1883.
+1747523919: Client <unknown> disconnected due to protocol error.
+1747523924: New connection from 172.24.0.1:34200 on port 1883.
+1747523924: Client <unknown> disconnected due to protocol error.
+1747523929: New connection from 172.24.0.1:34208 on port 1883.
+1747523929: Client <unknown> disconnected due to protocol error.
+1747523934: New connection from 172.24.0.1:52002 on port 1883.
+1747523934: Client <unknown> disconnected due to protocol error.
+1747523939: New connection from 172.24.0.1:52004 on port 1883.
+1747523939: Client <unknown> disconnected due to protocol error.
+1747523944: New connection from 172.24.0.1:50748 on port 1883.
+1747523944: Client <unknown> disconnected due to protocol error.
+1747523949: New connection from 172.24.0.1:50764 on port 1883.
+1747523949: Client <unknown> disconnected due to protocol error.
+1747523954: New connection from 172.24.0.1:52212 on port 1883.
+1747523954: Client <unknown> disconnected due to protocol error.
+1747523959: New connection from 172.24.0.1:52224 on port 1883.
+1747523959: Client <unknown> disconnected due to protocol error.
+1747523964: New connection from 172.24.0.1:37734 on port 1883.
+1747523964: Client <unknown> disconnected due to protocol error.
+1747523969: New connection from 172.24.0.1:37742 on port 1883.
+1747523969: Client <unknown> disconnected due to protocol error.
+1747523974: New connection from 172.24.0.1:58180 on port 1883.
+1747523974: Client <unknown> disconnected due to protocol error.
+1747523979: New connection from 172.24.0.1:58182 on port 1883.
+1747523979: Client <unknown> disconnected due to protocol error.
+1747523984: New connection from 172.24.0.1:57528 on port 1883.
+1747523984: Client <unknown> disconnected due to protocol error.
+1747523989: New connection from 172.24.0.1:57532 on port 1883.
+1747523989: Client <unknown> disconnected due to protocol error.
+1747523994: New connection from 172.24.0.1:52282 on port 1883.
+1747523994: Client <unknown> disconnected due to protocol error.
+1747523999: New connection from 172.24.0.1:52296 on port 1883.
+1747523999: Client <unknown> disconnected due to protocol error.
+1747524004: New connection from 172.24.0.1:36944 on port 1883.
+1747524004: Client <unknown> disconnected due to protocol error.
+1747524009: New connection from 172.24.0.1:36948 on port 1883.
+1747524009: Client <unknown> disconnected due to protocol error.
+1747524014: New connection from 172.24.0.1:53074 on port 1883.
+1747524014: Client <unknown> disconnected due to protocol error.
+1747524019: New connection from 172.24.0.1:53088 on port 1883.
+1747524019: Client <unknown> disconnected due to protocol error.
+1747524024: New connection from 172.24.0.1:38142 on port 1883.
+1747524024: Client <unknown> disconnected due to protocol error.
+1747524029: New connection from 172.24.0.1:38156 on port 1883.
+1747524029: Client <unknown> disconnected due to protocol error.
+1747524034: New connection from 172.24.0.1:35374 on port 1883.
+1747524034: Client <unknown> disconnected due to protocol error.
+1747524039: New connection from 172.24.0.1:35378 on port 1883.
+1747524039: Client <unknown> disconnected due to protocol error.
+1747524044: New connection from 172.24.0.1:38366 on port 1883.
+1747524044: Client <unknown> disconnected due to protocol error.
+1747524049: New connection from 172.24.0.1:38368 on port 1883.
+1747524049: Client <unknown> disconnected due to protocol error.
+1747524054: New connection from 172.24.0.1:52308 on port 1883.
+1747524054: Client <unknown> disconnected due to protocol error.
+1747524059: New connection from 172.24.0.1:52322 on port 1883.
+1747524059: Client <unknown> disconnected due to protocol error.
+1747524064: New connection from 172.24.0.1:46050 on port 1883.
+1747524064: Client <unknown> disconnected due to protocol error.
+1747524069: New connection from 172.24.0.1:46052 on port 1883.
+1747524069: Client <unknown> disconnected due to protocol error.
+1747524074: New connection from 172.24.0.1:55014 on port 1883.
+1747524074: Client <unknown> disconnected due to protocol error.
+1747524079: New connection from 172.24.0.1:55026 on port 1883.
+1747524079: Client <unknown> disconnected due to protocol error.
+1747524084: New connection from 172.24.0.1:33258 on port 1883.
+1747524084: Client <unknown> disconnected due to protocol error.
+1747524089: New connection from 172.24.0.1:33260 on port 1883.
+1747524089: Client <unknown> disconnected due to protocol error.
+1747524094: New connection from 172.24.0.1:40534 on port 1883.
+1747524094: Client <unknown> disconnected due to protocol error.
+1747524099: New connection from 172.24.0.1:40540 on port 1883.
+1747524099: Client <unknown> disconnected due to protocol error.
+1747524104: New connection from 172.24.0.1:36952 on port 1883.
+1747524104: Client <unknown> disconnected due to protocol error.
+1747524109: New connection from 172.24.0.1:36960 on port 1883.
+1747524109: Client <unknown> disconnected due to protocol error.
+1747524114: New connection from 172.24.0.1:53424 on port 1883.
+1747524114: Client <unknown> disconnected due to protocol error.
+1747524119: New connection from 172.24.0.1:53434 on port 1883.
+1747524119: Client <unknown> disconnected due to protocol error.
+1747524124: New connection from 172.24.0.1:56752 on port 1883.
+1747524124: Client <unknown> disconnected due to protocol error.
+1747524129: New connection from 172.24.0.1:56768 on port 1883.
+1747524129: Client <unknown> disconnected due to protocol error.
+1747524134: New connection from 172.24.0.1:48482 on port 1883.
+1747524134: Client <unknown> disconnected due to protocol error.
+1747524139: New connection from 172.24.0.1:48484 on port 1883.
+1747524139: Client <unknown> disconnected due to protocol error.
+1747524144: New connection from 172.24.0.1:32944 on port 1883.
+1747524144: Client <unknown> disconnected due to protocol error.
+1747524149: New connection from 172.24.0.1:32948 on port 1883.
+1747524149: Client <unknown> disconnected due to protocol error.
+1747524154: New connection from 172.24.0.1:45830 on port 1883.
+1747524154: Client <unknown> disconnected due to protocol error.
+1747524159: New connection from 172.24.0.1:45846 on port 1883.
+1747524159: Client <unknown> disconnected due to protocol error.
+1747524164: New connection from 172.24.0.1:37974 on port 1883.
+1747524164: Client <unknown> disconnected due to protocol error.
+1747524169: New connection from 172.24.0.1:37982 on port 1883.
+1747524169: Client <unknown> disconnected due to protocol error.
+1747524174: New connection from 172.24.0.1:58528 on port 1883.
+1747524174: Client <unknown> disconnected due to protocol error.
+1747524179: New connection from 172.24.0.1:58538 on port 1883.
+1747524179: Client <unknown> disconnected due to protocol error.
+1747524184: New connection from 172.24.0.1:56696 on port 1883.
+1747524184: Client <unknown> disconnected due to protocol error.
+1747524189: New connection from 172.24.0.1:56704 on port 1883.
+1747524189: Client <unknown> disconnected due to protocol error.
+1747524194: New connection from 172.24.0.1:37562 on port 1883.
+1747524194: Client <unknown> disconnected due to protocol error.
+1747524199: New connection from 172.24.0.1:37578 on port 1883.
+1747524199: Client <unknown> disconnected due to protocol error.
+1747524204: New connection from 172.24.0.1:48016 on port 1883.
+1747524204: Client <unknown> disconnected due to protocol error.
+1747524209: New connection from 172.24.0.1:48030 on port 1883.
+1747524209: Client <unknown> disconnected due to protocol error.
+1747524214: New connection from 172.24.0.1:42322 on port 1883.
+1747524214: Client <unknown> disconnected due to protocol error.
+1747524219: New connection from 172.24.0.1:42336 on port 1883.
+1747524219: Client <unknown> disconnected due to protocol error.
+1747524224: New connection from 172.24.0.1:35332 on port 1883.
+1747524224: Client <unknown> disconnected due to protocol error.
+1747524229: New connection from 172.24.0.1:35342 on port 1883.
+1747524229: Client <unknown> disconnected due to protocol error.
+1747524234: New connection from 172.24.0.1:56240 on port 1883.
+1747524234: Client <unknown> disconnected due to protocol error.
+1747524239: New connection from 172.24.0.1:56254 on port 1883.
+1747524239: Client <unknown> disconnected due to protocol error.
+1747524244: New connection from 172.24.0.1:39596 on port 1883.
+1747524244: Client <unknown> disconnected due to protocol error.
+1747524249: New connection from 172.24.0.1:39610 on port 1883.
+1747524249: Client <unknown> disconnected due to protocol error.
+1747524254: New connection from 172.24.0.1:41178 on port 1883.
+1747524254: Client <unknown> disconnected due to protocol error.
+1747524259: New connection from 172.24.0.1:41180 on port 1883.
+1747524259: Client <unknown> disconnected due to protocol error.
+1747524264: New connection from 172.24.0.1:49866 on port 1883.
+1747524264: Client <unknown> disconnected due to protocol error.
+1747524269: New connection from 172.24.0.1:49874 on port 1883.
+1747524269: Client <unknown> disconnected due to protocol error.
+1747524274: New connection from 172.24.0.1:36940 on port 1883.
+1747524274: Client <unknown> disconnected due to protocol error.
+1747524279: New connection from 172.24.0.1:36946 on port 1883.
+1747524279: Client <unknown> disconnected due to protocol error.
+1747524284: New connection from 172.24.0.1:59548 on port 1883.
+1747524284: Client <unknown> disconnected due to protocol error.
+1747524289: New connection from 172.24.0.1:59564 on port 1883.
+1747524289: Client <unknown> disconnected due to protocol error.
+1747524294: New connection from 172.24.0.1:59776 on port 1883.
+1747524294: Client <unknown> disconnected due to protocol error.
+1747524299: New connection from 172.24.0.1:59782 on port 1883.
+1747524299: Client <unknown> disconnected due to protocol error.
+1747524304: New connection from 172.24.0.1:40458 on port 1883.
+1747524304: Client <unknown> disconnected due to protocol error.
+1747524309: New connection from 172.24.0.1:40468 on port 1883.
+1747524309: Client <unknown> disconnected due to protocol error.
+1747524314: New connection from 172.24.0.1:56724 on port 1883.
+1747524314: Client <unknown> disconnected due to protocol error.
+1747524319: New connection from 172.24.0.1:56726 on port 1883.
+1747524319: Client <unknown> disconnected due to protocol error.
+1747524324: New connection from 172.24.0.1:57792 on port 1883.
+1747524324: Client <unknown> disconnected due to protocol error.
+1747524329: New connection from 172.24.0.1:57798 on port 1883.
+1747524329: Client <unknown> disconnected due to protocol error.
+1747524334: New connection from 172.24.0.1:44622 on port 1883.
+1747524334: Client <unknown> disconnected due to protocol error.
+1747524339: New connection from 172.24.0.1:44638 on port 1883.
+1747524339: Client <unknown> disconnected due to protocol error.
+1747524344: New connection from 172.24.0.1:53634 on port 1883.
+1747524344: Client <unknown> disconnected due to protocol error.
+1747524349: New connection from 172.24.0.1:53636 on port 1883.
+1747524349: Client <unknown> disconnected due to protocol error.
+1747524354: New connection from 172.24.0.1:56920 on port 1883.
+1747524354: Client <unknown> disconnected due to protocol error.
+1747524359: New connection from 172.24.0.1:56934 on port 1883.
+1747524359: Client <unknown> disconnected due to protocol error.
+1747524364: New connection from 172.24.0.1:39234 on port 1883.
+1747524364: Client <unknown> disconnected due to protocol error.
+1747524369: New connection from 172.24.0.1:39238 on port 1883.
+1747524369: Client <unknown> disconnected due to protocol error.
+1747524374: New connection from 172.24.0.1:59816 on port 1883.
+1747524374: Client <unknown> disconnected due to protocol error.
+1747524379: New connection from 172.24.0.1:59820 on port 1883.
+1747524379: Client <unknown> disconnected due to protocol error.
+1747524384: New connection from 172.24.0.1:60084 on port 1883.
+1747524384: Client <unknown> disconnected due to protocol error.
+1747524389: New connection from 172.24.0.1:60100 on port 1883.
+1747524389: Client <unknown> disconnected due to protocol error.
+1747524394: New connection from 172.24.0.1:45580 on port 1883.
+1747524394: Client <unknown> disconnected due to protocol error.
+1747524399: New connection from 172.24.0.1:45594 on port 1883.
+1747524399: Client <unknown> disconnected due to protocol error.
+1747524404: New connection from 172.24.0.1:34838 on port 1883.
+1747524404: Client <unknown> disconnected due to protocol error.
+1747524409: New connection from 172.24.0.1:34842 on port 1883.
+1747524409: Client <unknown> disconnected due to protocol error.
+1747524414: New connection from 172.24.0.1:55524 on port 1883.
+1747524414: Client <unknown> disconnected due to protocol error.
+1747524419: New connection from 172.24.0.1:55538 on port 1883.
+1747524419: Client <unknown> disconnected due to protocol error.
+1747524424: New connection from 172.24.0.1:43214 on port 1883.
+1747524424: Client <unknown> disconnected due to protocol error.
+1747524429: New connection from 172.24.0.1:43222 on port 1883.
+1747524429: Client <unknown> disconnected due to protocol error.
+1747524434: New connection from 172.24.0.1:59226 on port 1883.
+1747524434: Client <unknown> disconnected due to protocol error.
+1747524440: New connection from 172.24.0.1:59230 on port 1883.
+1747524440: Client <unknown> disconnected due to protocol error.
+1747524445: New connection from 172.24.0.1:35706 on port 1883.
+1747524445: Client <unknown> disconnected due to protocol error.
+1747524461: New connection from 172.24.0.1:51424 on port 1883.
+1747524461: New client connected from 172.24.0.1:51424 as PPC-4C75250B0987 (p2, c1, k15).
+1747525409: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747527210: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747527454: Client PPC-4C75250B0987 has exceeded timeout, disconnecting.
+1747529011: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747530812: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747532613: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747534414: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747536215: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747538016: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747539817: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747541618: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747543419: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747545220: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747547021: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747548822: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747550623: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747552424: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747554225: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747556026: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747556802: New connection from 172.24.0.1:50412 on port 1883.
+1747556802: New client connected from 172.24.0.1:50412 as mqttjs_274ba550 (p2, c1, k60).
+1747556928: New connection from 172.24.0.1:37726 on port 1883.
+1747556928: New client connected from 172.24.0.1:37726 as PPC-4C75250B0987 (p2, c1, k15).
+1747556951: Client PPC-4C75250B0987 has exceeded timeout, disconnecting.
+1747556963: New connection from 172.24.0.1:48952 on port 1883.
+1747556963: New client connected from 172.24.0.1:48952 as PPC-4C75250B0987 (p2, c1, k15).
+1747556999: New connection from 172.24.0.1:60636 on port 1883.
+1747556999: Client PPC-4C75250B0987 already connected, closing old connection.
+1747556999: New client connected from 172.24.0.1:60636 as PPC-4C75250B0987 (p2, c1, k15).
+1747557013: New connection from 172.24.0.1:57560 on port 1883.
+1747557013: Client PPC-4C75250B0987 already connected, closing old connection.
+1747557013: New client connected from 172.24.0.1:57560 as PPC-4C75250B0987 (p2, c1, k15).
+1747557343: Client mqttjs_274ba550 closed its connection.
+1747557346: New connection from 172.24.0.1:50314 on port 1883.
+1747557346: New client connected from 172.24.0.1:50314 as mqttjs_8cda46b0 (p2, c1, k60).
+1747557441: Client PPC-4C75250B0987 has exceeded timeout, disconnecting.
+1747557443: New connection from 172.24.0.1:59232 on port 1883.
+1747557443: New client connected from 172.24.0.1:59232 as PPC-4C75250B0987 (p2, c1, k15).
+1747557511: Client PPC-4C75250B0987 has exceeded timeout, disconnecting.
+1747557535: New connection from 172.24.0.1:52126 on port 1883.
+1747557535: New client connected from 172.24.0.1:52126 as PPC-4C75250B0987 (p2, c1, k15).
+1747557827: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747559575: Client mqttjs_8cda46b0 closed its connection.
+1747559622: New connection from 172.24.0.1:47204 on port 1883.
+1747559622: New client connected from 172.24.0.1:47204 as mqttjs_bc4bedc4 (p2, c1, k60).
+1747559628: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1747559684: New connection from 172.24.0.1:59374 on port 1883.
+1747559684: Client PPC-4C75250B0987 already connected, closing old connection.
+1747559684: New client connected from 172.24.0.1:59374 as PPC-4C75250B0987 (p2, c1, k15).
+1747559726: Client mqttjs_bc4bedc4 closed its connection.
+1747559761: New connection from 172.24.0.1:46242 on port 1883.
+1747559761: New client connected from 172.24.0.1:46242 as mqttjs_4a2f0fbd (p2, c1, k60).
+1747559791: New connection from 172.24.0.1:44678 on port 1883.
+1747559791: Client PPC-4C75250B0987 already connected, closing old connection.
+1747559791: New client connected from 172.24.0.1:44678 as PPC-4C75250B0987 (p2, c1, k15).
+1747559813: New connection from 172.24.0.1:51824 on port 1883.
+1747559813: Client PPC-4C75250B0987 already connected, closing old connection.
+1747559813: New client connected from 172.24.0.1:51824 as PPC-4C75250B0987 (p2, c1, k15).
+1747560211: Client mqttjs_4a2f0fbd closed its connection.
+1747560213: New connection from 172.24.0.1:34188 on port 1883.
+1747560213: New client connected from 172.24.0.1:34188 as mqttjs_9e635e1e (p2, c1, k60).
+1747560772: Client mqttjs_9e635e1e closed its connection.
+1747560960: mosquitto version 2.0.21 terminating
+1747560960: Saving in-memory database to /mosquitto/data//mosquitto.db.

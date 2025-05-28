@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPC</title>
+</head>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        width: 100%;
+    }
+    h1 {
+        color: #333;
+    }
+    #app {
+        margin-top: 20px;
+    }
+</style>
+<body>
+    <h1>Bienvenido a la página de inicio</h1>
+<div id="app"></div>
+
+<!-- Initialize Clerk with your
+Clerk Publishable Key and Frontend API URL -->
+<script
+  async
+  crossorigin="anonymous"
+  data-clerk-publishable-key="pk_test_dml0YWwtZ2VsZGluZy03Ni5jbGVyay5hY2NvdW50cy5kZXYk"
+  src="https://vital-gelding-76.clerk.accounts.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js"
+  type="text/javascript">
+</script>
+
+<script>
+  window.addEventListener('load', async function () {
+    await Clerk.load()
+
+    if (Clerk.user) {
+      document.getElementById('app').innerHTML = '<a href="/dashboard">Ir al Dashboard</a><div id="user-button"></div>'
+
+      const userButtonDiv = document.getElementById('user-button')
+
+      Clerk.mountUserButton(userButtonDiv)
+    } else {
+      document.getElementById('app').innerHTML = '<div id="sign-in"></div>'
+
+      const signInDiv = document.getElementById('sign-in')
+
+      Clerk.mountSignIn(signInDiv)
+    }
+  })
+</script>
+</body>
+</html>
