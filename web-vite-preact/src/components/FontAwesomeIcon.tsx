@@ -1,7 +1,7 @@
 import { icon, IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faCoffee, faCheckCircle, faCat, faAtom, faHome, faBars, faBell, faUser, faSun, faMoon, faWifi, faEnvelope, faSignal, faLock, faLockOpen, faCircleNotch, faPlugCircleXmark, faRobot, faSpinner, faStopwatch, faCalendar, faChevronDown, faClock, faRightLong, faCheck, faExclamationTriangle, faArrowRight, faEllipsisVertical, faPlus, faEdit, faSignIn, faGlobe, faXmark } from '@fortawesome/free-solid-svg-icons';
-library.add(faCoffee, faCheckCircle, faCat, faAtom, faHome, faBars, faBell, faUser, faSun, faMoon, faWifi, faStopwatch, faEnvelope, faSignal, faLock, faLockOpen, faCircleNotch, faPlugCircleXmark,faRobot, faSpinner, faCalendar, faBell, faChevronDown, faClock, faRightLong, faCheck, faExclamationTriangle, faArrowRight, faEllipsisVertical, faPlus, faEdit, faSignIn, faGlobe, faXmark);
+import { faRotate, faCoffee, faCheckCircle, faCat, faAtom, faHome, faBars, faBell, faUser, faSun, faMoon, faWifi, faEnvelope, faSignal, faLock, faLockOpen, faCircleNotch, faPlugCircleXmark, faRobot, faSpinner, faStopwatch, faCalendar, faChevronDown, faClock, faRightLong, faCheck, faExclamationTriangle, faArrowLeft, faArrowRight, faEllipsisVertical, faPlus, faEdit, faSignIn, faGlobe, faXmark, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+library.add(faRotate, faCoffee, faCheckCircle, faCat, faAtom, faHome, faBars, faBell, faUser, faSun, faMoon, faWifi, faStopwatch, faEnvelope, faSignal, faLock, faLockOpen, faCircleNotch, faPlugCircleXmark,faRobot, faSpinner, faCalendar, faBell, faChevronDown, faClock, faRightLong, faCheck, faExclamationTriangle, faArrowLeft, faArrowRight, faEllipsisVertical, faPlus, faEdit, faSignIn, faGlobe, faXmark, faEye, faEyeSlash);
 
 interface FontAwesomeIconProps {
   prefix?: IconPrefix;

@@ -52,9 +52,10 @@ private:
     
     MqttState state = MqttState::DISCONNECTED;
     unsigned long lastConnectionAttempt = 0;
-    const unsigned long connectionRetryInterval = 5000; // 5 segundos entre intentos de conexión
+    const unsigned long connectionRetryInterval = 35000; // 5 segundos entre intentos de conexión
 
-    void attemptConnect();    void resubscribeTopics();
+    void attemptConnect();
+    void resubscribeTopics();
     void publishDevicePresence();
     void publishDeviceOfflineStatus();
     void setupAckSubscription();

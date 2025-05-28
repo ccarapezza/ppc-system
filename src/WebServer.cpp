@@ -23,8 +23,8 @@ extern Log logger;
 extern IPAddress apIP;
 
 //const to save filenames in flash
-const char INDEX_JS[] PROGMEM = "/assets/index-Qcs1Yhoh.js";
-const char INDEX_CSS[] PROGMEM = "/assets/index-mDld0kGi.css";
+const char INDEX_JS[] PROGMEM = "/assets/index-CIoaLlAD.js";
+const char INDEX_CSS[] PROGMEM = "/assets/index-CqKaT6SG.css";
 
 const char *myHostname = "ppc.captiveportal";
 
@@ -93,6 +93,10 @@ void startServer(PpcConnection *ppcConnection) {
     });
     server.on("/logo.svg", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(LittleFS, "/logo.svg", "image/svg+xml");
+    });
+
+    server.on("/wifi", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/index.html", "text/html");
     });
     
     server.on("/about", HTTP_GET, [](AsyncWebServerRequest *request) {

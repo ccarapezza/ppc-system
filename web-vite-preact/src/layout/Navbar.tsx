@@ -4,7 +4,7 @@ import ThemeSwitchButtons from "../components/ThemeSwitchButtons";
 import { useRef, useEffect } from 'preact/hooks';
 
 const MENU = [
-    { name: 'Dashboard', link: '/' },
+    { name: 'Wifi', link: '/wifi' },
     { name: 'About', link: '/about' },
     { name: 'Timer', link: '/timer' }
 ];

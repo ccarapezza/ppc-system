@@ -39,6 +39,7 @@ export default function WiFiConnectModal({
 
     const [loadingConnectWifi, setLoadingConnectWifi] = useState(false);
     const [loadingCheckConnectionStatus, setLoadingCheckConnectionStatus] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const connectWifi = () => {
         const password = passwordRef.current?.value;
@@ -128,7 +129,22 @@ export default function WiFiConnectModal({
                 {networkConnectionData?.encryptionType != EncryptionType.OPEN &&
                     <div class="mt-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="small-input">Password</label>
-                        <input ref={passwordRef} type="password" id="small-input" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+                        <div class="relative">
+                            <input
+                                ref={passwordRef}
+                                type={showPassword ? "text" : "password"}
+                                id="small-input"
+                                class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 pr-10"
+                            />
+                            <button
+                                type="button"
+                                tabIndex={-1}
+                                class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                                onClick={() => setShowPassword(v => !v)}
+                            >
+                                <FontAwesomeIcon icon={showPassword ? "eye-slash" : "eye"} />
+                            </button>
+                        </div>
                     </div>
                 }
             </div>

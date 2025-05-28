@@ -39,6 +39,7 @@ export function App() {
             <div className="mx-auto w-full max-w-screen-xl px-4 py-6" id="main">
               <Router>
                 <Route path="/" component={WifiManager} />
+                <Route path="/wifi" component={WifiManager} />
                 <Route path="/about" component={About} />
                 <Route path="/timer" component={Timer} />
                 <Route default component={() => <Error type={404} url={window.location.href} />} />

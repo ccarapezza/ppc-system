@@ -371,6 +371,7 @@ export default function Timer() {
         PpcApi.enableAlarm(alarm.name, !alarm.enabled)
             .then((response: any) => {
                 if (response.success) {
+                    setShowEditModal(false);
                     getAlarms(); // Refresh alarms list
                 } else {
                     setErrorMessage(response.message || "Failed to update alarm");
@@ -632,12 +633,9 @@ export default function Timer() {
                                                     {alarms.map((alarm, index) => (
                                                         <li key={index} className="py-2">
                                                             <div className="flex justify-between items-center mb-2">
-                                                                <div className={"flex flex-col gap-1 p-2 w-full justify-center items-center"}>
-                                                                    <span className="text-xl">{alarm.name}</span>
-                                                                    <div className={"flex flex-col gap-2 items-center"}>
-                                                                        <div className="text-sm text-gray-600 flex items-center gap-2 text-xl">
-                                                                            <FontAwesomeIcon icon="clock"/><time>{alarm.hour.toString().padStart(2, '0')}:{alarm.minute.toString().padStart(2, '0')}</time>
-                                                                        </div>
+                                                                <div className={"flex flex-col gap-1 p-2 w-full items-center"}>
+                                                                    <div className={"flex justify-between items-center gap-2 w-full"}>
+                                                                        <span className="text-xl">{alarm.name}</span>
                                                                         <div className="text-sm text-gray-600 flex items-center gap-1 border-2 border-gray-200 px-2 rounded-md w-fit">
                                                                             <span className={"px-2"}>Sala {alarm.extraParams[0]}</span>
                                                                             <FontAwesomeIcon icon="right-long" />
@@ -653,7 +651,11 @@ export default function Timer() {
                                                                                 </div>
                                                                             }
                                                                         </div>
-
+                                                                    </div>
+                                                                    <div className={"flex justify-start items-center gap-2 w-full my-2"}>
+                                                                        <div className="text-sm text-gray-600 flex items-center gap-2 text-xl">
+                                                                            <FontAwesomeIcon icon="clock"/><time>{alarm.hour.toString().padStart(2, '0')}:{alarm.minute.toString().padStart(2, '0')}</time>
+                                                                        </div>
                                                                     </div>
                                                                     {/* Display active days */}
                                                                     <div className="flex flex-wrap gap-1 my-1 items-center gap-2 text-xl">
@@ -675,7 +677,7 @@ export default function Timer() {
                                                                 
                                                             </div>
                                                             <div className="flex items-end gap-2 w-full justify-between">
-                                                                <div>
+                                                                <div className={`flex flex-col gap-1 items-center`}>
                                                                     <div className={`flex gap-1 items-center px-2 py-1 rounded-md text-sm ${alarm.executed ? 'text-green-600' : 'text-yellow-800'}`}>
                                                                         <FontAwesomeIcon icon="check" />{alarm.executed ? 'Executed' : 'Pending'}
                                                                     </div>
@@ -687,28 +689,6 @@ export default function Timer() {
                                                                     
                                                                 </div>
                                                                 <div className="flex gap-2">
-                                                                    {/*
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => toggleAlarmEnabled(alarm)}
-                                                                        className={`px-2 py-1 rounded-md text-sm ${alarm.enabled ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`}
-                                                                    >
-                                                                        {alarm.enabled ? 'Disable' : 'Enable'}
-                                                                    </button>
-                                                                    */}
-                                                                    {/* new Checkbox Implementation */}
-                                                                    <div className="flex items-center">
-                                                                        <input
-                                                                            type="checkbox"
-                                                                            checked={alarm.enabled}
-                                                                            onChange={() => toggleAlarmEnabled(alarm)}
-                                                                            className={`form-checkbox h-5 w-5 ${alarm.enabled ? 'text-green-600' : 'text-red-600'} focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 rounded`}
-                                                                        />
-                                                                        <span className={`ml-2 text-sm ${alarm.enabled ? 'text-green-600' : 'text-red-600'}`}>
-                                                                            {alarm.enabled ? 'Enabled' : 'Disabled'}
-                                                                        </span>
-                                                                    </div>
-                                                                    
                                                                     <button
                                                                         type="button"
                                                                         onClick={() => openEditModal(alarm)}
@@ -1035,7 +1015,7 @@ export default function Timer() {
 
                     <div>
                         <label className="block text-gray-700 text-sm font-bold mb-2">
-                            Alarm Status
+                            Estado
                         </label>
                         <div className="flex gap-2">
                             <button
@@ -1047,7 +1027,7 @@ export default function Timer() {
                                         : 'bg-green-600 text-white hover:bg-green-700'
                                 }`}
                             >
-                                {selectedAlarm?.enabled ? 'Disable Alarm' : 'Enable Alarm'}
+                                {selectedAlarm?.enabled ? 'Desactivar' : 'Activar'}
                             </button>
                         </div>
                     </div>
@@ -1073,6 +1053,7 @@ export default function Timer() {
                         <Button
                             label="Crear"
                             onClick={createOnOffAlarm}
+                            disabled={loading}
                             className="bg-blue-600 text-white"
                         />
                     </div>

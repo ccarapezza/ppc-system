@@ -89,7 +89,20 @@ export default function WiFiScan({ connectionStatus, setConnectionStatus }: Conn
         <p class="text-gray-800 font-bold text-lg">WiFi Networks</p>
 
         {wifiList.length > 0 &&
-            <Card title={<span className={"font-bold"}>WiFi</span>} icon="wifi" className="w-full">
+            <Card
+                title={<span className={"font-bold"}>WiFi</span>}
+                rightContent={<button
+                    onClick={() =>scanWifi()}
+                    disabled={loading}
+                    className={"border rounded flex items-center gap-1 p-2"}
+                >  
+                    <FontAwesomeIcon icon="rotate" />
+                    <span>Actualizar</span>
+                </button>}
+                    
+                icon="wifi"
+                className="w-full"
+            >
                 <ul class="m-0 p-0">
                     {wifiList?.map((wifi: any) => {
                         return (
