@@ -11,16 +11,164 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
-
+/*
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
 }
+*/
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+@font-face {
+    font-family: "D7MBI";
+    src: url("/DSEG7Modern-BoldItalic.woff") format('woff');
+}
+
+@font-face {
+    font-family: "montserrat";
+    src: url("/Montserrat.woff2") format('woff2');
+}
+
+.D7MBI {
+    font-family: "D7MBI";
+}
+
+.clock-background {
+    /*
+    border: 3px solid #000;
+    border-radius: 9px;
+    box-shadow: 4px 4px 1px 0px rgba(0, 0, 0, 0.1) inset;
+    */
+}
+
+.default-lcd .text-clock {
+    color: #fb7c00;
+    background-color: #311901;
+}
+.default-lcd .clock-background {
+    background-color: #fb7c00;
+}
+.default-lcd .clock-time{
+    color: #311901;
+}
+.default-lcd.inverse .text-clock{
+    color: #311901;
+    background-color: #fb7c00;
+}
+.default-lcd.inverse .clock-background{
+    background-color: #311901;
+}
+.default-lcd.inverse .clock-time{
+    color: #fb7c00;
+}
+
+.green-lcd .text-clock {
+    color: #a4b751!important;
+    background-color: #1d200f!important;
+}
+.green-lcd .clock-background {
+    background-color: #a4b751!important;
+}
+.green-lcd .clock-time{
+    color: #1d200f!important;
+}
+.green-lcd.inverse .text-clock{
+    color: #1d200f!important;
+    background-color: #a4b751!important;
+}
+.green-lcd.inverse .clock-background{
+    background-color: #1d200f!important;
+}
+.green-lcd.inverse .clock-time{
+    color: #a4b751!important;
+}
+
+.red-lcd .text-clock {
+    color: #aa2421!important;
+    background-color: #df9e3b!important;
+}
+.red-lcd .clock-background {
+    background-color: #aa2421!important;
+}
+.red-lcd .clock-time{
+    color: #df9e3b!important;
+}
+.red-lcd.inverse .text-clock{
+    color: #df9e3b!important;
+    background-color: #aa2421!important;
+}
+.red-lcd.inverse .clock-background{
+    background-color: #df9e3b!important;
+}
+.red-lcd.inverse .clock-time{
+    color: #aa2421!important;
+}
+
+.blue-lcd .text-clock {
+    color: #034245!important;
+    background-color: #08e2ec!important;
+}
+/*
+.blue-lcd .clock-background {
+    background-color: #034245!important;
+}
+*/
+.dark .blue-lcd .clock-time{
+    color: #08e2ec!important;
+}
+.blue-lcd .clock-time{
+    color: #3a4747!important;
+}
+.blue-lcd.inverse .text-clock{
+    color: #08e2ec!important;
+    background-color: #034245!important;
+}
+.blue-lcd.inverse .clock-background{
+    background-color: #08e2ec!important;
+}
+.blue-lcd.inverse .clock-time{
+    color: #034245!important;
+}
+
+.clock-time-background {
+    position: absolute;
+    color: rgba(0, 0, 0, 0.05);
+}
+
+.disable-clock-text, .green-lcd .disable-clock-text, .red-lcd .disable-clock-text, .blue-lcd .disable-clock-text {
+    color: rgba(0, 0, 0, 0.10)!important;
+}
+
+.disable-clock-background, .green-lcd .disable-clock-background, .red-lcd .disable-clock-background, .blue-lcd .disable-clock-background {
+    background-color: rgba(0, 0, 0, 0.10)!important;
+}
+
+.bg-primary{
+    background-color: rgb(21, 87, 153, 0.8);
+}
+
+.bg-secondary{
+    background-color: #159957;
+}
+
+.text-primary{
+    color: #155799;
+}
+
+.text-secondary{
+    color: #159957;
+}
+
+.gradient-background {
+    background-image: linear-gradient(120deg, #155799, #159957);
+}
+
+.gradient-text{
+    color: linear-gradient(120deg, #155799, #159957);
 }
