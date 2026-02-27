@@ -16,7 +16,7 @@ void MqttClient::begin(const char* host, uint16_t port, PpcConnection* ppcConnec
     mqttClient.setCallback([this](char* topic, byte* payload, unsigned int length) {
         String msg;
         for (unsigned int i = 0; i < length; i++) msg += (char)payload[i];
-        if (messageCallback) messageCallback(msg);
+        if (messageCallback) messageCallback(String(topic), msg);
     });
     
     logger.log(LOG_INFO, "MQTT client initialized");
@@ -80,7 +80,7 @@ void MqttClient::publish(const char* topic, const char* payload) {
     }
 }
 
-void MqttClient::subscribe(const char* topic, std::function<void(String)> callback) {
+void MqttClient::subscribe(const char* topic, std::function<void(String, String)> callback) {
     messageCallback = callback;
     subscriptionTopic = String(topic); // Guardar el tema para resubscripciones
     
@@ -192,7 +192,7 @@ void MqttClient::setupAckSubscription() {
         } 
         // Otros mensajes de tópicos suscritos
         else if (messageCallback) {
-            messageCallback(msg);
+            messageCallback(topicStr, msg);
         }
     });
 }
@@ -303,5 +303,22 @@ String MqttClient::getStateName() {
             case 5: return "Not authorized";
             default: return "Unknown error (" + String(errorCode) + ")";
         }
+    }
+}
+
+void MqttClient::setDeviceInfoCallback(std::function<void()> callback) {
+    deviceInfoCallback = callback;
+}
+
+void MqttClient::publishDeviceInfo() {
+    if (!mqttClient.connected()) return;
+    
+    // Este método debería ser llamado desde el main.cpp cuando se reciba una solicitud
+    // La información real será recopilada en main.cpp y enviada via MQTT
+    String topic = "devices/" + deviceId + "/info";
+    
+    // El payload será generado en main.cpp usando los datos del dispositivo
+    if (deviceInfoCallback) {
+        deviceInfoCallback();
     }
 }

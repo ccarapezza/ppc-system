@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "Clock.h"
 #include <PpcConnection.h>
+#include "AlarmStorage.h"
 
 /**
  * @brief Estructura que define una alarma
@@ -114,6 +115,57 @@ public:
    * @return bool True si se encontró y actualizó la alarma, false si no se encontró
    */
   bool setAlarmDays(String name, bool daysOfWeek[7]);
+
+  /**
+   * @brief Inicializa el sistema de almacenamiento y carga las alarmas guardadas
+   * 
+   * @return bool True si se inicializó correctamente, false en caso contrario
+   */
+  bool initStorage();
+  
+  /**
+   * @brief Guarda todas las alarmas en almacenamiento persistente
+   * 
+   * @return bool True si se guardaron correctamente, false en caso contrario
+   */
+  bool saveToStorage();
+  
+  /**
+   * @brief Carga las alarmas desde el almacenamiento persistente
+   * 
+   * @return bool True si se cargaron correctamente, false en caso contrario
+   */
+  bool loadFromStorage();
+
+  /**
+   * @brief Reasigna la función execute a una alarma por nombre
+   * 
+   * @param name Nombre de la alarma
+   * @param execute Función a asignar
+   * @return bool True si se encontró y actualizó la alarma, false si no se encontró
+   */
+  bool setAlarmFunction(String name, std::function<void(int)> execute);
+
+  /**
+   * @brief Reasigna funciones execute para alarmas de relé basadas en extraParams
+   * Este método es útil después de cargar alarmas desde almacenamiento
+   */
+  void reassignRelayFunctions();
+
+private:
+  /**
+   * @brief Convierte la lista enlazada de alarmas a un vector para almacenamiento
+   * 
+   * @return std::vector<AlarmData> Vector con los datos de las alarmas
+   */
+  std::vector<AlarmData> alarmsToVector() const;
+  
+  /**
+   * @brief Carga alarmas desde un vector al sistema de lista enlazada
+   * 
+   * @param alarmsData Vector con los datos de las alarmas a cargar
+   */
+  void loadAlarmsFromVector(const std::vector<AlarmData>& alarmsData);
 };
 
 #endif // ALARMS_MANAGER_H

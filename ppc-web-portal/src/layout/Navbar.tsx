@@ -5,6 +5,7 @@ import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { useEffect, useRef } from "react";
 
 const MENU = [
+    { name: 'Dispositivos', link: '/devices' },
     { name: 'Wifi', link: '/wifi' },
     { name: 'About', link: '/about' },
     { name: 'Timer', link: '/timer' }

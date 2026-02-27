@@ -8,7 +8,9 @@ import {
   SignedOut,
   UserButton,
 } from '@clerk/nextjs'
-import Navbar from "./layout/Navbar";
+import Navbar from "@/layout/Navbar";
+import { ConnectionStatus } from "@/components/ConnectionStatus";
+import { DeviceWebSocketProvider } from "@/contexts/DeviceWebSocketContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,20 +34,22 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <DeviceWebSocketProvider>
+        <html lang="en">
+          <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
 
-          <div className="flex flex-col h-screen">
-            <Navbar />
-          </div>
-
-
-          <header className="flex justify-end items-center p-4 gap-4 h-16">
-            
-          </header>
-          {children}
-        </body>
-      </html>
+            <div className="flex flex-col h-screen">
+              <header className="">
+                <Navbar />
+              </header>
+              <main>            
+                {children}
+              </main>
+            </div>
+            <ConnectionStatus />
+          </body>
+        </html>
+      </DeviceWebSocketProvider>
     </ClerkProvider>
   );
 }

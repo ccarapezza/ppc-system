@@ -33,6 +33,10 @@ MqttClient mqttClient;
 String deviceId = "";
 String deviceName = "PPC-T1000"; // Cambia esto según necesites
 
+// Declaraciones forward de funciones
+void publishCurrentDeviceInfo();
+void handleMqttMessage(String topic, String message);
+
 void setup() {
   // Initialize serial and logging
   logger.init();
@@ -43,16 +47,28 @@ void setup() {
     logger.log(LOG_ERR, "Failed to initialize WiFi credential storage");
   }
   
+  // Initialize the alarm storage and load saved alarms
+  if (!alarmManager.initStorage()) {
+    logger.log(LOG_ERR, "Failed to initialize alarm storage");
+  }
+  
   // Generar ID único del dispositivo basado en la dirección MAC
   deviceId = WiFi.macAddress();
   deviceId.replace(":", ""); // Eliminar los dos puntos para un ID limpio
   logger.logf(LOG_INFO, "Device ID: %s", deviceId.c_str());
   
-  //mqttClient.begin("mqtt.powerplantcontrol.com.ar", 8883, &ppcConnection);  // o IP/broker local
-  mqttClient.begin("192.168.0.10", 1883, &ppcConnection);  // o IP/broker local
+  mqttClient.begin("mqtt.powerplantcontrol.com.ar", 1883, &ppcConnection);  // o IP/broker local
+  //mqttClient.begin("192.168.0.36", 1883, &ppcConnection);  // o IP/broker local
   mqttClient.setDeviceInfo(deviceId, deviceName);
-  mqttClient.subscribe((String("ppc/") + deviceId).c_str(), [](String message) {
-    logger.logf(LOG_INFO, "MQTT Message: %s", message.c_str());
+  
+  // Configurar callback para manejar mensajes MQTT del dispositivo
+  mqttClient.subscribe((String("devices/") + deviceId + "/+").c_str(), [](String topic, String message) {
+    handleMqttMessage(topic, message);
+  });
+  
+  // Configurar callback para generar información del dispositivo
+  mqttClient.setDeviceInfoCallback([]() {
+    publishCurrentDeviceInfo();
   });
   
   // Try to load saved WiFi credentials
@@ -105,4 +121,95 @@ void safeLoop() {
 void loop() {
   criticalLoop();
   //safeLoop();
+}
+
+// Función para publicar información completa del dispositivo
+void publishCurrentDeviceInfo() {
+  DynamicJsonDocument doc(2048);
+  
+  // Información de salidas digitales
+  JsonArray outputs = doc["digitalOutputs"].to<JsonArray>();
+  for (int i = 0; i < numDigitalOutputs; i++) {
+    JsonObject output = outputs.createNestedObject();
+    output["id"] = i;
+    output["pin"] = digitalOutputs[i]->getPin();
+    output["state"] = digitalOutputs[i]->getState();
+  }
+  
+  // Información de tiempo
+  Clock& clock = Clock::getInstance();
+  doc["time"]["time"] = clock.getCurrentDate();
+  
+  // Información de alarmas
+  String alarmsJson = alarmManager.getAlarms();
+  DynamicJsonDocument alarmDoc(1024);
+  deserializeJson(alarmDoc, alarmsJson);
+  doc["alarms"] = alarmDoc["alarms"];
+  
+  // Serializar y publicar
+  String payload;
+  serializeJson(doc, payload);
+  
+  String topic = "devices/" + deviceId + "/info";
+  mqttClient.publish(topic.c_str(), payload.c_str());
+  
+  logger.logf(LOG_INFO, "Published device info: %s", payload.c_str());
+}
+
+// Función para manejar mensajes MQTT entrantes
+void handleMqttMessage(String topic, String message) {
+  logger.logf(LOG_INFO, "MQTT Topic: %s, Message: %s", topic.c_str(), message.c_str());
+  
+  // Parsear el topic para determinar la acción
+  int lastSlash = topic.lastIndexOf('/');
+  if (lastSlash == -1) return;
+  
+  String action = topic.substring(lastSlash + 1);
+  
+  if (action == "request_info") {
+    // Solicitud de información del dispositivo
+    publishCurrentDeviceInfo();
+  }
+  else if (action == "control") {
+    // Control de salidas digitales
+    DynamicJsonDocument doc(512);
+    if (deserializeJson(doc, message) == DeserializationError::Ok) {
+      String type = doc["type"];
+      
+      if (type == "digital_output") {
+        int outputId = doc["output_id"];
+        bool state = doc["state"];
+        
+        if (outputId >= 0 && outputId < numDigitalOutputs) {
+          digitalOutputs[outputId]->setState(state);
+          logger.logf(LOG_INFO, "Digital output %d set to %s", outputId, state ? "ON" : "OFF");
+          
+          // Enviar confirmación
+          DynamicJsonDocument response(256);
+          response["success"] = true;
+          response["output_id"] = outputId;
+          response["state"] = digitalOutputs[outputId]->getState();
+          
+          String responsePayload;
+          serializeJson(response, responsePayload);
+          
+          String responseTopic = "devices/" + deviceId + "/control_response";
+          mqttClient.publish(responseTopic.c_str(), responsePayload.c_str());
+        }
+      }
+    }
+  }
+  else if (action == "link") {
+    // Manejar vinculación desde el servidor
+    DynamicJsonDocument doc(256);
+    if (deserializeJson(doc, message) == DeserializationError::Ok) {
+      if (doc["linked"] == true) {
+        logger.logf(LOG_INFO, "Device linked to user: %s", doc["user_id"].as<String>().c_str());
+      }
+    }
+  }
+  else if (action == "unlink") {
+    // Manejar desvinculación
+    logger.log(LOG_INFO, "Device unlinked from user");
+  }
 }

@@ -16,6 +16,7 @@ import aedes from "aedes";
 import net from "net";
 import { URL } from "url";
 import dotenv from "dotenv";
+import mqtt from "mqtt";
 
 // Cargar variables de entorno desde archivo .env
 dotenv.config();
@@ -34,7 +35,10 @@ const DEVICE_LINK_TOPIC = "devices/+/link";
 const DEVICE_UNLINK_TOPIC = "devices/+/unlink";
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:3001'], // Permitir conexiones desde Next.js
+  credentials: true
+}));
 app.use(bodyParser.json());
 
 // ------------------ STATIC FILES ------------------
@@ -239,6 +243,68 @@ wss.on("connection", (ws, req) => {
         );
       }
       
+      // Solicitar información del dispositivo
+      if (data.type === "request_device_info" && data.deviceId) {
+        console.log(`[WS] Solicitud de información del dispositivo ${data.deviceId} por usuario ${ws.userId}`);
+        
+        // Verificar que el dispositivo pertenece al usuario
+        db.get("SELECT * FROM devices WHERE device_id = ? AND user_id = ?", 
+          [data.deviceId, ws.userId], 
+          (err, row) => {
+            if (err || !row) {
+              ws.send(JSON.stringify({
+                type: "device_info_error",
+                deviceId: data.deviceId,
+                error: "Dispositivo no encontrado o no autorizado"
+              }));
+              return;
+            }
+            
+            // Solicitar información al dispositivo vía MQTT
+            aedesBroker.publish({
+              topic: `devices/${data.deviceId}/request_info`,
+              payload: JSON.stringify({ 
+                type: "request_info",
+                user_id: ws.userId,
+                request_id: Date.now().toString()
+              })
+            });
+          }
+        );
+      }
+      
+      // Controlar salida digital
+      if (data.type === "control_digital_output" && data.deviceId && typeof data.outputId === 'number' && typeof data.state === 'boolean') {
+        console.log(`[WS] Control de salida digital ${data.outputId} del dispositivo ${data.deviceId} por usuario ${ws.userId}`);
+        
+        // Verificar que el dispositivo pertenece al usuario
+        db.get("SELECT * FROM devices WHERE device_id = ? AND user_id = ?", 
+          [data.deviceId, ws.userId], 
+          (err, row) => {
+            if (err || !row) {
+              ws.send(JSON.stringify({
+                type: "control_result",
+                success: false,
+                deviceId: data.deviceId,
+                error: "Dispositivo no encontrado o no autorizado"
+              }));
+              return;
+            }
+            
+            // Enviar comando al dispositivo vía MQTT
+            aedesBroker.publish({
+              topic: `devices/${data.deviceId}/control`,
+              payload: JSON.stringify({ 
+                type: "digital_output",
+                output_id: data.outputId,
+                state: data.state,
+                user_id: ws.userId
+              })
+            });
+          }
+        );
+      }
+      
       if (data.type === "unlink_device" && data.deviceId) {
         console.log(`[WS] Solicitud de desvinculación para dispositivo ${data.deviceId} por usuario ${ws.userId}`);
         
@@ -315,10 +381,23 @@ function broadcastDeviceList() {
 
 // ------------------ MQTT BROKER (AEDES) ------------------
 const aedesBroker = aedes();
+
 const mqttServer = net.createServer(aedesBroker.handle);
 mqttServer.listen(1883, () => {
   console.log("[AEDES] MQTT broker corriendo en puerto 1883");
 });
+/*
+const mqttHost = 'localhost';
+const mqttPort = 1883;
+const aedesBroker = mqtt.connect(`mqtt://${mqttHost}:${mqttPort}`);
+console.log(`[MQTT] Conectando al broker MQTT en ${mqttHost}:${mqttPort}`);
+aedesBroker.on("connect", () => {
+  console.log(`[MQTT] Conectado a broker en ${mqttHost}:${mqttPort}`);
+});
+aedesBroker.on("error", (err) => {
+  console.error("[MQTT] Error al conectar al broker:", err);
+});
+*/
 
 // Mantener un registro de dispositivos online por client_id
 const clientToDeviceMap = new Map(); // client_id -> device_id
@@ -466,6 +545,53 @@ aedesBroker.on("publish", async (packet, client) => {
           }
         } catch (parseErr) {
           console.error("[AEDES] Error al procesar mensaje de vinculación:", parseErr);
+        }
+      }
+      // Manejo de información del dispositivo
+      else if (action === "info") {
+        try {
+          const payload = JSON.parse(packet.payload.toString());
+          console.log(`[AEDES] Información recibida del dispositivo ${device_id}:`, payload);
+          
+          // Reenviar la información a todos los clientes WebSocket conectados
+          const message = {
+            type: "device_info",
+            deviceId: device_id,
+            data: payload
+          };
+          
+          clients.forEach(ws => {
+            if (ws.readyState === ws.OPEN) {
+              ws.send(JSON.stringify(message));
+            }
+          });
+          
+        } catch (parseErr) {
+          console.error("[AEDES] Error al procesar información del dispositivo:", parseErr);
+        }
+      }
+      // Manejo de respuestas de control
+      else if (action === "control_response") {
+        try {
+          const payload = JSON.parse(packet.payload.toString());
+          console.log(`[AEDES] Respuesta de control del dispositivo ${device_id}:`, payload);
+          
+          // Reenviar la respuesta a todos los clientes WebSocket
+          const message = {
+            type: "control_result",
+            deviceId: device_id,
+            success: payload.success || false,
+            data: payload
+          };
+          
+          clients.forEach(ws => {
+            if (ws.readyState === ws.OPEN) {
+              ws.send(JSON.stringify(message));
+            }
+          });
+          
+        } catch (parseErr) {
+          console.error("[AEDES] Error al procesar respuesta de control:", parseErr);
         }
       }
       // Manejo de desvinculaciones
@@ -699,6 +825,53 @@ app.post("/api/devices/:deviceId/unlink", (req, res) => {
           
           broadcastDeviceList();
           res.json({ success: true });
+        }
+      );
+    }
+  );
+});
+
+// API para desvincular un dispositivo desde el admin (sin restricción de propietario)
+app.post("/api/admin/devices/:deviceId/unlink", (req, res) => {
+  const { deviceId } = req.params;
+  const adminUserId = req.userId;
+  
+  console.log(`[API] Administrador ${adminUserId} intentando desvincular dispositivo ${deviceId}`);
+  
+  // Verificar que el dispositivo existe y está vinculado
+  db.get(
+    "SELECT * FROM devices WHERE device_id = ? AND user_id IS NOT NULL",
+    [deviceId],
+    (err, row) => {
+      if (err) return res.status(500).json({ error: err.message });
+      
+      if (!row) {
+        return res.status(404).json({ error: "Dispositivo no encontrado o no está vinculado" });
+      }
+      
+      const previousUserId = row.user_id;
+      
+      // Desvincular el dispositivo
+      db.run(
+        "UPDATE devices SET user_id = NULL, linked_at = NULL WHERE device_id = ?", 
+        [deviceId], 
+        (err) => {
+          if (err) return res.status(500).json({ error: err.message });
+          
+          console.log(`[API] Dispositivo ${deviceId} desvinculado del usuario ${previousUserId} por admin ${adminUserId}`);
+          
+          // Publicar mensaje MQTT
+          aedesBroker.publish({
+            topic: `devices/${deviceId}/unlink`,
+            payload: JSON.stringify({ unlinked: true, admin_action: true })
+          });
+          
+          broadcastDeviceList();
+          res.json({ 
+            success: true, 
+            message: `Dispositivo ${deviceId} desvinculado exitosamente`,
+            previous_user_id: previousUserId 
+          });
         }
       );
     }

@@ -1,5 +1,7 @@
 #include "AlarmsManager.h"
 #include "Clock.h"
+#include "AlarmStorage.h"
+#include "DigitalOutput.h"
 
 // Initialize static instance to nullptr
 AlarmsManager* AlarmsManager::instance = nullptr;
@@ -54,6 +56,9 @@ int AlarmsManager::addAlarm(String name, int hour, int minute, std::function<voi
   
     lastAlarm = newAlarm;
   
+    // Guardar en almacenamiento persistente después de agregar
+    saveToStorage();
+  
     return alarmsCount();
 }
 
@@ -83,7 +88,12 @@ void AlarmsManager::alarmLoop(){
         
         currentAlarm->executed = true;
         Serial.println(currentAlarm->name + " - Executed at: " + clock.getCurrentDate());
-        currentAlarm->execute(1);
+        // Verificar que la función execute no sea nullptr antes de llamarla
+        if (currentAlarm->execute != nullptr) {
+            currentAlarm->execute(1);
+        } else {
+            Serial.println("Warning: Alarm " + currentAlarm->name + " has no execute function assigned");
+        }
       }
       
       currentAlarm = currentAlarm->next;
@@ -192,6 +202,8 @@ bool AlarmsManager::enableAlarm(String name, bool enabled) {
     
     if (alarm != nullptr) {
         alarm->enabled = enabled;
+        // Guardar cambios en almacenamiento persistente
+        saveToStorage();
         return true;
     }
     
@@ -206,8 +218,160 @@ bool AlarmsManager::setAlarmDays(String name, bool daysOfWeek[7]) {
         for (int i = 0; i < 7; i++) {
             alarm->daysOfWeek[i] = daysOfWeek[i];
         }
+        // Guardar cambios en almacenamiento persistente
+        saveToStorage();
         return true;
     }
     
     return false;
+}
+
+bool AlarmsManager::initStorage() {
+    if (!AlarmStorage::init()) {
+        Serial.println("Failed to initialize alarm storage");
+        return false;
+    }
+    
+    // Cargar alarmas existentes si las hay
+    if (AlarmStorage::hasAlarms()) {
+        return loadFromStorage();
+    }
+    
+    return true;
+}
+
+bool AlarmsManager::saveToStorage() {
+    std::vector<AlarmData> alarmsData = alarmsToVector();
+    return AlarmStorage::saveAlarms(alarmsData);
+}
+
+bool AlarmsManager::loadFromStorage() {
+    std::vector<AlarmData> alarmsData;
+    
+    if (!AlarmStorage::loadAlarms(alarmsData)) {
+        return false;
+    }
+    
+    // Limpiar alarmas existentes antes de cargar
+    Alarm* current = firstAlarm;
+    while (current != nullptr) {
+        Alarm* next = current->next;
+        delete current;
+        current = next;
+    }
+    firstAlarm = nullptr;
+    lastAlarm = nullptr;
+    
+    // Cargar alarmas desde el almacenamiento
+    loadAlarmsFromVector(alarmsData);
+    
+    // Reasignar automáticamente las funciones de relé
+    reassignRelayFunctions();
+    
+    return true;
+}
+
+std::vector<AlarmData> AlarmsManager::alarmsToVector() const {
+    std::vector<AlarmData> alarmsData;
+    
+    Alarm* current = firstAlarm;
+    while (current != nullptr) {
+        AlarmData data;
+        data.name = current->name;
+        data.hour = current->hour;
+        data.minute = current->minute;
+        data.executed = current->executed;
+        data.enabled = current->enabled;
+        data.extraParams = current->extraParams;
+        
+        // Copiar días de la semana
+        for (int i = 0; i < 7; i++) {
+            data.daysOfWeek[i] = current->daysOfWeek[i];
+        }
+        
+        alarmsData.push_back(data);
+        current = current->next;
+    }
+    
+    return alarmsData;
+}
+
+void AlarmsManager::loadAlarmsFromVector(const std::vector<AlarmData>& alarmsData) {
+    for (const auto& data : alarmsData) {
+        Alarm* newAlarm = new Alarm;
+        newAlarm->name = data.name;
+        newAlarm->hour = data.hour;
+        newAlarm->minute = data.minute;
+        newAlarm->executed = data.executed;
+        newAlarm->enabled = data.enabled;
+        newAlarm->extraParams = data.extraParams;
+        
+        // Copiar días de la semana
+        for (int i = 0; i < 7; i++) {
+            newAlarm->daysOfWeek[i] = data.daysOfWeek[i];
+        }
+        
+        // Nota: No podemos restaurar la función execute desde almacenamiento
+        // Las funciones deberán ser reasignadas después de cargar las alarmas
+        newAlarm->execute = nullptr;
+        newAlarm->next = nullptr;
+        
+        if (lastAlarm == nullptr) {
+            firstAlarm = newAlarm;
+        } else {
+            lastAlarm->next = newAlarm;
+        }
+        
+        lastAlarm = newAlarm;
+    }
+}
+
+bool AlarmsManager::setAlarmFunction(String name, std::function<void(int)> execute) {
+    Alarm *alarm = findAlarmByName(name);
+    
+    if (alarm != nullptr) {
+        alarm->execute = execute;
+        return true;
+    }
+    
+    return false;
+}
+
+void AlarmsManager::reassignRelayFunctions() {
+    // Declarar extern para acceder a digitalOutputs desde main.cpp
+    extern DigitalOutput* digitalOutputs[];
+    
+    Alarm *currentAlarm = firstAlarm;
+    
+    while (currentAlarm != nullptr) {
+        // Solo reasignar si no tiene función asignada
+        if (currentAlarm->execute == nullptr && !currentAlarm->extraParams.empty()) {
+            int channel = currentAlarm->extraParams[0]; // Primer parámetro es el canal
+            
+            // Verificar que el canal sea válido
+            if (channel >= 1 && channel <= 3) { // Asumiendo 3 relés máximo
+                if (currentAlarm->extraParams.size() > 1) {
+                    int state = currentAlarm->extraParams[1]; // Segundo parámetro es el estado
+                    
+                    if (state == 1) {
+                        // Función para encender relé
+                        currentAlarm->execute = [channel](int) {
+                            extern DigitalOutput* digitalOutputs[];
+                            digitalOutputs[channel - 1]->setState(true);
+                        };
+                        Serial.println("Reassigned ON function to alarm: " + currentAlarm->name);
+                    } else if (state == 0) {
+                        // Función para apagar relé
+                        currentAlarm->execute = [channel](int) {
+                            extern DigitalOutput* digitalOutputs[];
+                            digitalOutputs[channel - 1]->setState(false);
+                        };
+                        Serial.println("Reassigned OFF function to alarm: " + currentAlarm->name);
+                    }
+                }
+            }
+        }
+        
+        currentAlarm = currentAlarm->next;
+    }
 }

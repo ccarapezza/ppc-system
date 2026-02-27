@@ -19,7 +19,7 @@ public:
     void loop();
     void setDeviceInfo(const String& id, const String& name);
     void publish(const char* topic, const char* payload);
-    void subscribe(const char* topic, std::function<void(String message)> callback);
+    void subscribe(const char* topic, std::function<void(String topic, String message)> callback);
     bool isConnected() { return mqttClient.connected(); }
     int getState() { return mqttClient.state(); }
     String getStateName(); // Eliminado el modificador const
@@ -30,6 +30,10 @@ public:
     void unlinkDevice();
     bool isLinked() const { return linkedToUser; }
     String getLinkedUserId() const { return linkedUserId; }
+    
+    // Métodos para manejar información del dispositivo
+    void publishDeviceInfo();
+    void setDeviceInfoCallback(std::function<void()> callback);
 
 private:
     String deviceId;
@@ -39,13 +43,16 @@ private:
     PubSubClient mqttClient;
     PpcConnection* ppcConnection;
 
-    std::function<void(String)> messageCallback;
+    std::function<void(String, String)> messageCallback;
     String subscriptionTopic;
     
     // Variables para el manejo de la vinculación
     bool linkedToUser = false;
     String linkedUserId = "";
     std::function<void(bool success, String user_id)> linkCallback = nullptr;
+    
+    // Callback para obtener información del dispositivo
+    std::function<void()> deviceInfoCallback = nullptr;
 
     const char* mqttHost;
     uint16_t mqttPort;
