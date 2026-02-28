@@ -3,6 +3,7 @@
 export interface Device {
   device_id: string;
   device_name: string;
+  device_type: string;  // e.g. "base" | "timer" | "thermo"
   last_seen: string;
   is_online: boolean;
   first_seen: string;

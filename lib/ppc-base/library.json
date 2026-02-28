@@ -1,0 +1,8 @@
+{
+  "name": "ppc-base",
+  "version": "1.0.0",
+  "description": "PPC base library: WiFi, captive portal, MQTT, device linking",
+  "keywords": ["ppc", "wifi", "mqtt", "captive-portal"],
+  "frameworks": "arduino",
+  "platforms": "espressif8266"
+}

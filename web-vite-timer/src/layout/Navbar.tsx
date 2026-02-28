@@ -6,6 +6,7 @@ import { useRef, useEffect } from 'preact/hooks';
 const MENU = [
     { name: 'Wifi', link: '/wifi' },
     { name: 'About', link: '/about' },
+    { name: 'Timer', link: '/timer' }
 ];
 
 const Navbar = () => {

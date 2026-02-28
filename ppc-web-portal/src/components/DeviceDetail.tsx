@@ -125,7 +125,7 @@ export const DeviceDetail: React.FC<DeviceDetailProps> = ({ device, onClose }) =
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Device Time */}
+              {/* Device Time — shown for all device types */}
               {deviceInfo.time && (
                 <div className="bg-gray-50 rounded-lg p-4">
                   <h3 className="text-lg font-semibold mb-2 flex items-center">
@@ -135,106 +135,123 @@ export const DeviceDetail: React.FC<DeviceDetailProps> = ({ device, onClose }) =
                 </div>
               )}
 
-              {/* Digital Outputs */}
-              {deviceInfo.digitalOutputs && deviceInfo.digitalOutputs.length > 0 && (
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center">
-                    🔌 Salidas Digitales
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {deviceInfo.digitalOutputs.map((output: DigitalOutput) => (
-                      <div
-                        key={output.id}
-                        className="bg-white rounded-lg border p-4 flex items-center justify-between"
-                      >
-                        <div>
-                          <div className="font-medium">Salida {output.id}</div>
-                          <div className="text-sm text-gray-500">Pin {output.pin}</div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span
-                            className={`px-2 py-1 rounded text-xs font-medium ${
-                              output.state
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-red-100 text-red-800'
-                            }`}
+              {/* ── Timer-specific sections ── */}
+              {device.device_type === 'timer' && (
+                <>
+                  {/* Digital Outputs */}
+                  {deviceInfo.digitalOutputs && deviceInfo.digitalOutputs.length > 0 && (
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h3 className="text-lg font-semibold mb-4 flex items-center">
+                        🔌 Salidas Digitales
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {deviceInfo.digitalOutputs.map((output: DigitalOutput) => (
+                          <div
+                            key={output.id}
+                            className="bg-white rounded-lg border p-4 flex items-center justify-between"
                           >
-                            {output.state ? 'ON' : 'OFF'}
-                          </span>
-                          <button
-                            onClick={() => handleOutputToggle(output.id, output.state)}
-                            className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                              output.state
-                                ? 'bg-red-600 text-white hover:bg-red-700'
-                                : 'bg-green-600 text-white hover:bg-green-700'
-                            }`}
-                          >
-                            {output.state ? 'Apagar' : 'Encender'}
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Alarms */}
-              {deviceInfo.alarms && deviceInfo.alarms.length > 0 && (
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center">
-                    ⏰ Alarmas Programadas
-                  </h3>
-                  <div className="space-y-3">
-                    {deviceInfo.alarms.map((alarm: Alarm) => (
-                      <div
-                        key={alarm.id}
-                        className="bg-white rounded-lg border p-4 flex items-center justify-between"
-                      >
-                        <div className="flex items-center space-x-4">
-                          <div className="text-lg font-mono font-bold">
-                            {formatAlarmTime(alarm.hour, alarm.minute)}
-                          </div>
-                          <div>
-                            <div className="font-medium">
-                              Canal {alarm.channel} - {alarm.action}
+                            <div>
+                              <div className="font-medium">Salida {output.id}</div>
+                              <div className="text-sm text-gray-500">Pin {output.pin}</div>
                             </div>
-                            {alarm.description && (
-                              <div className="text-sm text-gray-500">{alarm.description}</div>
-                            )}
+                            <div className="flex items-center space-x-2">
+                              <span
+                                className={`px-2 py-1 rounded text-xs font-medium ${
+                                  output.state
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-red-100 text-red-800'
+                                }`}
+                              >
+                                {output.state ? 'ON' : 'OFF'}
+                              </span>
+                              <button
+                                onClick={() => handleOutputToggle(output.id, output.state)}
+                                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                                  output.state
+                                    ? 'bg-red-600 text-white hover:bg-red-700'
+                                    : 'bg-green-600 text-white hover:bg-green-700'
+                                }`}
+                              >
+                                {output.state ? 'Apagar' : 'Encender'}
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span
-                            className={`px-2 py-1 rounded text-xs font-medium ${
-                              alarm.enabled
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-gray-100 text-gray-800'
-                            }`}
-                          >
-                            {alarm.enabled ? 'Activa' : 'Inactiva'}
-                          </span>
-                          <span
-                            className={`px-2 py-1 rounded text-xs font-medium ${
-                              alarm.action === 'ON'
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-orange-100 text-orange-800'
-                            }`}
-                          >
-                            {alarm.action}
-                          </span>
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  )}
+
+                  {/* Alarms */}
+                  {deviceInfo.alarms && deviceInfo.alarms.length > 0 && (
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h3 className="text-lg font-semibold mb-4 flex items-center">
+                        ⏰ Alarmas Programadas
+                      </h3>
+                      <div className="space-y-3">
+                        {deviceInfo.alarms.map((alarm: Alarm) => (
+                          <div
+                            key={alarm.id}
+                            className="bg-white rounded-lg border p-4 flex items-center justify-between"
+                          >
+                            <div className="flex items-center space-x-4">
+                              <div className="text-lg font-mono font-bold">
+                                {formatAlarmTime(alarm.hour, alarm.minute)}
+                              </div>
+                              <div>
+                                <div className="font-medium">
+                                  Canal {alarm.channel} - {alarm.action}
+                                </div>
+                                {alarm.description && (
+                                  <div className="text-sm text-gray-500">{alarm.description}</div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span
+                                className={`px-2 py-1 rounded text-xs font-medium ${
+                                  alarm.enabled
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-gray-100 text-gray-800'
+                                }`}
+                              >
+                                {alarm.enabled ? 'Activa' : 'Inactiva'}
+                              </span>
+                              <span
+                                className={`px-2 py-1 rounded text-xs font-medium ${
+                                  alarm.action === 'ON'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : 'bg-orange-100 text-orange-800'
+                                }`}
+                              >
+                                {alarm.action}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* ── Future: thermo-specific sections ── */}
+              {device.device_type === 'thermo' && (
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold mb-2 flex items-center">
+                    🌡️ Sensor de Temperatura/Humedad
+                  </h3>
+                  <p className="text-gray-500 text-sm">
+                    Datos de temperatura y humedad disponibles próximamente.
+                  </p>
                 </div>
               )}
 
-              {/* Device Status Summary */}
+              {/* Device Status Summary — shown for all device types */}
               <div className="bg-gray-50 rounded-lg p-4">
                 <h3 className="text-lg font-semibold mb-4 flex items-center">
                   📊 Estado del Dispositivo
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
                   <div className="bg-white rounded p-3">
                     <div className="font-medium text-gray-700">Estado</div>
                     <div className={`font-bold ${device.is_online ? 'text-green-600' : 'text-red-600'}`}>
@@ -242,16 +259,16 @@ export const DeviceDetail: React.FC<DeviceDetailProps> = ({ device, onClose }) =
                     </div>
                   </div>
                   <div className="bg-white rounded p-3">
+                    <div className="font-medium text-gray-700">Tipo</div>
+                    <div className="font-mono text-gray-900 capitalize">{device.device_type}</div>
+                  </div>
+                  <div className="bg-white rounded p-3">
                     <div className="font-medium text-gray-700">Última conexión</div>
-                    <div className="font-mono text-gray-900">
-                      {formatTime(device.last_seen)}
-                    </div>
+                    <div className="font-mono text-gray-900">{formatTime(device.last_seen)}</div>
                   </div>
                   <div className="bg-white rounded p-3">
                     <div className="font-medium text-gray-700">Primera detección</div>
-                    <div className="font-mono text-gray-900">
-                      {formatTime(device.first_seen)}
-                    </div>
+                    <div className="font-mono text-gray-900">{formatTime(device.first_seen)}</div>
                   </div>
                 </div>
               </div>

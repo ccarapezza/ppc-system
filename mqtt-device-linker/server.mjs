@@ -41,6 +41,7 @@ db.serialize(() => {
     `CREATE TABLE IF NOT EXISTS devices (
       device_id TEXT PRIMARY KEY,
       device_name TEXT,
+      device_type TEXT DEFAULT 'base',
       last_seen DATETIME DEFAULT CURRENT_TIMESTAMP,
       is_online BOOLEAN DEFAULT 0,
       first_seen DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -48,7 +49,14 @@ db.serialize(() => {
       linked_at DATETIME
     )`
   );
-  
+
+  // Migration: add device_type column if it doesn't exist (for existing databases)
+  db.run("ALTER TABLE devices ADD COLUMN device_type TEXT DEFAULT 'base'", (err) => {
+    if (err && !err.message.includes("duplicate column")) {
+      console.error("[DB] Error adding device_type column:", err);
+    }
+  });
+
   // Índice para búsquedas por usuario
   db.run("CREATE INDEX IF NOT EXISTS idx_devices_user_id ON devices (user_id)");
 });
@@ -172,56 +180,48 @@ aedesBroker.on("publish", async (packet, client) => {
         try {
           const payload = JSON.parse(packet.payload.toString());
           const device_name = payload.device_name || "Dispositivo sin nombre";
+          const device_type = payload.device_type || "base";
           const status = payload.status || "online";
           const is_online = status === "online";
-          
-          console.log(`[AEDES] Device presence: ${device_id} - ${device_name} - Status: ${status} (is_online: ${is_online})`);
-          
+
+          console.log(`[AEDES] Device presence: ${device_id} - ${device_name} (${device_type}) - Status: ${status}`);
+
           // Registrar o actualizar el dispositivo en la base de datos
           db.get("SELECT * FROM devices WHERE device_id = ?", [device_id], (err, row) => {
             if (err) {
               console.error("[DB] Error al buscar dispositivo:", err);
               return;
             }
-            
+
             if (row) {
               // Dispositivo existe, actualizar estado y timestamp
-              // Forzar la actualización del estado con el valor correcto
-              console.log(`[DB] Actualizando dispositivo ${device_id} con estado ${is_online ? 'online' : 'offline'}`);
               db.run(
-                "UPDATE devices SET last_seen = CURRENT_TIMESTAMP, is_online = ?, device_name = ? WHERE device_id = ?",
-                [is_online ? 1 : 0, device_name, device_id],
+                "UPDATE devices SET last_seen = CURRENT_TIMESTAMP, is_online = ?, device_name = ?, device_type = ? WHERE device_id = ?",
+                [is_online ? 1 : 0, device_name, device_type, device_id],
                 (err) => {
                   if (err) {
                     console.error("[DB] Error al actualizar dispositivo:", err);
                   } else {
-                    console.log(`[DB] Dispositivo ${device_id} actualizado correctamente a ${is_online ? 'online' : 'offline'}`);
-                    // Asociar o desasociar cliente según estado
                     if (is_online && client) {
-                      console.log(`[AEDES] Registro asociación cliente ${client.id} -> dispositivo ${device_id}`);
                       clientToDeviceMap.set(client.id, device_id);
                     }
-                    broadcastDeviceList(); // Enviar lista actualizada a clientes WebSocket
+                    broadcastDeviceList();
                   }
                 }
               );
             } else {
               // Primer registro del dispositivo
-              console.log(`[DB] Registrando nuevo dispositivo ${device_id} con estado ${is_online ? 'online' : 'offline'}`);
               db.run(
-                "INSERT INTO devices (device_id, device_name, is_online, first_seen, last_seen) VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
-                [device_id, device_name, is_online ? 1 : 0],
+                "INSERT INTO devices (device_id, device_name, device_type, is_online, first_seen, last_seen) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+                [device_id, device_name, device_type, is_online ? 1 : 0],
                 (err) => {
                   if (err) {
                     console.error("[DB] Error al insertar dispositivo:", err);
                   } else {
-                    console.log(`[DB] Dispositivo ${device_id} registrado correctamente con estado ${is_online ? 'online' : 'offline'}`);
-                    // Asociar cliente si está online
                     if (is_online && client) {
-                      console.log(`[AEDES] Registro asociación cliente ${client.id} -> dispositivo ${device_id}`);
                       clientToDeviceMap.set(client.id, device_id);
                     }
-                    broadcastDeviceList(); // Enviar lista actualizada a clientes WebSocket
+                    broadcastDeviceList();
                   }
                 }
               );
