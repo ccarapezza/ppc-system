@@ -1,7 +1,10 @@
 #ifndef WEBSERVER_H
 #define WEBSERVER_H
 
-#include <ESPAsyncWebServer.h>
+// Forward-declare to avoid pulling ESPAsyncWebServer.h (with its
+// strict include-order requirements) into every translation unit.
+class AsyncWebServer;
+
 #include <functional>
 #include "PpcConnection.h"
 
