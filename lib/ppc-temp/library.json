@@ -1,0 +1,7 @@
+{
+    "name": "ppc-temp",
+    "version": "1.0.0",
+    "dependencies": {
+        "ppc-base": "*"
+    }
+}

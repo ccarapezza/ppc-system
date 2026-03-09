@@ -13,11 +13,13 @@ Custom target "Build WebApp" (shown in VSCode Project Tasks → Custom):
   CLI:  pio run -e ppc-base  -t buildwebapp
         pio run -e ppc-timer -t buildwebapp
         pio run -e ppc-thm   -t buildwebapp
+        pio run -e ppc-temp  -t buildwebapp
 
 Webapp mapping:
   ppc-base  → web-vite-preact/
   ppc-timer → web-vite-timer/
   ppc-thm   → web-vite-thm/
+  ppc-temp  → web-vite-temp/
 """
 
 Import("env")
@@ -30,6 +32,7 @@ WEBAPP_MAP = {
     "ppc-base":  "web-vite-preact",
     "ppc-timer": "web-vite-timer",
     "ppc-thm":   "web-vite-thm",
+    "ppc-temp":  "web-vite-temp",
 }
 
 project_dir = env["PROJECT_DIR"]

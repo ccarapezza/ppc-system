@@ -158,7 +158,7 @@ src/devices/thm/
 #include "PpcApplication.h"
 #include "ThmModule.h"
 
-#define DHT_PIN D4
+#define DHT_PIN D2
 
 PpcApplication app("PPC-THM1", "thm");
 
@@ -207,3 +207,107 @@ pio run -e ppc-thm
 - [ ] `library.json` declares dependency on `ppc-base`
 - [ ] `platformio.ini` has a new `[env:ppc-*]` section
 - [ ] `pio run -e ppc-base` still compiles (no regressions)
+
+---
+
+## Real Example: ppc-temp (DS18B20)
+
+The **ppc-temp** module is a concrete implementation that reads temperature from
+a DS18B20 one-wire sensor. It follows the same architecture described above.
+
+### Structure
+
+```
+lib/ppc-temp/
+├── library.json
+└── src/
+    ├── core/
+    │   ├── ports/
+    │   │   └── TemperaturePort.h        # read(), getTemperature(), isValid()
+    │   ├── TempService.h/.cpp
+    ├── adapters/
+    │   ├── Ds18b20Sensor.h/.cpp         # OneWire + DallasTemperature adapter
+    │   ├── TempController.h/.cpp        # HTTP routes
+    │   └── TempMqttAdapter.h/.cpp       # MQTT adapter
+    └── TempModule.h/.cpp                # Module implementation
+
+src/devices/temp/
+└── main_temp.cpp                        # Entry point
+```
+
+### Port
+
+```cpp
+class TemperaturePort {
+public:
+    virtual ~TemperaturePort() = default;
+    virtual bool  read() = 0;
+    virtual float getTemperature() const = 0;
+    virtual bool  isValid() const = 0;
+};
+```
+
+### Adapter (DS18B20)
+
+```cpp
+#include "core/ports/TemperaturePort.h"
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+class Ds18b20Sensor : public TemperaturePort {
+public:
+    explicit Ds18b20Sensor(uint8_t pin);
+    void    begin();
+    bool  read() override;
+    float getTemperature() const override;
+    bool  isValid() const override;
+private:
+    uint8_t          _pin;
+    OneWire          _oneWire;
+    DallasTemperature _dallas;
+    float            _temperature;
+    bool             _valid;
+};
+```
+
+### Entry Point
+
+```cpp
+#include "PpcApplication.h"
+#include "TempModule.h"
+
+#define DS18B20_PIN D4  // GPIO2
+
+PpcApplication app("PPC-TEMP1", "temp");
+
+void setup() {
+    app.init();
+    app.addModule(new TempModule(DS18B20_PIN, app.mqtt(), app.logger(),
+                                 app.deviceId().c_str()));
+    app.start();
+}
+
+void loop() { app.loop(); }
+```
+
+### platformio.ini
+
+```ini
+[env:ppc-temp]
+board = nodemcuv2
+build_src_filter = -<*> +<devices/temp/>
+build_flags = -DPPC_DEVICE_TEMP
+lib_deps =
+    ${env.lib_deps}
+    paulstoffregen/OneWire@^2.3.8
+```
+
+### Key Differences vs. the THM Example
+
+| | ppc-thm (DHT22) | ppc-temp (DS18B20) |
+|---|---|---|
+| Sensor | DHT22 (temp + humidity) | DS18B20 (temp only) |
+| Port methods | `readTemperature()`, `readHumidity()` | `read()`, `getTemperature()`, `isValid()` |
+| Libraries | `DHT.h` | `OneWire.h`, `DallasTemperature.h` |
+| Protocol | Single-wire (DHT) | 1-Wire (Dallas) |
+| Board | esp12e | nodemcuv2 |
