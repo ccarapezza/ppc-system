@@ -58,6 +58,10 @@ void setDeviceSpaRoutes(std::initializer_list<const char*> routes) {
     _deviceSpaRoutes.assign(routes.begin(), routes.end());
 }
 
+void setDeviceSpaRoutes(const char** routes, int count) {
+    _deviceSpaRoutes.assign(routes, routes + count);
+}
+
 void startServer(PpcConnection *ppcConnection) {
 
     Clock& clock = Clock::getInstance();
@@ -82,9 +86,19 @@ void startServer(PpcConnection *ppcConnection) {
     server.on("/wifi", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(LittleFS, "/index.html", "text/html");
     });
+    server.on("/clock", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/index.html", "text/html");
+    });
     server.on("/about", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(LittleFS, "/index.html", "text/html");
     });
+
+    // Register device-specific API routes BEFORE SPA routes
+    // so /thm/readings is matched before /thm serves index.html
+    if (_deviceRouteHandler) {
+        _deviceRouteHandler(server);
+        _deviceRouteHandler = nullptr; // prevent double registration
+    }
 
     // Device-specific SPA routes registered by device firmware
     for (const char* route : _deviceSpaRoutes) {
@@ -119,6 +133,72 @@ void startServer(PpcConnection *ppcConnection) {
         AsyncJsonResponse* response = new AsyncJsonResponse();
         JsonObject root = response->getRoot().to<JsonObject>();
         root["time"] = clock.getCurrentDate();
+        response->setLength();
+        request->send(response);
+    });
+
+    server.on("/clock-status", HTTP_GET, [&clock](AsyncWebServerRequest *request) {
+        AsyncJsonResponse* response = new AsyncJsonResponse();
+        JsonObject root = response->getRoot().to<JsonObject>();
+        root["ntpEnabled"]       = clock.isNtpEnabled();
+        root["ntpSynced"]        = clock.isNtpSynced();
+        root["lastNtpSyncEpoch"] = clock.getLastNtpSyncEpoch();
+        root["timeZoneOffset"]   = clock.getTimeZoneOffset();
+        root["currentTime"]      = clock.getCurrentDate();
+        response->setLength();
+        request->send(response);
+    });
+
+    server.on("/set-clock", HTTP_POST, [&clock](AsyncWebServerRequest *request) {
+        AsyncJsonResponse* response = new AsyncJsonResponse();
+        JsonObject root = response->getRoot().to<JsonObject>();
+
+        if (!request->hasParam("mode", true)) {
+            root["success"] = false;
+            root["message"] = "Missing 'mode' parameter (ntp or manual)";
+            response->setLength();
+            request->send(response);
+            return;
+        }
+
+        String mode = request->getParam("mode", true)->value();
+
+        if (mode == "ntp") {
+            int8_t tz = -3; // default
+            if (request->hasParam("timezone", true)) {
+                tz = (int8_t)request->getParam("timezone", true)->value().toInt();
+            }
+            clock.setTimeZoneOffset(tz);
+            clock.setNtpEnabled(true);
+            root["success"] = true;
+            root["message"] = "NTP mode enabled";
+        } else if (mode == "manual") {
+            if (!request->hasParam("year", true)   ||
+                !request->hasParam("month", true)  ||
+                !request->hasParam("day", true)    ||
+                !request->hasParam("hour", true)   ||
+                !request->hasParam("minute", true) ||
+                !request->hasParam("second", true)) {
+                root["success"] = false;
+                root["message"] = "Missing date/time parameters";
+                response->setLength();
+                request->send(response);
+                return;
+            }
+            uint16_t year   = (uint16_t)request->getParam("year", true)->value().toInt();
+            uint8_t  month  = (uint8_t)request->getParam("month", true)->value().toInt();
+            uint8_t  day    = (uint8_t)request->getParam("day", true)->value().toInt();
+            uint8_t  hour   = (uint8_t)request->getParam("hour", true)->value().toInt();
+            uint8_t  minute = (uint8_t)request->getParam("minute", true)->value().toInt();
+            uint8_t  second = (uint8_t)request->getParam("second", true)->value().toInt();
+            clock.setManualTime(year, month, day, hour, minute, second);
+            root["success"] = true;
+            root["message"] = "Manual time set";
+        } else {
+            root["success"] = false;
+            root["message"] = "Unknown mode. Use 'ntp' or 'manual'";
+        }
+
         response->setLength();
         request->send(response);
     });
@@ -263,11 +343,6 @@ void startServer(PpcConnection *ppcConnection) {
         }
         http.end();
     });
-
-    // Register device-specific routes (e.g. /alarms, /digital-outputs)
-    if (_deviceRouteHandler) {
-        _deviceRouteHandler(server);
-    }
 
     server.onNotFound([](AsyncWebServerRequest *request) {
         if (request->method() == HTTP_OPTIONS) {

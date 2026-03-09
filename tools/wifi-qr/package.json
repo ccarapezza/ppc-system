@@ -1,0 +1,16 @@
+{
+  "name": "ppc-wifi-qr",
+  "version": "1.0.0",
+  "description": "Generates a terminal QR code for connecting to a PPC device AP",
+  "type": "module",
+  "main": "index.mjs",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "bin": {
+    "wifi-qr": "./index.mjs"
+  },
+  "dependencies": {
+    "qrcode-terminal": "^0.12.0"
+  }
+}

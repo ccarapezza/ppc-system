@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//home/ccarapezza/ws/termohigrometros-vpd/vpd-tuya-calculator/lib/**)",
+      "Read(//home/ccarapezza/**)",
+      "Bash(cp -r web-vite-timer web-vite-thm)",
+      "Bash(rm -rf web-vite-thm/node_modules web-vite-thm/dist web-vite-thm/.git web-vite-thm/src/page/timer)"
+    ]
+  }
+}

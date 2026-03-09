@@ -6,6 +6,8 @@ const API_ENDPOINTS = {
     WIFI_CONNECT: '/wifi-connect',
     WIFI_DISCONNECT: '/wifi-disconnect',
     GET_TIME: '/get-time',
+    CLOCK_STATUS: '/clock-status',
+    SET_CLOCK: '/set-clock',
 };
 
 export class PpcApi {
@@ -40,6 +42,39 @@ export class PpcApi {
     static async disconnectWifi() {
         const response = await fetch(new URL(API_ENDPOINTS.WIFI_DISCONNECT, API_HOST), {
             method: 'POST'
+        });
+        return response.json();
+    }
+
+    static async getClockStatus() {
+        const response = await fetch(new URL(API_ENDPOINTS.CLOCK_STATUS, API_HOST));
+        return response.json();
+    }
+
+    static async setClockNtp(timezoneOffset: number) {
+        const formData = new FormData();
+        formData.append('mode', 'ntp');
+        formData.append('timezone', String(timezoneOffset));
+        const response = await fetch(new URL(API_ENDPOINTS.SET_CLOCK, API_HOST), {
+            method: 'POST',
+            body: formData,
+        });
+        return response.json();
+    }
+
+    static async setClockManual(year: number, month: number, day: number,
+                                hour: number, minute: number, second: number) {
+        const formData = new FormData();
+        formData.append('mode', 'manual');
+        formData.append('year', String(year));
+        formData.append('month', String(month));
+        formData.append('day', String(day));
+        formData.append('hour', String(hour));
+        formData.append('minute', String(minute));
+        formData.append('second', String(second));
+        const response = await fetch(new URL(API_ENDPOINTS.SET_CLOCK, API_HOST), {
+            method: 'POST',
+            body: formData,
         });
         return response.json();
     }

@@ -1,0 +1,7 @@
+{
+    "name": "ppc-thm",
+    "version": "1.0.0",
+    "dependencies": {
+        "ppc-base": "*"
+    }
+}

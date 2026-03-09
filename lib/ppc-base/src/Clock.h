@@ -7,27 +7,34 @@
 
 class Clock {
 public:
-    // Método estático que controla el acceso a la instancia Clock.
     static Clock& getInstance();
 
-    // Ejemplo de método que se puede llamar en la instancia Clock.
     void start();
     void run(PpcConnection *ppcConn);
     String getCurrentDate();
     RtcDateTime getCurrentDateTime();
 
-    // Eliminar el constructor, el operador de asignación y el constructor de copia para prevenir la creación de múltiples instancias.
+    // NTP / timezone configuration
+    void setNtpEnabled(bool enabled);
+    bool isNtpEnabled() const;
+    void setTimeZoneOffset(int8_t offsetHours);
+    int8_t getTimeZoneOffset() const;
+
+    // NTP sync status
+    bool isNtpSynced() const;
+    uint32_t getLastNtpSyncEpoch() const;
+
+    // Manual time setting (disables NTP)
+    void setManualTime(uint16_t year, uint8_t month, uint8_t day,
+                       uint8_t hour, uint8_t minute, uint8_t second);
+
     Clock(const Clock&) = delete;
     Clock& operator=(const Clock&) = delete;
 
 private:
-    // Constructor privado para evitar la creación de instancias.
     Clock();
-
-    // Destructor privado.
     ~Clock();
 
-    // Puntero a la instancia singleton.
     static Clock* instance;
 
     void withInternet();
@@ -35,6 +42,11 @@ private:
 
     TwoWire tWire;
     RtcDS1307<TwoWire> Rtc;
+
+    bool _ntpEnabled;
+    bool _ntpSynced;
+    uint32_t _lastNtpSyncEpoch;
+    int8_t _timeZoneOffset;
 };
 
 #endif // CLOCK_H
