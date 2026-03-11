@@ -11,7 +11,7 @@
 
 // Platform globals (ppc-base files reference these via extern declarations)
 PpcConnection ppcConnection;
-Log logger("192.168.0.36", 5140, "syslog", "esp8266", 115200);
+Log logger("192.168.0.214", 5140, "syslog", "esp8266", 115200);
 MqttClient mqttClient;
 
 static Runtime runtime;

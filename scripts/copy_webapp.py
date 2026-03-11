@@ -33,6 +33,7 @@ WEBAPP_MAP = {
     "ppc-timer": "web-vite-timer",
     "ppc-thm":   "web-vite-thm",
     "ppc-temp":  "web-vite-temp",
+    "ppc-full":  "web-vite-full",
 }
 
 project_dir = env["PROJECT_DIR"]

@@ -22,7 +22,7 @@ CLERK_SECRET_KEY=tu_clerk_secret_key
 El servidor MQTT/WebSocket debe estar ejecutándose en el puerto 3000. Para iniciarlo:
 
 ```bash
-cd mqtt-device-linker
+cd ppc-backend
 node server-clerk.mjs
 ```
 
