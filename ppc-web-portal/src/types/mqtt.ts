@@ -1,9 +1,22 @@
 // Tipos para la integración MQTT/WebSocket
 
+// Tipos de dispositivo que coinciden con el firmware
+export type DeviceType = 'base' | 'timer' | 'thm' | 'temp' | 'full';
+
+// Etapas de crecimiento VPD (del firmware VpdCalculator::stageName())
+export type VpdStage =
+  | 'DangerLow'
+  | 'PropagationEarlyVeg'
+  | 'LateVeg'
+  | 'EarlyFlower'
+  | 'MidLateFlower'
+  | 'DangerHigh'
+  | 'Unknown';
+
 export interface Device {
   device_id: string;
   device_name: string;
-  device_type: string;  // e.g. "base" | "timer" | "thermo"
+  device_type: DeviceType;
   last_seen: string;
   is_online: boolean;
   first_seen: string;
@@ -32,10 +45,26 @@ export interface Alarm {
   description?: string;
 }
 
+// DeviceInfo compuesto: cada módulo aporta campos opcionales
 export interface DeviceInfo {
-  digitalOutputs: DigitalOutput[];
-  time: DeviceTime;
-  alarms: Alarm[];
+  // Timer module
+  digitalOutputs?: DigitalOutput[];
+  alarms?: Alarm[];
+  // THM module (DHT22)
+  temperature?: number;
+  humidity?: number;
+  vpd?: number;
+  stage?: VpdStage;
+  sensorOk?: boolean;
+  // TEMP module (DS18B20) — namespaced para evitar colisión con THM
+  temp_temperature?: number;
+  temp_sensorOk?: boolean;
+  // Common
+  time?: DeviceTime;
+  // Metadata del backend
+  _lastUpdate?: number;
+  _stale?: boolean;
+  _offlineSince?: number;
 }
 
 export interface DeviceListMessage {
@@ -77,9 +106,9 @@ export interface ControlResultMessage {
   error?: string;
 }
 
-export type WebSocketMessage = 
-  | DeviceListMessage 
-  | LinkResultMessage 
+export type WebSocketMessage =
+  | DeviceListMessage
+  | LinkResultMessage
   | UnlinkResultMessage
   | DeviceInfoMessage
   | DeviceInfoErrorMessage
@@ -107,11 +136,17 @@ export interface ControlDigitalOutputMessage {
   state: boolean;
 }
 
-export type ClientMessage = 
-  | LinkDeviceMessage 
+export interface LinkDeviceByCodeMessage {
+  type: 'link_device_by_code';
+  code: string;
+}
+
+export type ClientMessage =
+  | LinkDeviceMessage
   | UnlinkDeviceMessage
   | RequestDeviceInfoMessage
-  | ControlDigitalOutputMessage;
+  | ControlDigitalOutputMessage
+  | LinkDeviceByCodeMessage;
 
 // Configuración del WebSocket
 export const WEBSOCKET_CONFIG = {

@@ -10,6 +10,7 @@ interface DeviceWebSocketContextType {
   isConnected: boolean;
   error: string | null;
   linkDevice: (deviceId: string) => void;
+  linkDeviceByCode: (code: string) => void;
   unlinkDevice: (deviceId: string) => void;
   requestDeviceInfo: (deviceId: string) => void;
   controlDigitalOutput: (deviceId: string, outputId: number, state: boolean) => void;
@@ -110,7 +111,12 @@ export const DeviceWebSocketProvider: React.FC<DeviceWebSocketProviderProps> = (
               
             case 'device_info':
               console.log(`[WS] Información del dispositivo ${message.deviceId} recibida`);
-              setDeviceInfos(prev => new Map(prev.set(message.deviceId, message.data)));
+              // Merge en lugar de reemplazar: dispositivos "full" envían múltiples mensajes de info
+              setDeviceInfos(prev => {
+                const existing = prev.get(message.deviceId) || {};
+                const merged = { ...existing, ...message.data };
+                return new Map(prev).set(message.deviceId, merged);
+              });
               clearError();
               break;
               
@@ -215,6 +221,14 @@ export const DeviceWebSocketProvider: React.FC<DeviceWebSocketProviderProps> = (
     });
   }, [sendMessage]);
 
+  const linkDeviceByCode = useCallback((code: string) => {
+    console.log(`[WS] Solicitando vinculación por código: ${code}`);
+    sendMessage({
+      type: 'link_device_by_code',
+      code
+    });
+  }, [sendMessage]);
+
   const unlinkDevice = useCallback((deviceId: string) => {
     console.log(`[WS] Solicitando desvinculación de dispositivo: ${deviceId}`);
     sendMessage({
@@ -269,6 +283,7 @@ export const DeviceWebSocketProvider: React.FC<DeviceWebSocketProviderProps> = (
     isConnected,
     error,
     linkDevice,
+    linkDeviceByCode,
     unlinkDevice,
     requestDeviceInfo,
     controlDigitalOutput,
