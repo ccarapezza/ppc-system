@@ -5,6 +5,7 @@ import { useRef, useEffect } from 'preact/hooks';
 
 const MENU = [
     { name: 'Wifi', link: '/wifi' },
+    { name: 'Vincular', link: '/link' },
     { name: 'Reloj', link: '/clock' },
     { name: 'Timer', link: '/timer' },
     { name: 'THM', link: '/thm' },

@@ -184,6 +184,14 @@ export default function WifiManager() {
                             }
                           </div>
                           <Button
+                            label="Ver codigo de vinculacion"
+                            icon="link"
+                            className="bg-blue-600 text-white w-fit"
+                            onClick={() => {
+                              route("/link");
+                            }}
+                          />
+                          <Button
                             label="Ir a la página de temporizador"
                             icon="arrow-right"
                             className="bg-primary text-white w-fit"

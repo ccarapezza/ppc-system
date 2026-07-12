@@ -8,6 +8,7 @@ import { useEffect } from 'preact/hooks';
 import Timer from './page/timer';
 import ThmDashboard from './page/thm';
 import TempDashboard from './page/temp';
+import LinkCode from './page/linkCode';
 
 /** fall-back route (handles unroutable URLs) */
 interface ErrorProps {
@@ -44,6 +45,7 @@ export function App() {
                 <Route path="/" component={WifiManager} />
                 <Route path="/wifi" component={WifiManager} />
                 <Route path="/clock" component={ClockSettings} />
+                <Route path="/link" component={LinkCode} />
                 <Route path="/about" component={About} />
                 <Route path="/timer" component={Timer} />
                 <Route path="/thm" component={ThmDashboard} />

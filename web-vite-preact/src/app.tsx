@@ -3,6 +3,7 @@ import Navbar from './layout/Navbar';
 import About from './page/about';
 import WifiManager from './page/wifiManager';
 import ClockSettings from './page/clock';
+import LinkCode from './page/linkCode';
 import { FunctionalComponent } from 'preact';
 import { useEffect } from 'preact/hooks';
 
@@ -41,6 +42,7 @@ export function App() {
                 <Route path="/" component={WifiManager} />
                 <Route path="/wifi" component={WifiManager} />
                 <Route path="/clock" component={ClockSettings} />
+                <Route path="/link" component={LinkCode} />
                 <Route path="/about" component={About} />
                 <Route default component={() => <Error type={404} url={window.location.href} />} />
               </Router>

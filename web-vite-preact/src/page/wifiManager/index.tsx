@@ -112,6 +112,17 @@ export default function WifiManager() {
                           <div class="font-bold text-center">
                             ¡Conectado a la red WiFi!
                           </div>
+                          <div class="text-sm text-center text-gray-600 dark:text-gray-400">
+                            Para vincular este dispositivo a tu cuenta, usa el codigo de vinculacion.
+                          </div>
+                          <Button
+                            label="Ver codigo de vinculacion"
+                            icon="link"
+                            className="bg-blue-600 text-white w-fit"
+                            onClick={() => {
+                              window.location.href = '/link';
+                            }}
+                          />
                           <Button
                             label="Cerrar"
                             icon="xmark"
