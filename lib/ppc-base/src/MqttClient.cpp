@@ -51,6 +51,11 @@ void MqttClient::loop() {
 
     if (mqttClient.connected()) {
         mqttClient.loop();
+
+        // Rotar link code cada 5 minutos
+        if (millis() - lastCodeGenTime >= CODE_ROTATION_INTERVAL) {
+            generateAndPublishLinkCode();
+        }
     }
 }
 
@@ -116,6 +121,7 @@ void MqttClient::attemptConnect() {
         resubscribeTopics();
         setupAckSubscription();
         publishDevicePresence();
+        generateAndPublishLinkCode();
     } else {
         int errorState = mqttClient.state();
         logger.logf(LOG_ERR, "MQTT connection failed, rc=%d", errorState);
@@ -256,5 +262,37 @@ void MqttClient::publishDeviceInfo() {
     if (!mqttClient.connected()) return;
     if (deviceInfoCallback) {
         deviceInfoCallback();
+    }
+}
+
+String MqttClient::generateLinkCode() {
+    static const char charset[] = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    static const int charsetLen = sizeof(charset) - 1;
+
+    // Seed from chip ID + time window (changes every 5 min)
+    uint32_t seed = ESP.getChipId() ^ (millis() / CODE_ROTATION_INTERVAL);
+    // Simple hash mixing
+    seed = (seed ^ (seed >> 16)) * 0x45d9f3b;
+    seed = (seed ^ (seed >> 16)) * 0x45d9f3b;
+    seed = seed ^ (seed >> 16);
+
+    String code = "";
+    for (int i = 0; i < 6; i++) {
+        code += charset[seed % charsetLen];
+        seed /= charsetLen;
+    }
+    return code;
+}
+
+void MqttClient::generateAndPublishLinkCode() {
+    previousLinkCode = currentLinkCode;
+    currentLinkCode = generateLinkCode();
+    lastCodeGenTime = millis();
+
+    if (mqttClient.connected() && !deviceId.isEmpty()) {
+        String topic = "devices/" + deviceId + "/link_code";
+        String payload = "{\"code\":\"" + currentLinkCode + "\"}";
+        mqttClient.publish(topic.c_str(), payload.c_str());
+        logger.logf(LOG_INFO, "Link code published: %s", currentLinkCode.c_str());
     }
 }

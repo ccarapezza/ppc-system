@@ -35,6 +35,8 @@ public:
     void publishDeviceInfo();
     void setDeviceInfoCallback(std::function<void()> callback);
 
+    String getCurrentLinkCode() const { return currentLinkCode; }
+
 private:
     String deviceId;
     String deviceName;
@@ -66,6 +68,14 @@ private:
     void publishDeviceOfflineStatus();
     void setupAckSubscription();
     void handleAckMessage(const String& message);
+
+    // Link code
+    String currentLinkCode;
+    String previousLinkCode;
+    unsigned long lastCodeGenTime = 0;
+    static const unsigned long CODE_ROTATION_INTERVAL = 300000; // 5 minutos
+    void generateAndPublishLinkCode();
+    String generateLinkCode();
 };
 
 #endif

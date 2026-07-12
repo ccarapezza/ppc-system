@@ -92,6 +92,9 @@ void startServer(PpcConnection *ppcConnection) {
     server.on("/about", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(LittleFS, "/index.html", "text/html");
     });
+    server.on("/link", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/index.html", "text/html");
+    });
 
     // Register device-specific API routes BEFORE SPA routes
     // so /thm/readings is matched before /thm serves index.html
@@ -273,6 +276,17 @@ void startServer(PpcConnection *ppcConnection) {
         JsonObject root = response->getRoot().to<JsonObject>();
         ppcConnection->disconnectNetwork();
         root["status"] = "disconnected";
+        response->setLength();
+        request->send(response);
+    });
+
+    server.on("/link-code", HTTP_GET, [](AsyncWebServerRequest *request){
+        extern MqttClient mqttClient;
+        AsyncJsonResponse* response = new AsyncJsonResponse();
+        JsonObject root = response->getRoot().to<JsonObject>();
+        root["code"] = mqttClient.getCurrentLinkCode();
+        root["device_id"] = WiFi.macAddress().c_str();
+        root["device_name"] = "PPC Device";
         response->setLength();
         request->send(response);
     });

@@ -37,7 +37,7 @@ void PpcApplication::init() {
     _deviceId.replace(":", "");
     ::logger.logf(LOG_INFO, "Device ID: %s", _deviceId.c_str());
 
-    mqttClient.begin("mqtt.powerplantcontrol.com.ar", 1883, &ppcConnection);
+    mqttClient.begin("mqtt.cc-lab.space", 1883, &ppcConnection);
     mqttClient.setDeviceInfo(_deviceId, String(_deviceName));
     mqttClient.setDeviceType(String(_deviceType));
 }
