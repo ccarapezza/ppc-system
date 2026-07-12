@@ -135,6 +135,7 @@ mqttServer.listen(1883, () => {
 
 // Mantener un registro de dispositivos online por client_id
 const clientToDeviceMap = new Map(); // client_id -> device_id
+const deviceInfoStore = new Map(); // device_id -> merged info object
 
 // Suscripción a eventos de publicación
 // Maneja mensajes publicados en los tópicos de link/unlink/presence
@@ -277,8 +278,8 @@ aedesBroker.on("publish", async (packet, client) => {
       else if (action === "unlink") {
         // Solo limpiar la vinculación, no eliminar el registro del dispositivo
         db.run(
-          "UPDATE devices SET user_id = NULL, linked_at = NULL WHERE device_id = ?", 
-          [device_id], 
+          "UPDATE devices SET user_id = NULL, linked_at = NULL WHERE device_id = ?",
+          [device_id],
           (err) => {
             if (err) {
               console.error("[DB] Error:", err);
@@ -286,7 +287,7 @@ aedesBroker.on("publish", async (packet, client) => {
             }
             console.log(`[AEDES] Desvinculado ${device_id}`);
             broadcastDeviceList();
-            
+
             // Confirmar al dispositivo
             aedesBroker.publish({
               topic: `devices/${device_id}/ack`,
@@ -294,6 +295,65 @@ aedesBroker.on("publish", async (packet, client) => {
             });
           }
         );
+      }
+      // Manejo de información del dispositivo (con merge para dispositivos "full")
+      else if (action === "info") {
+        try {
+          const payload = JSON.parse(packet.payload.toString());
+          console.log(`[AEDES] Información recibida del dispositivo ${device_id}:`, payload);
+
+          const existing = deviceInfoStore.get(device_id) || {};
+          const merged = { ...existing, ...payload };
+
+          // Resolver colisión de "temperature" entre THM y TEMP
+          if (payload.temperature !== undefined && payload.humidity === undefined && payload.vpd === undefined) {
+            merged.temp_temperature = payload.temperature;
+            merged.temp_sensorOk = payload.sensorOk;
+            if (existing.humidity !== undefined) {
+              merged.temperature = existing.temperature;
+              merged.sensorOk = existing.sensorOk;
+            }
+          }
+
+          merged._lastUpdate = Date.now();
+          deviceInfoStore.set(device_id, merged);
+
+          const message = {
+            type: "device_info",
+            deviceId: device_id,
+            data: merged
+          };
+
+          clients.forEach(ws => {
+            if (ws.readyState === ws.OPEN) {
+              ws.send(JSON.stringify(message));
+            }
+          });
+        } catch (parseErr) {
+          console.error("[AEDES] Error al procesar información del dispositivo:", parseErr);
+        }
+      }
+      // Manejo de respuestas de control
+      else if (action === "control_response") {
+        try {
+          const payload = JSON.parse(packet.payload.toString());
+          console.log(`[AEDES] Control response de ${device_id}:`, payload);
+
+          const message = {
+            type: "control_result",
+            success: payload.success,
+            deviceId: device_id,
+            data: payload
+          };
+
+          clients.forEach(ws => {
+            if (ws.readyState === ws.OPEN) {
+              ws.send(JSON.stringify(message));
+            }
+          });
+        } catch (parseErr) {
+          console.error("[AEDES] Error al procesar control_response:", parseErr);
+        }
       }
     }
   } catch (err) {
@@ -344,7 +404,14 @@ aedesBroker.on("clientDisconnect", (client) => {
         
         // Eliminar la asociación cliente-dispositivo
         clientToDeviceMap.delete(client.id);
-        
+
+        // Marcar info cacheada como stale (mantener para "último conocido")
+        const cachedInfo = deviceInfoStore.get(deviceId);
+        if (cachedInfo) {
+          cachedInfo._stale = true;
+          cachedInfo._offlineSince = Date.now();
+        }
+
         // Informar a los clientes del cambio de estado
         broadcastDeviceList();
       }

@@ -299,9 +299,9 @@
                       <th>Estado</th>
                       <th>Device ID</th>
                       <th>Nombre</th>
-                      <th>User ID</th>
+                      <th>Usuario</th>
+                      <th>Código</th>
                       <th>Última conexión</th>
-                      <th>Primera detección</th>
                       <th>Vinculación</th>
                       <th>Acciones</th>
                     </tr>
@@ -421,11 +421,14 @@
           filteredDevices = filteredDevices.filter(device => !device.linked);
         }
 
-        // Filter by search text
+        // Filter by search text (includes user name, email, and link code)
         if (searchText) {
           filteredDevices = filteredDevices.filter(device =>
             (device.device_id && device.device_id.toLowerCase().includes(searchText)) ||
-            (device.device_name && device.device_name.toLowerCase().includes(searchText))
+            (device.device_name && device.device_name.toLowerCase().includes(searchText)) ||
+            (device.user_name && device.user_name.toLowerCase().includes(searchText)) ||
+            (device.user_email && device.user_email.toLowerCase().includes(searchText)) ||
+            (device.link_code && device.link_code.toLowerCase().includes(searchText))
           );
         }
 
@@ -542,6 +545,22 @@
           const linkedBadgeClass = device.linked ? 'badge-primary' : 'badge-secondary';
           const linkedText = device.linked ? 'Vinculado' : 'No vinculado';
 
+          // Build user display
+          const userDisplay = device.user_name
+            ? `<div class="d-flex align-items-center gap-2">
+                ${device.user_image ? `<img src="${device.user_image}" alt="" style="width:24px;height:24px;border-radius:50%">` : ''}
+                <div>
+                  <div class="fw-medium" style="font-size:0.85rem">${device.user_name}</div>
+                  ${device.user_email ? `<div class="text-muted" style="font-size:0.75rem">${device.user_email}</div>` : ''}
+                </div>
+              </div>`
+            : (device.user_id ? `<span class="text-muted" style="font-size:0.75rem">${device.user_id.substring(0, 12)}...</span>` : '<span class="text-muted">-</span>');
+
+          // Build link code display
+          const linkCodeDisplay = device.link_code
+            ? `<span class="badge badge-warning fw-bold" style="font-family:monospace;letter-spacing:2px">${device.link_code}</span>`
+            : '<span class="text-muted">-</span>';
+
           row.innerHTML = `
           <td>
             <span class="badge ${statusBadgeClass}">
@@ -551,22 +570,27 @@
           </td>
           <td><span class="fw-medium">${device.device_id || '-'}</span></td>
           <td>${device.device_name || '-'}</td>
-          <td>${device.user_id || '-'}</td>
+          <td>${userDisplay}</td>
+          <td>${linkCodeDisplay}</td>
           <td class="timestamp">${convertUTCtoGMT3(device.last_seen).toLocaleString()}</td>
-          <td class="timestamp">${convertUTCtoGMT3(device.first_seen).toLocaleString()}</td>
           <td><span class="badge ${linkedBadgeClass}">${linkedText}</span></td>
           <td>
             ${device.linked ? `
-              <button 
-                class="btn btn-danger btn-sm" 
-                data-device-id="${device.device_id}" 
-                onclick="unlinkDevice('${device.device_id}')" 
+              <button
+                class="btn btn-danger btn-sm"
+                data-device-id="${device.device_id}"
+                onclick="unlinkDevice('${device.device_id}')"
                 title="Desvincular dispositivo">
                 <i data-lucide="unlink" style="width:16px;height:16px"></i>
               </button>
             ` : '<span class="text-muted">-</span>'}
           </td>
         `;
+          // Mobile user info
+          const mobileUserInfo = device.user_name
+            ? `${device.user_name}${device.user_email ? ` · ${device.user_email}` : ''}`
+            : (device.user_id ? device.user_id.substring(0, 12) + '...' : '');
+
           mobileRow.innerHTML = `
           <td>
             <div class="d-flex gap-1">
@@ -578,14 +602,18 @@
                     <span class="status-indicator ${device.is_online ? 'status-online' : 'status-offline'}"></span>
                     ${statusText}
                   </span>
+                  ${device.link_code ? `<span class="badge badge-warning fw-bold ms-1" style="font-family:monospace;letter-spacing:2px">${device.link_code}</span>` : ''}
                 </div>
                 <div>
-                  <span class="badge ${linkedBadgeClass}"><i data-lucide="user" class="me-1" style="width:20px;height:20px"></i>${linkedText} ${device.user_id ? `(${device.user_id})` : ''}</span>
+                  <span class="badge ${linkedBadgeClass}">
+                    <i data-lucide="user" class="me-1" style="width:16px;height:16px"></i>
+                    ${linkedText}${mobileUserInfo ? ` · ${mobileUserInfo}` : ''}
+                  </span>
                   ${device.linked ? `
-                    <button 
-                      class="btn btn-danger btn-sm ms-2" 
-                      data-device-id="${device.device_id}" 
-                      onclick="unlinkDevice('${device.device_id}')" 
+                    <button
+                      class="btn btn-danger btn-sm ms-2"
+                      data-device-id="${device.device_id}"
+                      onclick="unlinkDevice('${device.device_id}')"
                       title="Desvincular dispositivo">
                       <i data-lucide="unlink" style="width:16px;height:16px"></i>
                     </button>
@@ -598,12 +626,6 @@
                     <small>Última conexión</small>
                     <small class="text-muted">
                       ${convertUTCtoGMT3(device.last_seen).toLocaleString()}
-                    </small>
-                  </div>
-                  <div class="vstack align-items-end my-2">
-                    <small>Primera detección</small>
-                    <small class="text-muted">
-                      ${convertUTCtoGMT3(device.first_seen).toLocaleString()}
                     </small>
                   </div>
               </div>
@@ -753,7 +775,7 @@
         // Conectar al WebSocket con token en la URL
         // Use wss:// for HTTPS and ws:// for HTTP
         const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${protocol}//${location.host}?token=${token}`;
+        const wsUrl = `${protocol}//${location.host}?token=${token}&mode=admin`;
         ws = new WebSocket(wsUrl);
         
         // Configurar los handlers del WebSocket

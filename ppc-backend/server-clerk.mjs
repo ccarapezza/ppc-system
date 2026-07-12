@@ -32,6 +32,57 @@ const clerkDomain = CLERK_PUBLISHABLE_KEY ? CLERK_PUBLISHABLE_KEY.split('_')[2] 
 const CLERK_JWKS_URL = process.env.CLERK_JWKS_URL || `https://${clerkDomain}.clerk.accounts.dev/.well-known/jwks.json`;
 const CLERK_API_URL = "https://api.clerk.dev/v1";
 const DEVICE_LINK_TOPIC = "devices/+/link";
+
+// ------------------ USER INFO CACHE ------------------
+const userInfoCache = new Map(); // userId -> { firstName, lastName, email, imageUrl, fetchedAt }
+const USER_CACHE_TTL = 30 * 60 * 1000; // 30 minutes
+
+async function fetchClerkUser(userId) {
+  // Check cache first
+  const cached = userInfoCache.get(userId);
+  if (cached && (Date.now() - cached.fetchedAt) < USER_CACHE_TTL) {
+    return cached;
+  }
+
+  try {
+    const res = await axios.get(`${CLERK_API_URL}/users/${userId}`, {
+      headers: { Authorization: `Bearer ${CLERK_SECRET_KEY}` }
+    });
+    const u = res.data;
+    const info = {
+      firstName: u.first_name || '',
+      lastName: u.last_name || '',
+      email: u.email_addresses?.find(e => e.id === u.primary_email_address_id)?.email_address || '',
+      imageUrl: u.image_url || '',
+      fetchedAt: Date.now()
+    };
+    userInfoCache.set(userId, info);
+    return info;
+  } catch (err) {
+    console.error(`[CLERK] Error fetching user ${userId}:`, err.message);
+    return null;
+  }
+}
+
+// Resolve user info for a list of user IDs (batch, with cache)
+async function enrichDevicesWithUserInfo(devices) {
+  const uniqueUserIds = [...new Set(devices.map(d => d.user_id).filter(Boolean))];
+
+  // Fetch all missing users in parallel
+  await Promise.all(uniqueUserIds.map(uid => fetchClerkUser(uid)));
+
+  return devices.map(device => {
+    if (!device.user_id) return device;
+    const info = userInfoCache.get(device.user_id);
+    if (!info) return device;
+    return {
+      ...device,
+      user_name: [info.firstName, info.lastName].filter(Boolean).join(' ') || null,
+      user_email: info.email || null,
+      user_image: info.imageUrl || null,
+    };
+  });
+}
 const DEVICE_UNLINK_TOPIC = "devices/+/unlink";
 
 const app = express();
@@ -42,12 +93,11 @@ app.use(cors({
 app.use(bodyParser.json());
 
 // ------------------ STATIC FILES ------------------
-//app.use(express.static(path.join(__dirname, "public")));
-
-// Ruta raíz para devolver index.html
+// Ruta raíz para devolver index-clerk.html (antes del static para que tenga prioridad)
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index-clerk.html"));
 });
+app.use(express.static(path.join(__dirname, "public")));
 
 // ------------------ DB SETUP ------------------
 const db = new sqlite3.Database("devices.db");
@@ -57,6 +107,7 @@ db.serialize(() => {
     `CREATE TABLE IF NOT EXISTS devices (
       device_id TEXT PRIMARY KEY,
       device_name TEXT,
+      device_type TEXT DEFAULT 'base',
       last_seen DATETIME DEFAULT CURRENT_TIMESTAMP,
       is_online BOOLEAN DEFAULT 0,
       first_seen DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -64,7 +115,14 @@ db.serialize(() => {
       linked_at DATETIME
     )`
   );
-  
+
+  // Migración: agregar columna device_type si no existe (para DBs existentes)
+  db.run("ALTER TABLE devices ADD COLUMN device_type TEXT DEFAULT 'base'", (err) => {
+    if (err && !err.message.includes("duplicate column")) {
+      console.error("[DB] Error en migración device_type:", err);
+    }
+  });
+
   // Índice para búsquedas por usuario
   db.run("CREATE INDEX IF NOT EXISTS idx_devices_user_id ON devices (user_id)");
 });
@@ -140,6 +198,7 @@ const wss = new WebSocketServer({
         // Almacenar la información del usuario en el objeto request
         req.userId = decoded.sub;
         req.userInfo = decoded;
+        req.adminMode = url.searchParams.get('mode') === 'admin';
         
         // Permitir la conexión
         done(true);
@@ -156,44 +215,52 @@ const wss = new WebSocketServer({
 
 let clients = [];
 
-function sendDeviceList(ws) {
-    
-    // Construir la consulta SQL según si filtramos por usuario o no
-    let sql = "SELECT * FROM devices";
-    const params = [];
-    
-    /*
-    // Si el usuario está autenticado, enviar solo sus dispositivos si tiene userId
+async function sendDeviceList(ws) {
     const userId = ws.userId;
-  if (userId) {
-    sql += " WHERE user_id = ?";
-    params.push(userId);
-  }
-    */
-  
-  db.all(sql, params, (err, rows) => {
-    if (err) return;
-    
-    // Convertir las filas a un formato más amigable para el frontend
-    const devices = rows.map(device => ({
-      ...device,
-      is_online: !!device.is_online, // Convertir 0/1 a boolean
-      linked: !!device.user_id,      // Determinar si está vinculado
-      last_seen: device.last_seen,   // Mantener timestamp para cálculos de "último visto hace"
-      first_seen: device.first_seen  // Cuando se descubrió por primera vez
-    }));
-    
-    const payload = JSON.stringify({ type: "device_list", devices });
-    if (ws.readyState === ws.OPEN) {
-      ws.send(payload);
-    }
-  });
+    if (!userId) return;
+
+    const sql = ws.adminMode ? "SELECT * FROM devices" : "SELECT * FROM devices WHERE user_id = ?";
+    const params = ws.adminMode ? [] : [userId];
+
+    db.all(sql, params, async (err, rows) => {
+      if (err) return;
+
+      let devices = rows.map(device => ({
+        ...device,
+        is_online: !!device.is_online,
+        linked: !!device.user_id,
+        last_seen: device.last_seen,
+        first_seen: device.first_seen
+      }));
+
+      // Enrich with user info for admin mode
+      if (ws.adminMode) {
+        devices = await enrichDevicesWithUserInfo(devices);
+      }
+
+      // Add active link codes for admin mode
+      if (ws.adminMode) {
+        devices = devices.map(device => {
+          const codeEntry = linkCodeStore.get(device.device_id);
+          if (codeEntry && (Date.now() - codeEntry.timestamp) < 600000) {
+            return { ...device, link_code: codeEntry.code };
+          }
+          return device;
+        });
+      }
+
+      const payload = JSON.stringify({ type: "device_list", devices });
+      if (ws.readyState === ws.OPEN) {
+        ws.send(payload);
+      }
+    });
 }
 
 wss.on("connection", (ws, req) => {
   // Guardar información del usuario en el objeto WebSocket
   ws.userId = req.userId;
   ws.userInfo = req.userInfo;
+  ws.adminMode = req.adminMode || false;
   
   clients.push(ws);
   console.log(`[WS] Cliente conectado - Usuario: ${ws.userId}`);
@@ -207,11 +274,11 @@ wss.on("connection", (ws, req) => {
       if (data.type === "link_device" && data.deviceId) {
         console.log(`[WS] Solicitud de vinculación para dispositivo ${data.deviceId} por usuario ${ws.userId}`);
         
-        // Vincular el dispositivo con el usuario
+        // Vincular el dispositivo con el usuario (solo si no está vinculado)
         db.run(
-          "UPDATE devices SET user_id = ?, linked_at = CURRENT_TIMESTAMP WHERE device_id = ?",
+          "UPDATE devices SET user_id = ?, linked_at = CURRENT_TIMESTAMP WHERE device_id = ? AND user_id IS NULL",
           [ws.userId, data.deviceId],
-          (err) => {
+          function(err) {
             if (err) {
               console.error("[DB] Error al vincular dispositivo:", err);
               ws.send(JSON.stringify({
@@ -219,6 +286,13 @@ wss.on("connection", (ws, req) => {
                 success: false,
                 deviceId: data.deviceId,
                 error: "Error al vincular dispositivo"
+              }));
+            } else if (this.changes === 0) {
+              ws.send(JSON.stringify({
+                type: "link_result",
+                success: false,
+                deviceId: data.deviceId,
+                error: "Dispositivo no disponible o ya vinculado"
               }));
             } else {
               console.log(`[WS] Dispositivo ${data.deviceId} vinculado a usuario ${ws.userId}`);
@@ -243,6 +317,61 @@ wss.on("connection", (ws, req) => {
         );
       }
       
+      // Vincular dispositivo por código
+      if (data.type === "link_device_by_code" && data.code) {
+        const code = data.code.toUpperCase().trim();
+        console.log(`[WS] Solicitud de vinculación por código '${code}' de usuario ${ws.userId}`);
+
+        // Buscar dispositivo por código (válido por 10 minutos)
+        let targetDeviceId = null;
+        for (const [deviceId, entry] of linkCodeStore.entries()) {
+          if (entry.code === code && (Date.now() - entry.timestamp) < 600000) {
+            targetDeviceId = deviceId;
+            break;
+          }
+        }
+
+        if (!targetDeviceId) {
+          ws.send(JSON.stringify({
+            type: "link_result",
+            success: false,
+            error: "Código inválido o expirado"
+          }));
+        } else {
+          db.run(
+            "UPDATE devices SET user_id = ?, linked_at = CURRENT_TIMESTAMP WHERE device_id = ? AND user_id IS NULL",
+            [ws.userId, targetDeviceId],
+            function(err) {
+              if (err || this.changes === 0) {
+                ws.send(JSON.stringify({
+                  type: "link_result",
+                  success: false,
+                  deviceId: targetDeviceId,
+                  error: "Dispositivo no disponible o ya vinculado"
+                }));
+                return;
+              }
+
+              console.log(`[WS] Dispositivo ${targetDeviceId} vinculado a usuario ${ws.userId} por código`);
+              linkCodeStore.delete(targetDeviceId);
+
+              aedesBroker.publish({
+                topic: `devices/${targetDeviceId}/link`,
+                payload: JSON.stringify({ linked: true, user_id: ws.userId })
+              });
+
+              ws.send(JSON.stringify({
+                type: "link_result",
+                success: true,
+                deviceId: targetDeviceId
+              }));
+
+              broadcastDeviceList();
+            }
+          );
+        }
+      }
+
       // Solicitar información del dispositivo
       if (data.type === "request_device_info" && data.deviceId) {
         console.log(`[WS] Solicitud de información del dispositivo ${data.deviceId} por usuario ${ws.userId}`);
@@ -401,6 +530,8 @@ aedesBroker.on("error", (err) => {
 
 // Mantener un registro de dispositivos online por client_id
 const clientToDeviceMap = new Map(); // client_id -> device_id
+const deviceInfoStore = new Map(); // device_id -> merged info object
+const linkCodeStore = new Map(); // device_id -> { code, timestamp }
 
 // Suscripción a eventos de publicación
 // Maneja mensajes publicados en los tópicos de link/unlink/presence
@@ -446,25 +577,26 @@ aedesBroker.on("publish", async (packet, client) => {
         try {
           const payload = JSON.parse(packet.payload.toString());
           const device_name = payload.device_name || "Dispositivo sin nombre";
+          const device_type = payload.device_type || "base";
           const status = payload.status || "online";
           const is_online = status === "online";
-          
-          console.log(`[AEDES] Device presence: ${device_id} - ${device_name} - Status: ${status} (is_online: ${is_online})`);
-          
+
+          console.log(`[AEDES] Device presence: ${device_id} - ${device_name} (${device_type}) - Status: ${status} (is_online: ${is_online})`);
+
           // Registrar o actualizar el dispositivo en la base de datos
           db.get("SELECT * FROM devices WHERE device_id = ?", [device_id], (err, row) => {
             if (err) {
               console.error("[DB] Error al buscar dispositivo:", err);
               return;
             }
-            
+
             if (row) {
               // Dispositivo existe, actualizar estado y timestamp
               // Forzar la actualización del estado con el valor correcto
               console.log(`[DB] Actualizando dispositivo ${device_id} con estado ${is_online ? 'online' : 'offline'}`);
               db.run(
-                "UPDATE devices SET last_seen = CURRENT_TIMESTAMP, is_online = ?, device_name = ? WHERE device_id = ?",
-                [is_online ? 1 : 0, device_name, device_id],
+                "UPDATE devices SET last_seen = CURRENT_TIMESTAMP, is_online = ?, device_name = ?, device_type = ? WHERE device_id = ?",
+                [is_online ? 1 : 0, device_name, device_type, device_id],
                 (err) => {
                   if (err) {
                     console.error("[DB] Error al actualizar dispositivo:", err);
@@ -483,8 +615,8 @@ aedesBroker.on("publish", async (packet, client) => {
               // Primer registro del dispositivo
               console.log(`[DB] Registrando nuevo dispositivo ${device_id} con estado ${is_online ? 'online' : 'offline'}`);
               db.run(
-                "INSERT INTO devices (device_id, device_name, is_online, first_seen, last_seen) VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
-                [device_id, device_name, is_online ? 1 : 0],
+                "INSERT INTO devices (device_id, device_name, device_type, is_online, first_seen, last_seen) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+                [device_id, device_name, device_type, is_online ? 1 : 0],
                 (err) => {
                   if (err) {
                     console.error("[DB] Error al insertar dispositivo:", err);
@@ -547,25 +679,50 @@ aedesBroker.on("publish", async (packet, client) => {
           console.error("[AEDES] Error al procesar mensaje de vinculación:", parseErr);
         }
       }
-      // Manejo de información del dispositivo
+      // Manejo de información del dispositivo (con merge para dispositivos "full" que envían múltiples mensajes)
       else if (action === "info") {
         try {
           const payload = JSON.parse(packet.payload.toString());
           console.log(`[AEDES] Información recibida del dispositivo ${device_id}:`, payload);
-          
-          // Reenviar la información a todos los clientes WebSocket conectados
+
+          // Merge: cada módulo publica por separado al mismo topic
+          // Timer: { digitalOutputs, alarms, time }
+          // THM:   { temperature, humidity, vpd, stage, sensorOk, time }
+          // TEMP:  { temperature, sensorOk, time }
+          const existing = deviceInfoStore.get(device_id) || {};
+          const merged = { ...existing, ...payload };
+
+          // Resolver colisión de "temperature" entre THM y TEMP:
+          // Si el payload tiene temperature pero NO humidity/vpd, es del módulo TEMP
+          if (payload.temperature !== undefined && payload.humidity === undefined && payload.vpd === undefined) {
+            merged.temp_temperature = payload.temperature;
+            merged.temp_sensorOk = payload.sensorOk;
+            // No sobrescribir temperature de THM si ya existe
+            if (existing.humidity !== undefined) {
+              merged.temperature = existing.temperature;
+              merged.sensorOk = existing.sensorOk;
+            }
+          }
+
+          merged._lastUpdate = Date.now();
+          deviceInfoStore.set(device_id, merged);
+
+          // Reenviar la información mergeada solo al owner del dispositivo
           const message = {
             type: "device_info",
             deviceId: device_id,
-            data: payload
+            data: merged
           };
-          
-          clients.forEach(ws => {
-            if (ws.readyState === ws.OPEN) {
-              ws.send(JSON.stringify(message));
-            }
+
+          db.get("SELECT user_id FROM devices WHERE device_id = ?", [device_id], (err, row) => {
+            if (err || !row || !row.user_id) return;
+            clients.forEach(ws => {
+              if (ws.readyState === ws.OPEN && ws.userId === row.user_id) {
+                ws.send(JSON.stringify(message));
+              }
+            });
           });
-          
+
         } catch (parseErr) {
           console.error("[AEDES] Error al procesar información del dispositivo:", parseErr);
         }
@@ -576,22 +733,40 @@ aedesBroker.on("publish", async (packet, client) => {
           const payload = JSON.parse(packet.payload.toString());
           console.log(`[AEDES] Respuesta de control del dispositivo ${device_id}:`, payload);
           
-          // Reenviar la respuesta a todos los clientes WebSocket
+          // Reenviar la respuesta solo al owner del dispositivo
           const message = {
             type: "control_result",
             deviceId: device_id,
             success: payload.success || false,
             data: payload
           };
-          
-          clients.forEach(ws => {
-            if (ws.readyState === ws.OPEN) {
-              ws.send(JSON.stringify(message));
-            }
+
+          db.get("SELECT user_id FROM devices WHERE device_id = ?", [device_id], (err, row) => {
+            if (err || !row || !row.user_id) return;
+            clients.forEach(ws => {
+              if (ws.readyState === ws.OPEN && ws.userId === row.user_id) {
+                ws.send(JSON.stringify(message));
+              }
+            });
           });
           
         } catch (parseErr) {
           console.error("[AEDES] Error al procesar respuesta de control:", parseErr);
+        }
+      }
+      // Manejo de códigos de vinculación
+      else if (action === "link_code") {
+        try {
+          const payload = JSON.parse(packet.payload.toString());
+          if (payload.code) {
+            linkCodeStore.set(device_id, {
+              code: payload.code.toUpperCase(),
+              timestamp: Date.now()
+            });
+            console.log(`[AEDES] Link code para ${device_id}: ${payload.code}`);
+          }
+        } catch (parseErr) {
+          console.error("[AEDES] Error al procesar link_code:", parseErr);
         }
       }
       // Manejo de desvinculaciones
@@ -663,9 +838,17 @@ aedesBroker.on("clientDisconnect", (client) => {
           console.log(`[DB] Dispositivo ${deviceId} marcado como offline en la base de datos`);
         }
         
-        // Eliminar la asociación cliente-dispositivo
+        // Eliminar la asociación cliente-dispositivo y link code
         clientToDeviceMap.delete(client.id);
-        
+        linkCodeStore.delete(deviceId);
+
+        // Marcar info cacheada como stale (mantener para "último conocido")
+        const cachedInfo = deviceInfoStore.get(deviceId);
+        if (cachedInfo) {
+          cachedInfo._stale = true;
+          cachedInfo._offlineSince = Date.now();
+        }
+
         // Informar a los clientes del cambio de estado
         broadcastDeviceList();
       }
